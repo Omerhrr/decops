@@ -1,0 +1,51 @@
+warning: `VIRTUAL_ENV=/home/z/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+/home/z/my-project/backend/app/core/errors.py:54: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+  class ValidationFailedError(AppError):
+{"timestamp": "2026-10-14T19:06:53.314624+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [2507]"}
+{"timestamp": "2026-10-14T19:06:53.314714+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup."}
+{"timestamp": "2026-10-14T19:06:53.316572+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete."}
+{"timestamp": "2026-10-14T19:06:53.317766+00:00", "level": "INFO", "logger": "uvicorn.error", "message": "Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)"}
+{"timestamp": "2026-10-14T19:06:54.811484+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.login", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:06:54.821184+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/login", "method": "POST", "status": 200}
+{"timestamp": "2026-10-14T19:06:54.821299+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:58768 - \"POST /api/v1/auth/login HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:06:54.842204+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 200}
+{"timestamp": "2026-10-14T19:06:54.842303+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:58778 - \"GET /api/v1/auth/me HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:06:54.869107+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.logout", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:06:54.870860+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/logout", "method": "POST", "status": 204}
+{"timestamp": "2026-10-14T19:06:54.870950+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:58786 - \"POST /api/v1/auth/logout HTTP/1.1\" 204"}
+{"timestamp": "2026-10-14T19:06:54.880196+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:06:54.880291+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:58788 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:12:22.615062+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:12:22.615151+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:55716 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:12:22.645718+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::ffff:127.0.0.1:0 - \"GET /api/v1/health HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:12:22.806031+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.login", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:12:22.811322+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/login", "method": "POST", "status": 200}
+{"timestamp": "2026-10-14T19:12:22.811435+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::ffff:127.0.0.1:0 - \"POST /api/v1/auth/login HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:12:22.832802+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 200}
+{"timestamp": "2026-10-14T19:12:22.832881+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::ffff:127.0.0.1:0 - \"GET /api/v1/auth/me HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:12:22.874140+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:12:22.874231+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:55716 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:12:35.206865+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:12:35.206955+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:41126 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:12:35.264418+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:12:35.264499+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:41126 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:12:43.460430+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.login", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:12:43.465000+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/login", "method": "POST", "status": 200}
+{"timestamp": "2026-10-14T19:12:43.465084+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::1:0 - \"POST /api/v1/auth/login HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:12:43.504185+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::1:0 - \"GET /api/v1/health HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:12:51.150365+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.logout", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:12:51.151955+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/logout", "method": "POST", "status": 204}
+{"timestamp": "2026-10-14T19:12:51.152035+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::1:0 - \"POST /api/v1/auth/logout HTTP/1.1\" 204"}
+{"timestamp": "2026-10-14T19:13:29.301553+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:13:29.301668+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:50358 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:13:39.586871+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:13:39.586969+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:55296 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:13:51.907094+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:13:51.907183+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:55156 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:14:12.084348+00:00", "level": "INFO", "logger": "decops.audit", "message": "audit_event", "action": "auth.login", "resource_type": "user", "resource_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4", "actor_user_id": "0f7f140e-7daa-4886-a846-1d4a9b278fb4"}
+{"timestamp": "2026-10-14T19:14:12.088753+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/login", "method": "POST", "status": 200}
+{"timestamp": "2026-10-14T19:14:12.088841+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::1:0 - \"POST /api/v1/auth/login HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:14:12.176608+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "::1:0 - \"GET /api/v1/health HTTP/1.1\" 200"}
+{"timestamp": "2026-10-14T19:14:26.993328+00:00", "level": "INFO", "logger": "decops.app", "message": "request", "request_id": "-", "path": "/api/v1/auth/me", "method": "GET", "status": 401}
+{"timestamp": "2026-10-14T19:14:26.993421+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:48930 - \"GET /api/v1/auth/me HTTP/1.1\" 401"}
+{"timestamp": "2026-10-14T19:14:27.004741+00:00", "level": "INFO", "logger": "uvicorn.access", "message": "127.0.0.1:48936 - \"GET /api/v1/health HTTP/1.1\" 200"}

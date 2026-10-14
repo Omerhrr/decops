@@ -1,0 +1,1900 @@
+{
+  "project": {
+    "name": "DecOps",
+    "full_name": "DecOps Operations Management System",
+    "company": "Interdec",
+    "project_type": "Internal company task and workflow management system",
+    "version": "1.0.0",
+    "status": "Planning",
+    "objective": "Replace spreadsheet-based task tracking with a centralized, secure, auditable system for managing tasks, projects, departments, responsibilities, milestones, dependencies, progress, and reporting.",
+    "product_principles": [
+      "Single-company deployment",
+      "Secure task-level access control",
+      "Configurable task visibility",
+      "Accountability through explicit ownership",
+      "Flexible sequential and parallel workflows",
+      "Cross-department collaboration",
+      "Reliable audit history",
+      "Spreadsheet import compatibility",
+      "Management visibility without compromising restricted task data",
+      "Maintainable architecture with room for future expansion"
+    ],
+    "non_goals": [
+      "Multi-tenant SaaS platform",
+      "Public task marketplace",
+      "General-purpose project management SaaS",
+      "Replacing all existing enterprise systems",
+      "Providing unrestricted access to every employee",
+      "Automatically changing task permissions based solely on frontend state"
+    ]
+  },
+  "technology_stack": {
+    "frontend": {
+      "framework": "Nuxt",
+      "version_policy": "Use a currently supported stable release and pin the version.",
+      "language": "TypeScript",
+      "ui_framework": "Vue 3",
+      "styling": "Tailwind CSS",
+      "requirements": [
+        "Responsive layouts",
+        "Reusable components",
+        "Accessible forms and navigation",
+        "Typed API clients",
+        "Server-side rendering where appropriate",
+        "Centralized frontend error handling",
+        "Permission-aware interface rendering"
+      ]
+    },
+    "backend": {
+      "framework": "FastAPI",
+      "language": "Python",
+      "validation": "Pydantic",
+      "orm": "SQLAlchemy",
+      "database_migrations": "Alembic or another explicitly selected migration mechanism",
+      "architecture": "Modular monolith",
+      "requirements": [
+        "Versioned REST API",
+        "Centralized authorization",
+        "Strict request and response validation",
+        "Consistent error responses",
+        "Structured logging",
+        "Transaction management",
+        "Background job support",
+        "Automated API documentation"
+      ]
+    },
+    "database": {
+      "engine": "PostgreSQL",
+      "requirements": [
+        "Foreign-key integrity",
+        "Transactions",
+        "Appropriate indexes",
+        "Unique constraints",
+        "Optimistic concurrency control",
+        "Automated backups",
+        "Auditable schema changes"
+      ],
+      "row_level_security": {
+        "enabled": "Optional defense-in-depth after the authorization model is established.",
+        "policy": "If enabled, configure and test PostgreSQL RLS carefully for the application database role, transaction-scoped context, connection pooling, and background workers.",
+        "warning": "Do not treat RLS as a substitute for application authorization. Avoid privileged database credentials that silently bypass intended policies."
+      }
+    },
+    "file_storage": {
+      "purpose": "Store task attachments and related documents.",
+      "requirements": [
+        "Private object storage",
+        "Randomized object identifiers",
+        "File size limits",
+        "Content-type validation",
+        "Malware scanning where available",
+        "Short-lived authorized download links or an authenticated download endpoint",
+        "Access checks before upload, download, replacement, or deletion",
+        "Retention and deletion policies"
+      ]
+    },
+    "authentication": {
+      "recommended_approach": "Server-managed sessions using secure, HttpOnly cookies, or an approved organizational identity provider.",
+      "requirements": [
+        "Secure password hashing if passwords are locally managed",
+        "Session expiration",
+        "Session revocation",
+        "Account deactivation",
+        "Login throttling",
+        "Multi-factor authentication if required by Interdec",
+        "CSRF protection where applicable",
+        "Secure cookie configuration",
+        "Audit logging for security-sensitive events"
+      ]
+    },
+    "deployment": {
+      "architecture": "One frontend application, one API application, PostgreSQL, private file storage, and a background worker where required.",
+      "environments": [
+        "Development",
+        "Testing",
+        "Staging",
+        "Production"
+      ],
+      "requirements": [
+        "Environment-based configuration",
+        "Secret management",
+        "HTTPS",
+        "Health checks",
+        "Centralized error monitoring",
+        "Database backup and restore procedures",
+        "Deployment and rollback procedures",
+        "Dependency and vulnerability scanning"
+      ]
+    }
+  },
+  "functional_modules": [
+    {
+      "id": "MOD-001",
+      "name": "Authentication and Identity",
+      "features": [
+        "User login and logout",
+        "Session management",
+        "User profile management",
+        "Password reset if locally managed",
+        "Account activation and deactivation",
+        "Optional organizational SSO",
+        "Optional MFA",
+        "Security event history"
+      ]
+    },
+    {
+      "id": "MOD-002",
+      "name": "Users, Departments, and Roles",
+      "features": [
+        "Create and manage employees",
+        "Create and manage departments",
+        "Assign employees to departments",
+        "Assign global roles",
+        "Configure permissions",
+        "Support employees belonging to multiple departments if approved",
+        "Deactivate departing employees",
+        "Transfer task responsibilities during employee departure",
+        "Record role and department changes"
+      ]
+    },
+    {
+      "id": "MOD-003",
+      "name": "Task Management",
+      "features": [
+        "Create tasks",
+        "Edit permitted task fields",
+        "Assign one accountable project manager",
+        "Assign supporting project managers",
+        "Record the assigning user",
+        "Set priorities and deadlines",
+        "Associate departments",
+        "Configure task visibility",
+        "Add descriptions and instructions",
+        "Record blockers and dependencies",
+        "Attach documents",
+        "Comment on tasks",
+        "Track task history",
+        "Complete, cancel, reopen, or archive tasks according to permissions"
+      ],
+      "ui_wireframes": [
+        "Kanban Board: visualize tasks by status with drag-and-drop transitions",
+        "Task Detail Modal: open from Kanban cards to show full task details"
+      ]
+    },
+    {
+      "id": "MOD-004",
+      "name": "Workflow and Milestones",
+      "features": [
+        "Create stages within tasks",
+        "Create milestones and subtasks within stages",
+        "Support sequential workflows",
+        "Support parallel workflows",
+        "Assign work items to employees",
+        "Configure required and optional milestones",
+        "Set stage-specific deadlines",
+        "Define completion requirements",
+        "Track work-item dependencies",
+        "Prevent invalid workflow transitions",
+        "Display workflow progress visually"
+      ],
+      "ui_wireframes": [
+        "Gantt Chart: timeline view of stages, milestones, and dependencies",
+        "Task Detail Modal: open from Gantt bars to show workflow details"
+      ]
+    },
+    {
+      "id": "MOD-005",
+      "name": "Access Control",
+      "features": [
+        "Global role-based access control",
+        "Task-level access control",
+        "Configurable task visibility",
+        "Restricted task search",
+        "Restricted attachments and comments",
+        "Restricted exports",
+        "Authorized management reporting",
+        "Permission change history",
+        "Automated authorization tests"
+      ]
+    },
+    {
+      "id": "MOD-006",
+      "name": "Collaboration and Notifications",
+      "features": [
+        "Task comments",
+        "Task activity timeline",
+        "Assignment notifications",
+        "Deadline reminders",
+        "Overdue notifications",
+        "Blocker notifications",
+        "Milestone completion notifications",
+        "Review requests",
+        "In-app notification center",
+        "Optional email notifications"
+      ],
+      "ui_wireframes": [
+        "Task Detail Modal: tabs for Comments, Attachments, History, Notifications"
+      ]
+    },
+    {
+      "id": "MOD-007",
+      "name": "Dashboards and Reporting",
+      "features": [
+        "My Tasks",
+        "Tasks assigned to me",
+        "Tasks I am accountable for",
+        "Overdue tasks",
+        "Blocked tasks",
+        "Upcoming deadlines",
+        "Department workload",
+        "Task completion trends",
+        "Milestone progress",
+        "Management overview",
+        "Authorized CSV exports"
+      ],
+      "ui_wireframes": [
+        "Dashboard toggle: switch between Kanban and Gantt views",
+        "Department workload charts complementing Kanban/Gantt"
+      ]
+    }
+  ],
+  "frontend_components": [
+    "KanbanBoard",
+    "GanttChart",
+    "TaskModal",
+    "TaskCard",
+    "ProgressBar",
+    "CommentThread",
+    "AttachmentList"
+  ]
+}
+
+    {
+      "id": "MOD-008",
+      "name": "Spreadsheet Migration",
+      "features": [
+        "CSV upload",
+        "Column mapping",
+        "Preview before import",
+        "Date normalization",
+        "User resolution",
+        "Duplicate detection",
+        "Validation warnings",
+        "Import error reporting",
+        "Import summaries",
+        "Import history",
+        "Safe retry behavior"
+      ]
+    },
+    {
+      "id": "MOD-009",
+      "name": "Audit and Administration",
+      "features": [
+        "User administration",
+        "Role administration",
+        "Department administration",
+        "Workflow configuration",
+        "Task access policy administration",
+        "Audit event search",
+        "System health monitoring",
+        "Notification configuration",
+        "Import job monitoring",
+        "Backup and recovery procedures"
+      ]
+    }
+  ],
+  "roles_and_permissions": {
+    "design_principles": [
+      "Use RBAC for general permissions.",
+      "Use resource-level authorization for individual tasks and their nested resources.",
+      "Apply least privilege by default.",
+      "Do not assume that a user can access a task merely because the user knows its identifier.",
+      "Do not assume department membership automatically grants task access.",
+      "Allow permissions to vary by task when authorized.",
+      "Audit changes to sensitive permissions.",
+      "Define explicit policies for administrative access to restricted tasks."
+    ],
+    "roles": [
+      {
+        "name": "System Administrator",
+        "description": "Maintains application infrastructure and system configuration.",
+        "permissions": [
+          "Manage system configuration",
+          "Inspect system health",
+          "Manage technical settings",
+          "Access security audit information according to policy"
+        ],
+        "restriction": "Technical administration must not automatically imply unrestricted access to confidential business content."
+      },
+      {
+        "name": "Company Administrator",
+        "description": "Manages Interdec users, departments, roles, and approved operational settings.",
+        "permissions": [
+          "Manage users",
+          "Manage departments",
+          "Assign roles",
+          "Configure workflows",
+          "Manage approved organization-wide settings"
+        ]
+      },
+      {
+        "name": "Management",
+        "description": "Oversees organizational work and authorized management reporting.",
+        "permissions": [
+          "View authorized dashboards",
+          "View permitted tasks",
+          "Review operational performance",
+          "Access authorized reports",
+          "Approve tasks where explicitly permitted"
+        ],
+        "restriction": "Organization-wide reporting must not expose restricted task content or leak confidential task existence through aggregates."
+      },
+      {
+        "name": "Accountable PM",
+        "description": "Owns the outcome of an assigned task.",
+        "permissions": [
+          "View assigned task",
+          "Manage permitted task fields",
+          "Coordinate supporting PMs",
+          "Manage permitted milestones",
+          "Update progress",
+          "Report blockers",
+          "Request review",
+          "Submit task for completion"
+        ]
+      },
+      {
+        "name": "Supporting PM",
+        "description": "Contributes to a task under the accountable PM.",
+        "permissions": [
+          "View task within granted scope",
+          "Update assigned work",
+          "Manage permitted milestones",
+          "Report blockers",
+          "Comment on accessible tasks"
+        ]
+      },
+      {
+        "name": "Department Lead",
+        "description": "Coordinates work for a department.",
+        "permissions": [
+          "View tasks authorized for the department",
+          "Review department workload",
+          "Assign departmental work where permitted",
+          "Escalate blockers",
+          "Access authorized department reports"
+        ]
+      },
+      {
+        "name": "Department Member",
+        "description": "Performs assigned operational work.",
+        "permissions": [
+          "View authorized tasks",
+          "Update assigned work items",
+          "Comment where permitted",
+          "Report blockers",
+          "Upload permitted attachments"
+        ]
+      },
+      {
+        "name": "Approver",
+        "description": "Reviews tasks or milestones requiring formal approval.",
+        "permissions": [
+          "View items submitted for review within granted scope",
+          "Approve",
+          "Reject with a reason",
+          "Request changes"
+        ]
+      },
+      {
+        "name": "Read-Only Auditor",
+        "description": "Reviews authorized records and audit trails.",
+        "permissions": [
+          "Read permitted tasks",
+          "Read permitted audit events",
+          "Export approved records"
+        ],
+        "restriction": "No task modification unless separately granted."
+      }
+    ],
+    "implementation_note": "Treat these roles as proposed defaults. Interdec must approve the final role matrix before production."
+  },
+  "task_visibility": {
+    "modes": [
+      {
+        "name": "private",
+        "description": "Access is limited to explicitly authorized users and permitted administrators."
+      },
+      {
+        "name": "participants",
+        "description": "Access is limited to the task's authorized participants and explicitly granted reviewers."
+      },
+      {
+        "name": "department_scoped",
+        "description": "Access is limited to users with the required department permission, subject to explicit restrictions and grants."
+      },
+      {
+        "name": "custom",
+        "description": "Access is determined by individually granted users, groups, or approved roles."
+      }
+    ],
+    "rules": [
+      "Every task has an explicit access policy.",
+      "Task creation must establish a valid access policy.",
+      "Access to a task does not automatically grant access to unrelated tasks.",
+      "Access to a task must not automatically authorize every operation on it.",
+      "Nested resources inherit task restrictions unless a more restrictive policy applies.",
+      "Changing visibility requires explicit permission and produces an audit event.",
+      "Revoked access must take effect immediately for subsequent authorization checks.",
+      "Notifications and background jobs must respect current access permissions.",
+      "Search, autocomplete, exports, dashboards, and reporting must apply authorization.",
+      "Access grants must support revocation and audit history."
+    ]
+  },
+  "task_lifecycle": {
+    "statuses": [
+      "draft",
+      "open",
+      "in_progress",
+      "blocked",
+      "under_review",
+      "completed",
+      "cancelled",
+      "archived"
+    ],
+    "transitions": [
+      {
+        "from": "draft",
+        "to": [
+          "open",
+          "cancelled"
+        ]
+      },
+      {
+        "from": "open",
+        "to": [
+          "in_progress",
+          "blocked",
+          "cancelled"
+        ]
+      },
+      {
+        "from": "in_progress",
+        "to": [
+          "blocked",
+          "under_review",
+          "completed",
+          "cancelled"
+        ]
+      },
+      {
+        "from": "blocked",
+        "to": [
+          "in_progress",
+          "cancelled"
+        ]
+      },
+      {
+        "from": "under_review",
+        "to": [
+          "in_progress",
+          "completed",
+          "cancelled"
+        ]
+      },
+      {
+        "from": "completed",
+        "to": [
+          "in_progress",
+          "archived"
+        ]
+      },
+      {
+        "from": "cancelled",
+        "to": [
+          "open",
+          "archived"
+        ]
+      },
+      {
+        "from": "archived",
+        "to": []
+      }
+    ],
+    "transition_rules": [
+      "Every transition must be validated by the backend.",
+      "Only authorized users may initiate a transition.",
+      "Completion may require all mandatory work items to be complete.",
+      "Reopening a completed task requires explicit permission and a recorded reason.",
+      "Cancelling a task requires an authorized actor and a recorded reason.",
+      "Blocked tasks must have an explanation.",
+      "Review rejection must record the reason and return the task to an actionable state.",
+      "Terminal-state and reopening rules must be confirmed with Interdec."
+    ]
+  },
+  "workflow_engine": {
+    "structure": [
+      "Task",
+      "Stage",
+      "Milestone",
+      "Subtask"
+    ],
+    "requirements": [
+      "A task can contain multiple stages.",
+      "A stage can contain milestones and subtasks.",
+      "Work items can be assigned to individual employees.",
+      "Work items can have independent start dates and deadlines.",
+      "Dependencies can connect work items within or across stages.",
+      "Sequential stages become actionable according to predecessor completion.",
+      "Parallel stages may progress simultaneously.",
+      "Mandatory and optional milestones must be distinguishable.",
+      "Completed work items retain their completion history.",
+      "Workflow changes must be audited.",
+      "Circular dependencies must be rejected."
+    ],
+    "execution_modes": {
+      "sequential": "A stage becomes actionable when its required predecessor stages are complete.",
+      "parallel": "Multiple stages can remain active simultaneously, subject to dependencies.",
+      "mixed": "A workflow can combine sequential and parallel stages."
+    },
+    "progress_calculation": {
+      "default": "Calculate progress from required work items and configured stage weights.",
+      "requirements": [
+        "Define whether milestones or subtasks contribute to progress.",
+        "Avoid counting the same work twice when calculating parent progress.",
+        "Define how cancelled and optional items affect progress.",
+        "Distinguish calculated progress from manually entered progress.",
+        "Record manual overrides and reasons if overrides are permitted.",
+        "Display the calculation method to authorized users."
+      ]
+    }
+  },
+  "data_model": {
+    "conventions": {
+      "primary_keys": "Use UUIDs or another consistently generated, non-guessable identifier strategy.",
+      "timestamps": "Store timestamps in UTC and render them in the configured user or company timezone.",
+      "soft_deletion": "Use explicit lifecycle and archival rules rather than silently deleting operational records.",
+      "audit": "Record actor, action, resource, timestamp, and relevant before-and-after values where appropriate.",
+      "authorization": "Every protected resource must be authorized independently on the backend."
+    },
+    "tables": [
+      {
+        "name": "users",
+        "fields": [
+          "id",
+          "employee_code",
+          "full_name",
+          "email",
+          "authentication_reference",
+          "account_status",
+          "created_at",
+          "updated_at",
+          "last_login_at"
+        ]
+      },
+      {
+        "name": "departments",
+        "fields": [
+          "id",
+          "name",
+          "description",
+          "department_lead_user_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "name": "department_memberships",
+        "fields": [
+          "id",
+          "department_id",
+          "user_id",
+          "membership_role",
+          "valid_from",
+          "valid_until",
+          "created_at"
+        ]
+      },
+      {
+        "name": "roles",
+        "fields": [
+          "id",
+          "name",
+          "description",
+          "is_system_role"
+        ]
+      },
+      {
+        "name": "permissions",
+        "fields": [
+          "id",
+          "code",
+          "description"
+        ]
+      },
+      {
+        "name": "role_permissions",
+        "fields": [
+          "role_id",
+          "permission_id"
+        ]
+      },
+      {
+        "name": "user_roles",
+        "fields": [
+          "user_id",
+          "role_id",
+          "scope_type",
+          "scope_id",
+          "granted_by",
+          "granted_at"
+        ]
+      },
+      {
+        "name": "tasks",
+        "fields": [
+          "id",
+          "task_number",
+          "title",
+          "description",
+          "priority",
+          "status",
+          "accountable_pm_id",
+          "assigned_by_id",
+          "start_date",
+          "due_date",
+          "percent_complete",
+          "progress_mode",
+          "next_follow_up_date",
+          "dependency_summary",
+          "attachment_folder_reference",
+          "visibility_mode",
+          "created_at",
+          "updated_at",
+          "completed_at",
+          "cancelled_at",
+          "archived_at",
+          "version"
+        ]
+      },
+      {
+        "name": "task_assignments",
+        "fields": [
+          "id",
+          "task_id",
+          "user_id",
+          "assignment_role",
+          "assigned_by_id",
+          "assigned_at",
+          "revoked_at"
+        ]
+      },
+      {
+        "name": "task_departments",
+        "fields": [
+          "task_id",
+          "department_id",
+          "participation_type",
+          "created_at"
+        ]
+      },
+      {
+        "name": "task_access_grants",
+        "fields": [
+          "id",
+          "task_id",
+          "principal_type",
+          "principal_id",
+          "access_level",
+          "granted_by_id",
+          "granted_at",
+          "revoked_at",
+          "revocation_reason"
+        ]
+      },
+      {
+        "name": "task_stages",
+        "fields": [
+          "id",
+          "task_id",
+          "name",
+          "description",
+          "sequence_number",
+          "execution_mode",
+          "status",
+          "weight",
+          "start_date",
+          "due_date",
+          "completed_at",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      {
+        "name": "work_items",
+        "fields": [
+          "id",
+          "task_id",
+          "stage_id",
+          "parent_work_item_id",
+          "item_type",
+          "title",
+          "description",
+          "status",
+          "priority",
+          "assigned_user_id",
+          "sequence_number",
+          "is_required",
+          "weight",
+          "start_date",
+          "due_date",
+          "completed_at",
+          "created_at",
+          "updated_at",
+          "version"
+        ]
+      },
+      {
+        "name": "dependencies",
+        "fields": [
+          "id",
+          "predecessor_type",
+          "predecessor_id",
+          "successor_type",
+          "successor_id",
+          "dependency_type",
+          "created_by_id",
+          "created_at"
+        ]
+      },
+      {
+        "name": "blockers",
+        "fields": [
+          "id",
+          "task_id",
+          "work_item_id",
+          "description",
+          "status",
+          "reported_by_id",
+          "assigned_to_id",
+          "reported_at",
+          "resolved_at",
+          "resolution_note"
+        ]
+      },
+      {
+        "name": "attachments",
+        "fields": [
+          "id",
+          "task_id",
+          "work_item_id",
+          "uploaded_by_id",
+          "original_filename",
+          "storage_key",
+          "content_type",
+          "size_bytes",
+          "checksum",
+          "scan_status",
+          "created_at",
+          "deleted_at"
+        ]
+      },
+      {
+        "name": "comments",
+        "fields": [
+          "id",
+          "task_id",
+          "work_item_id",
+          "author_id",
+          "body",
+          "created_at",
+          "updated_at",
+          "deleted_at"
+        ]
+      },
+      {
+        "name": "notifications",
+        "fields": [
+          "id",
+          "recipient_id",
+          "event_type",
+          "resource_type",
+          "resource_id",
+          "read_at",
+          "created_at"
+        ]
+      },
+      {
+        "name": "outbox_events",
+        "fields": [
+          "id",
+          "event_type",
+          "aggregate_type",
+          "aggregate_id",
+          "payload",
+          "created_at",
+          "processed_at",
+          "attempt_count",
+          "last_error"
+        ]
+      },
+      {
+        "name": "audit_events",
+        "fields": [
+          "id",
+          "actor_user_id",
+          "action",
+          "resource_type",
+          "resource_id",
+          "occurred_at",
+          "request_id",
+          "reason",
+          "change_summary",
+          "metadata"
+        ]
+      },
+      {
+        "name": "workflow_templates",
+        "fields": [
+          "id",
+          "name",
+          "description",
+          "definition",
+          "version",
+          "created_by_id",
+          "created_at",
+          "updated_at",
+          "is_active"
+        ]
+      },
+      {
+        "name": "import_jobs",
+        "fields": [
+          "id",
+          "uploaded_by_id",
+          "filename",
+          "status",
+          "total_rows",
+          "successful_rows",
+          "warning_rows",
+          "failed_rows",
+          "created_at",
+          "completed_at",
+          "report_storage_key"
+        ]
+      }
+    ],
+    "database_constraints": [
+      "Enforce unique employee codes where used.",
+      "Enforce appropriate email uniqueness rules.",
+      "Enforce unique task numbers.",
+      "Use foreign keys for relationships.",
+      "Prevent duplicate active task assignments where applicable.",
+      "Prevent invalid percentage values.",
+      "Validate date consistency.",
+      "Prevent duplicate access grants where prohibited.",
+      "Prevent invalid dependency relationships.",
+      "Prevent workflow cycles.",
+      "Use optimistic concurrency checks on editable tasks and work items.",
+      "Index common authorized task filters.",
+      "Index task assignments, departments, statuses, due dates, and audit lookups."
+    ]
+  },
+  "backend_architecture": {
+    "style": "Modular monolith",
+    "principles": [
+      "Keep business logic out of route handlers.",
+      "Separate authorization from presentation.",
+      "Use explicit database transactions.",
+      "Centralize workflow transition rules.",
+      "Keep audit generation consistent.",
+      "Validate all imported and external data.",
+      "Use background workers for asynchronous tasks.",
+      "Avoid introducing microservices before there is a demonstrated need."
+    ],
+    "modules": [
+      "auth",
+      "users",
+      "departments",
+      "roles",
+      "permissions",
+      "tasks",
+      "task_access",
+      "workflows",
+      "work_items",
+      "dependencies",
+      "blockers",
+      "attachments",
+      "comments",
+      "notifications",
+      "dashboards",
+      "reports",
+      "imports",
+      "audit",
+      "administration"
+    ],
+    "request_authorization_pipeline": [
+      "Authenticate the user.",
+      "Confirm that the account and session are active.",
+      "Resolve the requested operation and resource.",
+      "Check the required global permission.",
+      "Check access to the specific task or resource.",
+      "Check the user's task-level role and permitted action.",
+      "Validate workflow and business rules.",
+      "Apply changes inside a transaction.",
+      "Write the audit event.",
+      "Write relevant notification events to the transactional outbox.",
+      "Commit the transaction.",
+      "Return only fields the user is authorized to receive."
+    ],
+    "consistency_requirements": [
+      "Business changes, audit events, and outbox events should be committed atomically where feasible.",
+      "Background jobs must re-check authorization when acting on protected resources.",
+      "Notification workers must avoid sending content to users whose access has been revoked.",
+      "Retries must be idempotent.",
+      "Concurrent edits must not silently overwrite one another."
+    ]
+  },
+  "api": {
+    "base_path": "/api/v1",
+    "conventions": [
+      "Use consistent JSON request and response schemas.",
+      "Validate every request.",
+      "Return appropriate HTTP status codes.",
+      "Use pagination for list endpoints.",
+      "Apply authorization before returning resource details.",
+      "Support filtering and sorting through explicit parameters.",
+      "Use idempotency keys for applicable retryable operations.",
+      "Document endpoints using OpenAPI.",
+      "Avoid leaking restricted resource existence through error differences."
+    ],
+    "endpoint_groups": [
+      {
+        "group": "Authentication",
+        "routes": [
+          "POST /auth/login",
+          "POST /auth/logout",
+          "GET /auth/me",
+          "POST /auth/password-reset",
+          "POST /auth/password-reset/confirm"
+        ]
+      },
+      {
+        "group": "Users",
+        "routes": [
+          "GET /users",
+          "POST /users",
+          "GET /users/{user_id}",
+          "PATCH /users/{user_id}",
+          "POST /users/{user_id}/deactivate",
+          "POST /users/{user_id}/transfer-responsibilities"
+        ]
+      },
+      {
+        "group": "Departments",
+        "routes": [
+          "GET /departments",
+          "POST /departments",
+          "GET /departments/{department_id}",
+          "PATCH /departments/{department_id}",
+          "GET /departments/{department_id}/members",
+          "POST /departments/{department_id}/members",
+          "DELETE /departments/{department_id}/members/{user_id}"
+        ]
+      },
+      {
+        "group": "Tasks",
+        "routes": [
+          "GET /tasks",
+          "POST /tasks",
+          "GET /tasks/{task_id}",
+          "PATCH /tasks/{task_id}",
+          "POST /tasks/{task_id}/transition",
+          "POST /tasks/{task_id}/assignments",
+          "DELETE /tasks/{task_id}/assignments/{assignment_id}",
+          "POST /tasks/{task_id}/departments",
+          "POST /tasks/{task_id}/access-grants",
+          "DELETE /tasks/{task_id}/access-grants/{grant_id}",
+          "GET /tasks/{task_id}/activity"
+        ]
+      },
+      {
+        "group": "Workflow",
+        "routes": [
+          "GET /tasks/{task_id}/stages",
+          "POST /tasks/{task_id}/stages",
+          "PATCH /tasks/{task_id}/stages/{stage_id}",
+          "POST /tasks/{task_id}/stages/reorder",
+          "GET /tasks/{task_id}/work-items",
+          "POST /tasks/{task_id}/work-items",
+          "GET /tasks/{task_id}/work-items/{work_item_id}",
+          "PATCH /tasks/{task_id}/work-items/{work_item_id}",
+          "POST /tasks/{task_id}/work-items/{work_item_id}/transition",
+          "POST /tasks/{task_id}/dependencies"
+        ]
+      },
+      {
+        "group": "Collaboration",
+        "routes": [
+          "GET /tasks/{task_id}/comments",
+          "POST /tasks/{task_id}/comments",
+          "POST /tasks/{task_id}/attachments",
+          "GET /tasks/{task_id}/attachments",
+          "GET /tasks/{task_id}/attachments/{attachment_id}/download",
+          "GET /notifications",
+          "POST /notifications/{notification_id}/read"
+        ]
+      },
+      {
+        "group": "Dashboards and Reports",
+        "routes": [
+          "GET /dashboard/summary",
+          "GET /dashboard/my-tasks",
+          "GET /dashboard/overdue",
+          "GET /dashboard/blocked",
+          "GET /reports/task-completion",
+          "GET /reports/department-workload",
+          "POST /reports/exports"
+        ]
+      },
+      {
+        "group": "Imports",
+        "routes": [
+          "POST /imports/csv",
+          "GET /imports/{import_job_id}",
+          "GET /imports/{import_job_id}/report",
+          "POST /imports/{import_job_id}/commit"
+        ]
+      },
+      {
+        "group": "Administration and Audit",
+        "routes": [
+          "GET /admin/roles",
+          "POST /admin/roles",
+          "PATCH /admin/roles/{role_id}",
+          "GET /admin/audit-events",
+          "GET /admin/system-health",
+          "GET /admin/workflow-templates",
+          "POST /admin/workflow-templates"
+        ]
+      }
+    ]
+  },
+  "spreadsheet_migration": {
+    "source_columns": [
+      "Task ID",
+      "Date Created",
+      "Task Title",
+      "Task Description",
+      "Priority",
+      "Accountable PM",
+      "Supporting PM(s)",
+      "Assigned By",
+      "Start Date",
+      "Due Date",
+      "Status",
+      "% Complete",
+      "Last Updated",
+      "Next Follow-up Date",
+      "Dependency / Blocker",
+      "Attachment / Folder Link",
+      "Completion Date"
+    ],
+    "mapping": {
+      "Task ID": "task_number or legacy_external_id",
+      "Date Created": "created_at",
+      "Task Title": "title",
+      "Task Description": "description",
+      "Priority": "priority",
+      "Accountable PM": "accountable_pm_id",
+      "Supporting PM(s)": "task_assignments",
+      "Assigned By": "assigned_by_id",
+      "Start Date": "start_date",
+      "Due Date": "due_date",
+      "Status": "status",
+      "% Complete": "percent_complete",
+      "Last Updated": "updated_at",
+      "Next Follow-up Date": "next_follow_up_date",
+      "Dependency / Blocker": "dependency_summary",
+      "Attachment / Folder Link": "attachment_folder_reference",
+      "Completion Date": "completed_at"
+    },
+    "import_pipeline": [
+      "Upload the CSV file.",
+      "Validate the file type, size, encoding, and header structure.",
+      "Allow authorized users to map source columns to DecOps fields.",
+      "Preview a sample of normalized rows.",
+      "Normalize whitespace, dates, status values, and priority values.",
+      "Resolve employee names against the user directory.",
+      "Flag ambiguous employee names for manual resolution.",
+      "Validate required fields and date relationships.",
+      "Detect likely duplicate tasks using legacy identifiers and configurable matching rules.",
+      "Generate a row-level validation report.",
+      "Allow the user to correct errors or exclude explicitly selected rows.",
+      "Commit valid rows in a transaction or controlled batch process.",
+      "Record the import job and the resulting task identifiers.",
+      "Preserve source identifiers for traceability.",
+      "Provide a downloadable import summary."
+    ],
+    "rules": [
+      "Never silently discard invalid rows.",
+      "Never invent a user mapping when names are ambiguous.",
+      "Do not allow an import to grant unauthorized access.",
+      "Treat legacy attachment links as untrusted references.",
+      "Do not fetch arbitrary external URLs automatically.",
+      "Do not fabricate historical audit events that cannot be verified.",
+      "Record the import actor and timestamp.",
+      "Support safe retries without duplicating previously committed records."
+    ],
+    "legacy_data_policy": {
+      "historical_timestamps": "Preserve source timestamps only when their meaning and reliability are understood.",
+      "historical_progress": "Import the supplied percentage but flag records requiring reconciliation with the new workflow calculation.",
+      "legacy_statuses": "Use an approved mapping table and report unmapped values.",
+      "legacy_access": "Assign an explicitly approved initial visibility policy to imported tasks.",
+      "legacy_dependencies": "Preserve the original dependency description even when the referenced task cannot be resolved."
+    }
+  },
+  "frontend_pages": [
+    {
+      "name": "Login",
+      "features": [
+        "Authentication",
+        "Validation messages",
+        "Session handling",
+        "Account recovery where supported"
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "features": [
+        "Assigned tasks",
+        "Accountable tasks",
+        "Upcoming deadlines",
+        "Overdue tasks",
+        "Blocked tasks",
+        "Recent authorized activity",
+        "Workload summary"
+      ]
+    },
+    {
+      "name": "My Tasks",
+      "features": [
+        "Search",
+        "Filters",
+        "Sort",
+        "Priority indicators",
+        "Due dates",
+        "Status updates",
+        "Quick access to assigned work"
+      ]
+    },
+    {
+      "name": "Task Register",
+      "features": [
+        "All accessible tasks",
+        "Task number",
+        "Title",
+        "Accountable PM",
+        "Departments",
+        "Priority",
+        "Status",
+        "Progress",
+        "Start date",
+        "Due date",
+        "Next follow-up"
+      ]
+    },
+    {
+      "name": "Task Detail",
+      "features": [
+        "Task summary",
+        "Accountability and assignments",
+        "Visibility settings",
+        "Workflow stages",
+        "Milestones and subtasks",
+        "Dependencies",
+        "Blockers",
+        "Comments",
+        "Attachments",
+        "Activity timeline",
+        "Completion and review actions"
+      ]
+    },
+    {
+      "name": "Workflow Editor",
+      "features": [
+        "Add and reorder stages",
+        "Add milestones",
+        "Add subtasks",
+        "Configure sequential and parallel work",
+        "Assign work items",
+        "Configure required items",
+        "Set deadlines",
+        "Define dependencies",
+        "Preview progress calculation"
+      ]
+    },
+    {
+      "name": "Department Workspace",
+      "features": [
+        "Authorized departmental tasks",
+        "Department workload",
+        "Blocked work",
+        "Upcoming deadlines",
+        "Team assignments"
+      ]
+    },
+    {
+      "name": "Calendar and Timeline",
+      "features": [
+        "Task deadlines",
+        "Milestone dates",
+        "Overdue indicators",
+        "Dependency visualization",
+        "Filtering by authorized department or assignee"
+      ]
+    },
+    {
+      "name": "Reports",
+      "features": [
+        "Task completion",
+        "Overdue work",
+        "Department workload",
+        "Blocker analysis",
+        "Authorized CSV exports"
+      ]
+    },
+    {
+      "name": "Notifications",
+      "features": [
+        "Unread notifications",
+        "Assignment events",
+        "Deadline reminders",
+        "Review requests",
+        "Blocker updates"
+      ]
+    },
+    {
+      "name": "Administration",
+      "features": [
+        "Users",
+        "Departments",
+        "Roles",
+        "Permissions",
+        "Workflow templates",
+        "Import history",
+        "Audit events",
+        "System configuration"
+      ]
+    },
+    {
+      "name": "Import Center",
+      "features": [
+        "CSV upload",
+        "Column mapping",
+        "Preview",
+        "Validation report",
+        "Import execution",
+        "Import history"
+      ]
+    }
+  ],
+  "notifications": {
+    "channels": [
+      "In-app",
+      "Email, if approved"
+    ],
+    "events": [
+      "Task assigned",
+      "Supporting PM added",
+      "Deadline approaching",
+      "Task overdue",
+      "Work item completed",
+      "Task blocked",
+      "Blocker resolved",
+      "Task submitted for review",
+      "Review rejected",
+      "Task completed",
+      "Task reopened",
+      "Visibility changed",
+      "Access granted or revoked"
+    ],
+    "delivery_requirements": [
+      "Use a transactional outbox for reliable asynchronous delivery.",
+      "Make processing idempotent.",
+      "Retry transient delivery failures.",
+      "Record permanent delivery failures.",
+      "Respect user notification preferences.",
+      "Re-check authorization before sending sensitive task details.",
+      "Avoid exposing confidential task titles in email subjects where policy prohibits it.",
+      "Do not send notifications for transactions that ultimately roll back."
+    ]
+  },
+  "security": {
+    "requirements": [
+      {
+        "id": "SEC-001",
+        "name": "Authentication",
+        "controls": [
+          "Secure sessions",
+          "Password hashing if applicable",
+          "Login throttling",
+          "Session revocation",
+          "Account deactivation"
+        ]
+      },
+      {
+        "id": "SEC-002",
+        "name": "Authorization",
+        "controls": [
+          "Centralized backend permission checks",
+          "Task-level authorization",
+          "Nested-resource authorization",
+          "Permission checks on every mutation",
+          "Permission checks on search and reporting"
+        ]
+      },
+      {
+        "id": "SEC-003",
+        "name": "Cross-Task Isolation",
+        "controls": [
+          "Reject unauthorized access to another task by identifier",
+          "Prevent cross-task comment access",
+          "Prevent cross-task attachment access",
+          "Prevent cross-task work-item updates",
+          "Prevent dependency-based information leakage",
+          "Prevent unauthorized task counts and search suggestions"
+        ]
+      },
+      {
+        "id": "SEC-004",
+        "name": "Data Protection",
+        "controls": [
+          "HTTPS",
+          "Encrypted storage where supported",
+          "Managed secrets",
+          "Database backup protection",
+          "Private object storage",
+          "Retention policies"
+        ]
+      },
+      {
+        "id": "SEC-005",
+        "name": "Auditability",
+        "controls": [
+          "Record permission changes",
+          "Record status transitions",
+          "Record assignment changes",
+          "Record visibility changes",
+          "Record administrative actions",
+          "Restrict audit modification",
+          "Exclude passwords, session tokens, and unnecessary sensitive content from logs"
+        ]
+      },
+      {
+        "id": "SEC-006",
+        "name": "Input and File Security",
+        "controls": [
+          "Strict input validation",
+          "Safe filename handling",
+          "File size restrictions",
+          "Content-type validation",
+          "Malware scanning where available",
+          "Protection against CSV formula injection in generated exports"
+        ]
+      },
+      {
+        "id": "SEC-007",
+        "name": "Operational Security",
+        "controls": [
+          "Dependency scanning",
+          "Secure configuration",
+          "Database least privilege",
+          "Production error monitoring",
+          "Backup restoration tests",
+          "Incident response procedures"
+        ]
+      }
+    ],
+    "mandatory_test_scenarios": [
+      "User A cannot read a restricted task belonging to User B.",
+      "User A cannot update a restricted task by changing its identifier.",
+      "User A cannot retrieve another task's comments.",
+      "User A cannot download another task's attachments.",
+      "User A cannot change task visibility without permission.",
+      "User A cannot assign unauthorized users to a task.",
+      "User A cannot use search to discover restricted task titles.",
+      "User A cannot infer restricted task information through dashboard aggregates.",
+      "A revoked user loses access to subsequent requests.",
+      "A background notification job does not disclose information after access revocation.",
+      "A department member does not automatically gain access to every task associated with that department unless policy explicitly grants it.",
+      "An unauthorized export request is rejected.",
+      "Concurrent edits do not silently overwrite newer task data."
+    ]
+  },
+  "testing_strategy": {
+    "unit_tests": [
+      "Task status transitions",
+      "Permission evaluation",
+      "Visibility policies",
+      "Progress calculations",
+      "Dependency validation",
+      "Date validation",
+      "Import normalization",
+      "Notification event creation"
+    ],
+    "integration_tests": [
+      "Database constraints",
+      "Task creation and assignment",
+      "Workflow progression",
+      "Transactional audit writes",
+      "Outbox processing",
+      "File upload and download authorization",
+      "CSV import and retry behavior"
+    ],
+    "authorization_tests": [
+      "Role-level access",
+      "Task-level access",
+      "Nested-resource access",
+      "Department-scoped access",
+      "Custom grants",
+      "Grant revocation",
+      "Restricted reports",
+      "Search isolation",
+      "Background worker isolation"
+    ],
+    "end_to_end_tests": [
+      "Create a task and assign an accountable PM.",
+      "Add supporting PMs and participating departments.",
+      "Create stages and nested milestones.",
+      "Complete sequential and parallel work.",
+      "Report and resolve a blocker.",
+      "Submit a task for review.",
+      "Complete and reopen a task under the appropriate permissions.",
+      "Import a CSV and reconcile the results.",
+      "Verify notifications and activity history."
+    ],
+    "performance_tests": [
+      "Task register pagination",
+      "Dashboard aggregation",
+      "Large CSV imports",
+      "Concurrent task updates",
+      "Audit-event queries",
+      "Authorized task searches"
+    ],
+    "release_gate": "No unresolved critical security vulnerabilities, no known cross-task authorization failures, and no unresolved critical data-integrity defects."
+  },
+  "implementation_phases": [
+    {
+      "phase": 1,
+      "name": "Requirements Validation",
+      "objectives": [
+        "Review Interdec's spreadsheet and examples.",
+        "Confirm the meaning of every existing column.",
+        "Map the real task lifecycle.",
+        "Identify department structures.",
+        "Agree on role and visibility rules.",
+        "Confirm reporting requirements."
+      ],
+      "deliverables": [
+        "Approved requirements document",
+        "Role-permission matrix",
+        "Task lifecycle diagram",
+        "Workflow specification",
+        "CSV field mapping"
+      ],
+      "exit_criteria": [
+        "Interdec approves the requirements.",
+        "Critical workflow and authorization decisions are documented."
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Application Foundation",
+      "objectives": [
+        "Initialize the Nuxt frontend.",
+        "Initialize the FastAPI backend.",
+        "Configure PostgreSQL.",
+        "Establish database migrations.",
+        "Implement authentication.",
+        "Create application logging and error handling.",
+        "Set up automated testing and deployment environments."
+      ],
+      "deliverables": [
+        "Running frontend and backend",
+        "Database schema foundation",
+        "Authentication",
+        "CI checks",
+        "Development and staging environments"
+      ],
+      "exit_criteria": [
+        "Users can authenticate securely.",
+        "Automated tests run in CI.",
+        "Database migrations work reliably."
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Identity and Authorization",
+      "objectives": [
+        "Implement users and departments.",
+        "Implement roles and permissions.",
+        "Implement task access policies.",
+        "Implement assignment authorization.",
+        "Build cross-task isolation tests."
+      ],
+      "deliverables": [
+        "User administration",
+        "Department management",
+        "Permission system",
+        "Task access policy engine",
+        "Authorization test suite"
+      ],
+      "exit_criteria": [
+        "Cross-task isolation tests pass.",
+        "Permission changes are audited."
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Task Management",
+      "objectives": [
+        "Implement task CRUD operations.",
+        "Implement accountability and supporting assignments.",
+        "Implement priorities and deadlines.",
+        "Implement task lifecycle transitions.",
+        "Implement task detail and register interfaces."
+      ],
+      "deliverables": [
+        "Task API",
+        "Task register",
+        "Task detail page",
+        "Assignment management",
+        "Task activity history"
+      ],
+      "exit_criteria": [
+        "Users can manage authorized tasks.",
+        "All task mutations enforce authorization and validation."
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Workflow Engine",
+      "objectives": [
+        "Implement stages and work items.",
+        "Implement milestones and subtasks.",
+        "Implement sequential and parallel execution.",
+        "Implement dependencies and blockers.",
+        "Implement progress calculation.",
+        "Implement completion and review rules."
+      ],
+      "deliverables": [
+        "Workflow API",
+        "Workflow editor",
+        "Milestone tracking",
+        "Dependency handling",
+        "Progress calculations"
+      ],
+      "exit_criteria": [
+        "Required workflows pass end-to-end tests.",
+        "Invalid transitions and dependency cycles are rejected."
+      ]
+    },
+    {
+      "phase": 6,
+      "name": "Collaboration and Notifications",
+      "objectives": [
+        "Implement comments and activity timelines.",
+        "Implement private attachments.",
+        "Implement in-app notifications.",
+        "Implement the transactional outbox.",
+        "Add optional email delivery."
+      ],
+      "deliverables": [
+        "Comments",
+        "Attachment management",
+        "Notification center",
+        "Background worker",
+        "Delivery retry handling"
+      ],
+      "exit_criteria": [
+        "Restricted content remains protected across collaboration features.",
+        "Notification processing is retry-safe."
+      ]
+    },
+    {
+      "phase": 7,
+      "name": "Dashboards and Reporting",
+      "objectives": [
+        "Implement personal dashboards.",
+        "Implement management dashboards.",
+        "Implement department views.",
+        "Implement workload and completion reports.",
+        "Implement authorized exports."
+      ],
+      "deliverables": [
+        "Dashboard",
+        "Department workspace",
+        "Reporting module",
+        "Export functionality"
+      ],
+      "exit_criteria": [
+        "Dashboard totals reconcile with authorized task records.",
+        "Restricted information does not leak through reports."
+      ]
+    },
+    {
+      "phase": 8,
+      "name": "CSV Migration",
+      "objectives": [
+        "Implement CSV upload and mapping.",
+        "Implement validation and preview.",
+        "Resolve users and statuses.",
+        "Detect duplicates.",
+        "Import approved historical tasks.",
+        "Generate reconciliation reports."
+      ],
+      "deliverables": [
+        "Import center",
+        "Validation engine",
+        "Import history",
+        "Reconciliation report"
+      ],
+      "exit_criteria": [
+        "Interdec approves the migrated data.",
+        "Failed and ambiguous rows are explicitly reported."
+      ]
+    },
+    {
+      "phase": 9,
+      "name": "Hardening and User Acceptance Testing",
+      "objectives": [
+        "Run authorization and penetration tests.",
+        "Run performance tests.",
+        "Test backup restoration.",
+        "Verify audit trails.",
+        "Conduct user acceptance testing.",
+        "Resolve critical defects."
+      ],
+      "deliverables": [
+        "Security test report",
+        "Performance test report",
+        "Restore test report",
+        "UAT sign-off",
+        "Production runbook"
+      ],
+      "exit_criteria": [
+        "Interdec approves the application for production.",
+        "Critical security and data-integrity issues are resolved."
+      ]
+    },
+    {
+      "phase": 10,
+      "name": "Production Launch",
+      "objectives": [
+        "Deploy the production environment.",
+        "Create approved user accounts.",
+        "Import the validated task register.",
+        "Train users and administrators.",
+        "Monitor early usage.",
+        "Collect and prioritize feedback."
+      ],
+      "deliverables": [
+        "Production DecOps",
+        "Migrated task data",
+        "User documentation",
+        "Administrator documentation",
+        "Support and incident procedures"
+      ],
+      "exit_criteria": [
+        "Authorized users can perform their required workflows.",
+        "Monitoring, backup, and recovery processes are operational.",
+        "Interdec accepts the production rollout."
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "AC-01",
+      "requirement": "An authorized user can create a task with a unique task number, title, description, priority, accountable PM, and due date."
+    },
+    {
+      "id": "AC-02",
+      "requirement": "Every active task has exactly one accountable PM unless Interdec explicitly approves a different accountability model."
+    },
+    {
+      "id": "AC-03",
+      "requirement": "A task can have multiple supporting PMs and participating departments."
+    },
+    {
+      "id": "AC-04",
+      "requirement": "A task can contain multiple stages, milestones, and subtasks."
+    },
+    {
+      "id": "AC-05",
+      "requirement": "Sequential, parallel, and mixed workflows behave according to configured rules."
+    },
+    {
+      "id": "AC-06",
+      "requirement": "Task progress is calculated consistently and the calculation method is visible to authorized users."
+    },
+    {
+      "id": "AC-07",
+      "requirement": "Authorized users can report blockers and update their resolution status."
+    },
+    {
+      "id": "AC-08",
+      "requirement": "Task dependencies are validated and circular dependencies are rejected."
+    },
+    {
+      "id": "AC-09",
+      "requirement": "Task visibility can be configured according to the approved access policy."
+    },
+    {
+      "id": "AC-10",
+      "requirement": "A user cannot access an unauthorized task by guessing, changing, or reusing a resource identifier."
+    },
+    {
+      "id": "AC-11",
+      "requirement": "Task isolation applies to comments, attachments, work items, search, exports, and dashboards."
+    },
+    {
+      "id": "AC-12",
+      "requirement": "Task creation, assignments, visibility changes, status changes, and administrative changes generate appropriate audit events."
+    },
+    {
+      "id": "AC-13",
+      "requirement": "Authorized users receive relevant notifications without exposing restricted task information."
+    },
+    {
+      "id": "AC-14",
+      "requirement": "Dashboards and reports include only information the requesting user is authorized to access."
+    },
+    {
+      "id": "AC-15",
+      "requirement": "CSV import supports column mapping, preview, validation, duplicate detection, and row-level error reporting."
+    },
+    {
+      "id": "AC-16",
+      "requirement": "Ambiguous employee mappings and invalid dates are flagged instead of silently guessed."
+    },
+    {
+      "id": "AC-17",
+      "requirement": "Task attachments are private and every download is authorized."
+    },
+    {
+      "id": "AC-18",
+      "requirement": "Concurrent updates cannot silently overwrite a more recent task version."
+    },
+    {
+      "id": "AC-19",
+      "requirement": "Production data can be restored from backups using a tested recovery procedure."
+    },
+    {
+      "id": "AC-20",
+      "requirement": "Interdec completes user acceptance testing and approves the production rollout."
+    }
+  ],
+  "decisions_to_confirm_with_interdec": [
+    {
+      "id": "DEC-01",
+      "question": "Who can create tasks?",
+      "options": [
+        "All employees",
+        "Department leads and PMs",
+        "Administrators and designated PMs"
+      ]
+    },
+    {
+      "id": "DEC-02",
+      "question": "Can a task have more than one accountable PM?",
+      "recommended_default": "One accountable PM with multiple supporting PMs."
+    },
+    {
+      "id": "DEC-03",
+      "question": "Does department membership automatically grant access to department tasks?",
+      "recommended_default": "Only when explicitly permitted by the task's access policy."
+    },
+    {
+      "id": "DEC-04",
+      "question": "Who can create, change, and revoke task visibility grants?",
+      "recommended_default": "Authorized task owners and designated administrators, with audit logging."
+    },
+    {
+      "id": "DEC-05",
+      "question": "Can task workflows contain sequential and parallel stages?",
+      "recommended_default": "Support both."
+    },
+    {
+      "id": "DEC-06",
+      "question": "Must all milestones be complete before a task can be completed?",
+      "recommended_default": "All required milestones must be complete."
+    },
+    {
+      "id": "DEC-07",
+      "question": "Is formal approval required before task completion?",
+      "recommended_default": "Make approval configurable per task or workflow template."
+    },
+    {
+      "id": "DEC-08",
+      "question": "Who can reopen completed or cancelled tasks?",
+      "recommended_default": "Authorized users with a recorded reason."
+    },
+    {
+      "id": "DEC-09",
+      "question": "What happens when an employee leaves Interdec?",
+      "recommended_default": "Deactivate the account, revoke sessions, preserve history, and transfer active responsibilities through an audited process."
+    },
+    {
+      "id": "DEC-10",
+      "question": "Should task progress be automatically calculated or manually entered?",
+      "recommended_default": "Calculated progress by default, with an explicitly labeled and audited override if required."
+    },
+    {
+      "id": "DEC-11",
+      "question": "Which timezone should dates use?",
+      "recommended_default": "Store timestamps in UTC and use an agreed company timezone for date-based deadlines."
+    },
+    {
+      "id": "DEC-12",
+      "question": "Should DecOps use Interdec's existing identity provider?",
+      "recommended_default": "Use approved organizational SSO if available and suitable."
+    },
+    {
+      "id": "DEC-13",
+      "question": "Are email notifications required?",
+      "recommended_default": "Start with in-app notifications and add email if approved."
+    },
+    {
+      "id": "DEC-14",
+      "question": "Where should DecOps be hosted?",
+      "recommended_default": "Select hosting based on Interdec's security, availability, budget, data residency, and operational requirements."
+    },
+    {
+      "id": "DEC-15",
+      "question": "What are the expected user count, task volume, and attachment volume?",
+      "purpose": "Use these figures to size the deployment and establish performance targets."
+    },
+    {
+      "id": "DEC-16",
+      "question": "How long must completed tasks, attachments, and audit records be retained?",
+      "purpose": "Establish retention, archival, and deletion policies."
+    }
+  ],
+  "definition_of_done": [
+    "The approved requirements have been implemented.",
+    "The task lifecycle and workflow engine pass automated tests.",
+    "Task-level access control is enforced by the backend.",
+    "Cross-task and nested-resource isolation tests pass.",
+    "Audit events are generated for sensitive operations.",
+    "Notifications and background processing are retry-safe.",
+    "CSV imports have validation, error reporting, and reconciliation.",
+    "Production backups and restoration have been tested.",
+    "Monitoring and error reporting are operational.",
+    "Deployment and rollback procedures are documented.",
+    "User and administrator documentation is available.",
+    "Interdec has completed user acceptance testing.",
+    "Interdec has approved production deployment."
+  ]
+}

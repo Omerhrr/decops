@@ -1,0 +1,23 @@
+$ nuxt dev
+● Starting Nuxt...
+● Nuxt 4.6.1 (with Nitro 2.13.4, Vite 8.3.4 and Vue 3.5.44)
+▲ The dev server is reachable from the network without authentication: anyone who can connect can read the app, build errors and source code.
+
+  ➜ Local:    http://localhost:3000/
+  ➜ Network:  http://21.0.13.212:3000/
+
+● Setting up modules
+● Preparing app
+● Generating types
+● Bundling app
+✔ Vite client built in 39ms
+✔ Vite server built in 27ms
+● Building server
+[nitro] ✔ Nuxt Nitro server built in 898ms
+◆ Ready in 2.14s  → http://localhost:3000/
+  config 243ms · modules 44ms · app 287ms · types 304ms · bundle 213ms · server 1.05s
+ℹ hmr update /pages/login.vue, /assets/css/main.css, /assets/css/main.css?direct, virtual:nuxt:.nuxt%2Froutes.mjs
+ℹ hmr update virtual:nuxt:.nuxt%2Froutes.mjs
+ℹ hmr update /pages/login.vue, /assets/css/main.css, /assets/css/main.css?direct, virtual:nuxt:.nuxt%2Froutes.mjs
+✔ Vite server hmr 29 files in 1.025ms
+✔ Vite server hmr 25 files in 0.829ms
