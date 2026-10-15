@@ -1,22 +1,22 @@
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5" data-test="task-comments">
+  <section class="rounded-2xl border border-line bg-surface p-5" data-test="task-comments">
     <div class="flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-slate-900">Comments</h2>
-      <span v-if="comments.length" class="text-xs text-slate-400">{{ comments.length }}</span>
+      <h2 class="text-sm font-semibold text-ink">Comments</h2>
+      <span v-if="comments.length" class="text-xs text-faint">{{ comments.length }}</span>
     </div>
-    <p class="mt-1 text-xs text-slate-400">Visible to everyone who can see this task. Access is re-checked on every request.</p>
+    <p class="mt-1 text-xs text-faint">Visible to everyone who can see this task. Access is re-checked on every request.</p>
 
     <form class="mt-4" @submit.prevent="submit">
       <textarea
         v-model="draft"
         rows="3"
         placeholder="Write a comment…"
-        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
+        class="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500"
         :disabled="submitting"
         data-test="comment-input"
       />
       <div class="mt-2 flex items-center justify-between gap-2">
-        <p v-if="error" class="text-xs text-rose-600">{{ error }}</p>
+        <p v-if="error" class="text-xs text-rose-600 dark:text-rose-400">{{ error }}</p>
         <span v-else />
         <button
           type="submit"
@@ -31,18 +31,18 @@
 
     <ul v-if="comments.length" class="mt-5 space-y-4">
       <li v-for="comment in comments" :key="comment.id" class="flex gap-3">
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-hover text-xs font-semibold text-body">
           {{ initials(comment.author.full_name) }}
         </span>
-        <div class="min-w-0 flex-1 rounded-xl bg-slate-50 px-3 py-2.5">
+        <div class="min-w-0 flex-1 rounded-xl bg-elevated px-3 py-2.5">
           <div class="flex items-baseline justify-between gap-2">
-            <p class="truncate text-xs font-semibold text-slate-800">{{ comment.author.full_name }}</p>
+            <p class="truncate text-xs font-semibold text-ink">{{ comment.author.full_name }}</p>
             <div class="flex shrink-0 items-center gap-2">
-              <span class="text-[11px] text-slate-400">{{ relativeTime(comment.created_at) }}</span>
+              <span class="text-[11px] text-faint">{{ relativeTime(comment.created_at) }}</span>
               <button
                 v-if="auth.user.value && comment.author.id === auth.user.value.id"
                 type="button"
-                class="text-[11px] text-slate-400 hover:text-rose-600"
+                class="text-[11px] text-faint hover:text-rose-600 dark:text-rose-400"
                 :data-test="`comment-delete-${comment.id}`"
                 @click="remove(comment)"
               >
@@ -50,11 +50,11 @@
               </button>
             </div>
           </div>
-          <p class="mt-1 whitespace-pre-line text-sm text-slate-700">{{ comment.body }}</p>
+          <p class="mt-1 whitespace-pre-line text-sm text-body">{{ comment.body }}</p>
         </div>
       </li>
     </ul>
-    <p v-else class="mt-5 text-sm text-slate-400">No comments yet - start the discussion.</p>
+    <p v-else class="mt-5 text-sm text-faint">No comments yet - start the discussion.</p>
   </section>
 </template>
 

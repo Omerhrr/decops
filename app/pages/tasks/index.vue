@@ -2,13 +2,13 @@
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
-          <NuxtLink to="/" class="hover:text-slate-600">Dashboard</NuxtLink>
+        <nav class="text-xs text-faint" aria-label="Breadcrumb">
+          <NuxtLink to="/" class="hover:text-body">Dashboard</NuxtLink>
           <span class="mx-1">/</span>
-          <span class="text-slate-600">Tasks</span>
+          <span class="text-body">Tasks</span>
         </nav>
-        <h1 class="mt-1 text-xl font-semibold text-slate-900">Task register</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="mt-1 text-xl font-semibold text-ink">Task register</h1>
+        <p class="mt-1 text-sm text-muted">
           Every task you are authorized to see (MOD-003). Access is evaluated per task by the policy engine.
         </p>
       </div>
@@ -42,12 +42,12 @@
         <option value="">All priorities</option>
         <option v-for="p in PRIORITIES" :key="p" :value="p">{{ capitalize(p) }}</option>
       </select>
-      <span class="text-sm text-slate-500 sm:ml-auto">{{ total }} task{{ total === 1 ? '' : 's' }}</span>
+      <span class="text-sm text-muted sm:ml-auto">{{ total }} task{{ total === 1 ? '' : 's' }}</span>
     </section>
 
-    <section class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+    <section class="mt-4 overflow-x-auto rounded-2xl border border-line bg-surface">
+      <table class="min-w-full divide-y divide-line text-sm">
+        <thead class="bg-elevated text-left text-xs uppercase tracking-wide text-muted">
           <tr>
             <th class="px-4 py-3">Number</th>
             <th class="px-4 py-3">Title</th>
@@ -59,18 +59,18 @@
             <th class="px-4 py-3">Due date</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-line">
           <tr v-if="loading">
             <td colspan="8" class="px-4 py-2">
               <div class="space-y-2 py-2" aria-busy="true" aria-label="Loading tasks">
-                <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-slate-100" />
+                <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-hover" />
               </div>
             </td>
           </tr>
           <tr v-else-if="!tasks.length">
             <td colspan="8">
               <div class="empty-state">
-                <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <svg class="h-8 w-8 text-faint" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                 </svg>
                 <p class="mt-2">No authorized tasks match the filters.</p>
@@ -80,19 +80,19 @@
               </div>
             </td>
           </tr>
-          <tr v-for="t in tasks" :key="t.id" class="cursor-pointer transition-colors hover:bg-slate-50" @click="openTask(t.id)">
-            <td class="table-cell whitespace-nowrap font-mono text-xs text-slate-600">{{ t.task_number }}</td>
+          <tr v-for="t in tasks" :key="t.id" class="cursor-pointer transition-colors hover:bg-hover" @click="openTask(t.id)">
+            <td class="table-cell whitespace-nowrap font-mono text-xs text-body">{{ t.task_number }}</td>
             <td class="table-cell">
-              <NuxtLink :to="`/tasks/${t.id}`" class="font-medium text-slate-900 hover:text-brand-700" @click.stop>
+              <NuxtLink :to="`/tasks/${t.id}`" class="font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300" @click.stop>
                 {{ t.title }}
               </NuxtLink>
-              <p class="text-xs text-slate-500">{{ visibilityLabel(t.visibility_mode) }} visibility</p>
+              <p class="text-xs text-muted">{{ visibilityLabel(t.visibility_mode) }} visibility</p>
             </td>
-            <td class="px-4 py-3 text-slate-600">{{ t.accountable_pm?.full_name ?? '-' }}</td>
+            <td class="px-4 py-3 text-body">{{ t.accountable_pm?.full_name ?? '-' }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap gap-1">
                 <AppBadge v-for="name in t.department_names" :key="name" tone="gray">{{ name }}</AppBadge>
-                <span v-if="!t.department_names.length" class="text-xs text-slate-400"> - </span>
+                <span v-if="!t.department_names.length" class="text-xs text-faint"> - </span>
               </div>
             </td>
             <td class="px-4 py-3">
@@ -103,13 +103,13 @@
             </td>
             <td class="px-4 py-3">
               <div class="flex items-center gap-2">
-                <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+                <div class="h-1.5 w-16 overflow-hidden rounded-full bg-hover">
                   <div class="h-full rounded-full bg-brand-500" :style="{ width: `${t.percent_complete}%` }" />
                 </div>
-                <span class="text-xs text-slate-500">{{ t.percent_complete }}%</span>
+                <span class="text-xs text-muted">{{ t.percent_complete }}%</span>
               </div>
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-xs" :class="isOverdue(t) ? 'font-medium text-rose-600' : 'text-slate-500'">
+            <td class="whitespace-nowrap px-4 py-3 text-xs" :class="isOverdue(t) ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-muted'">
               {{ formatDate(t.due_date) }}
             </td>
           </tr>
@@ -127,7 +127,7 @@
       >
         Previous
       </button>
-      <span class="text-slate-500">Page {{ page }} of {{ totalPages }}</span>
+      <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
       <button
         type="button"
         class="btn-secondary px-3 py-1.5"
@@ -139,16 +139,16 @@
       </button>
     </div>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="showCreate = false">
-      <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-lg font-semibold text-slate-900">Create task</h2>
-        <p class="mt-1 text-sm text-slate-500">
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showCreate = false">
+      <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-lg font-semibold text-ink">Create task</h2>
+        <p class="mt-1 text-sm text-muted">
           New tasks start as drafts. The access policy is established at creation.
         </p>
 
         <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label class="block sm:col-span-2">
-            <span class="text-xs font-medium text-slate-600">Title *</span>
+            <span class="text-xs font-medium text-body">Title *</span>
             <input
               v-model="form.title"
               type="text"
@@ -157,7 +157,7 @@
             />
           </label>
           <label class="block sm:col-span-2">
-            <span class="text-xs font-medium text-slate-600">Description</span>
+            <span class="text-xs font-medium text-body">Description</span>
             <textarea
               v-model="form.description"
               rows="3"
@@ -166,13 +166,13 @@
             />
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-slate-600">Priority</span>
+            <span class="text-xs font-medium text-body">Priority</span>
             <select v-model="form.priority" class="input-field mt-1">
               <option v-for="p in PRIORITIES" :key="p" :value="p">{{ capitalize(p) }}</option>
             </select>
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-slate-600">Accountable PM *</span>
+            <span class="text-xs font-medium text-body">Accountable PM *</span>
             <select v-model="form.accountable_pm_id" class="input-field mt-1">
               <option value="">Select a person</option>
               <option :value="meId">{{ meName }} (me)</option>
@@ -180,15 +180,15 @@
             </select>
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-slate-600">Start date</span>
+            <span class="text-xs font-medium text-body">Start date</span>
             <input v-model="form.start_date" type="date" class="input-field mt-1" />
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-slate-600">Due date</span>
+            <span class="text-xs font-medium text-body">Due date</span>
             <input v-model="form.due_date" type="date" class="input-field mt-1" />
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-slate-600">Visibility</span>
+            <span class="text-xs font-medium text-body">Visibility</span>
             <select v-model="form.visibility_mode" class="input-field mt-1">
               <option value="participants">Participants (the project team)</option>
               <option value="private">Private (invited people only)</option>
@@ -197,7 +197,7 @@
             </select>
           </label>
           <label v-if="form.visibility_mode === 'department_scoped'" class="block">
-            <span class="text-xs font-medium text-slate-600">Department *</span>
+            <span class="text-xs font-medium text-body">Department *</span>
             <select v-model="form.department_id" class="input-field mt-1">
               <option value="">Select a department</option>
               <option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
@@ -205,7 +205,7 @@
           </label>
         </div>
 
-        <p v-if="createError" role="alert" class="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ createError }}</p>
+        <p v-if="createError" role="alert" class="mt-4 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ createError }}</p>
 
         <div class="mt-6 flex justify-end gap-3">
           <button type="button" class="btn-secondary" @click="showCreate = false">

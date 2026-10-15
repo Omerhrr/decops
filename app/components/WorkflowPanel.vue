@@ -1,14 +1,14 @@
 <template>
-  <div v-if="!workflow" class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-400">
+  <div v-if="!workflow" class="rounded-2xl border border-line bg-surface p-5 text-sm text-faint">
     Loading workflow…
   </div>
   <div v-else class="space-y-6">
     <!-- Progress + calculation method (AC-06) -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-5">
+    <section class="rounded-2xl border border-line bg-surface p-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="text-sm font-semibold text-slate-900">Workflow progress</h2>
-          <p class="mt-1 text-xs text-slate-400">
+          <h2 class="text-sm font-semibold text-ink">Workflow progress</h2>
+          <p class="mt-1 text-xs text-faint">
             {{ workflow!.task_progress_mode === 'calculated'
               ? 'Calculated from the workflow (weighted stages × required items).'
               : 'Manual progress entry; the engine calculation is shown for reference.' }}
@@ -17,7 +17,7 @@
         <button
           v-if="canManage"
           type="button"
-          class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100"
+          class="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-body hover:bg-hover"
           @click="toggleProgressMode"
         >
           Switch to {{ workflow!.task_progress_mode === 'calculated' ? 'manual' : 'calculated' }}
@@ -25,37 +25,37 @@
       </div>
 
       <div class="mt-4 flex items-center gap-3">
-        <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+        <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-hover">
           <div
             class="h-full rounded-full transition-all"
             :class="workflow!.task_progress_mode === 'calculated' ? 'bg-brand-500' : 'bg-indigo-400'"
             :style="{ width: `${displayPercent}%` }"
           />
         </div>
-        <span class="text-sm font-semibold text-slate-700">{{ displayPercent }}%</span>
+        <span class="text-sm font-semibold text-body">{{ displayPercent }}%</span>
       </div>
-      <p class="mt-2 text-xs text-slate-500">{{ workflow!.progress.method }}</p>
+      <p class="mt-2 text-xs text-muted">{{ workflow!.progress.method }}</p>
 
       <div v-if="workflow!.progress.stages.length" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div v-for="s in workflow!.progress.stages" :key="s.stage_id" class="rounded-xl bg-slate-50 px-3 py-2">
+        <div v-for="s in workflow!.progress.stages" :key="s.stage_id" class="rounded-xl bg-elevated px-3 py-2">
           <div class="flex items-center justify-between text-xs">
-            <span class="font-medium text-slate-700">{{ s.stage_name }}</span>
-            <span class="text-slate-400">weight {{ s.weight }} · {{ s.percent }}%</span>
+            <span class="font-medium text-body">{{ s.stage_name }}</span>
+            <span class="text-faint">weight {{ s.weight }} · {{ s.percent }}%</span>
           </div>
-          <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200">
+          <div class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-hover">
             <div class="h-full rounded-full bg-brand-400" :style="{ width: `${s.percent}%` }" />
           </div>
-          <p class="mt-1 text-[11px] leading-4 text-slate-400">{{ s.method }}</p>
+          <p class="mt-1 text-[11px] leading-4 text-faint">{{ s.method }}</p>
         </div>
       </div>
     </section>
 
     <!-- Stages & work items (editor) -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-5">
+    <section class="rounded-2xl border border-line bg-surface p-5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 class="text-sm font-semibold text-slate-900">Stages &amp; work items</h2>
-          <p class="mt-1 text-xs text-slate-400">
+          <h2 class="text-sm font-semibold text-ink">Stages &amp; work items</h2>
+          <p class="mt-1 text-xs text-faint">
             Sequential stages start when all earlier stages finish; parallel stages run simultaneously. Cycles and invalid transitions are rejected by the engine.
           </p>
         </div>
@@ -69,21 +69,21 @@
         </button>
       </div>
 
-      <p v-if="panelError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ panelError }}</p>
+      <p v-if="panelError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ panelError }}</p>
 
       <ol v-if="workflow!.stages.length" class="mt-4 space-y-4">
-        <li v-for="stage in workflow!.stages" :key="stage.id" class="rounded-xl border border-slate-100 bg-slate-50/60 p-4">
+        <li v-for="stage in workflow!.stages" :key="stage.id" class="rounded-xl border border-line bg-elevated/60 p-4">
           <div class="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-800">
-                <span class="text-slate-400">{{ stage.sequence_number }}.</span>
+              <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
+                <span class="text-faint">{{ stage.sequence_number }}.</span>
                 {{ stage.name }}
                 <AppBadge :tone="stageStatusTone(stage.status)">{{ stageStatusLabel(stage.status) }}</AppBadge>
                 <AppBadge tone="gray">{{ stage.execution_mode }}</AppBadge>
                 <AppBadge v-if="stage.progress_basis !== 'all_items'" tone="amber">{{ basisLabel(stage.progress_basis) }}</AppBadge>
                 <AppBadge v-if="!isActionable(stage) && stage.status === 'pending'" tone="rose">waiting</AppBadge>
               </p>
-              <p class="mt-1 text-xs text-slate-400">
+              <p class="mt-1 text-xs text-faint">
                 weight {{ stage.weight }} · {{ formatDate(stage.start_date) }} → {{ formatDate(stage.due_date) }}
                 <template v-if="stage.completed_at"> · completed {{ formatDateTime(stage.completed_at) }}</template>
               </p>
@@ -104,24 +104,24 @@
           <ul class="mt-3 space-y-2">
             <li v-for="item in itemsOf(stage.id)" :key="item.id"
                 class="rounded-lg border px-3 py-2"
-                :class="item.status === 'cancelled' ? 'border-slate-100 bg-white/40 opacity-60' : 'border-slate-200 bg-white'">
+                :class="item.status === 'cancelled' ? 'border-line bg-surface/40 opacity-60' : 'border-line bg-surface'">
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <p class="flex flex-wrap items-center gap-1.5 text-sm text-slate-800">
+                  <p class="flex flex-wrap items-center gap-1.5 text-sm text-ink">
                     <span class="inline-block h-2 w-2 rotate-45 rounded-[1px]"
-                          :class="item.item_type === 'milestone' ? 'bg-amber-500' : 'bg-slate-300'" />
+                          :class="item.item_type === 'milestone' ? 'bg-amber-500' : 'bg-line-strong'" />
                     <span class="font-medium">{{ item.title }}</span>
                     <AppBadge :tone="itemStatusTone(item.status)">{{ item.status.replaceAll('_', ' ') }}</AppBadge>
                     <AppBadge v-if="!item.is_required" tone="gray">optional</AppBadge>
                     <AppBadge v-if="isBlocked(item)" tone="rose">blocked by {{ blockedByNames(item) }}</AppBadge>
                   </p>
-                  <p class="mt-0.5 text-xs text-slate-400">
+                  <p class="mt-0.5 text-xs text-faint">
                     {{ item.assignee ? `assigned to ${item.assignee.full_name}` : 'unassigned' }}
                     · weight {{ item.weight }}
                     · due {{ formatDate(item.due_date) }}
                     <template v-if="item.completed_at"> · completed {{ formatDateTime(item.completed_at) }}</template>
                   </p>
-                  <p v-if="item.parent_work_item_id" class="mt-0.5 text-[11px] text-slate-400">
+                  <p v-if="item.parent_work_item_id" class="mt-0.5 text-[11px] text-faint">
                     under milestone “{{ itemTitle(item.parent_work_item_id) }}”
                   </p>
                 </div>
@@ -138,55 +138,55 @@
               </div>
             </li>
           </ul>
-          <p v-if="!itemsOf(stage.id).length" class="mt-2 text-xs text-slate-400">No work items in this stage yet.</p>
+          <p v-if="!itemsOf(stage.id).length" class="mt-2 text-xs text-faint">No work items in this stage yet.</p>
 
           <button
             v-if="canManage"
             type="button"
-            class="mt-3 text-xs font-medium text-brand-600 hover:text-brand-700"
+            class="mt-3 text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
             @click="openItemModal(stage)"
           >
             + Add milestone / subtask
           </button>
         </li>
       </ol>
-      <p v-else class="mt-4 rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">
+      <p v-else class="mt-4 rounded-xl bg-elevated px-4 py-6 text-center text-sm text-faint">
         No stages yet - build the workflow to track stages, milestones and progress.
       </p>
     </section>
 
     <!-- Dependencies -->
-    <section class="rounded-2xl border border-slate-200 bg-white p-5">
+    <section class="rounded-2xl border border-line bg-surface p-5">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 class="text-sm font-semibold text-slate-900">Dependencies &amp; blockers</h2>
-          <p class="mt-1 text-xs text-slate-400">A work item cannot start until its predecessors complete. Cycles are rejected.</p>
+          <h2 class="text-sm font-semibold text-ink">Dependencies &amp; blockers</h2>
+          <p class="mt-1 text-xs text-faint">A work item cannot start until its predecessors complete. Cycles are rejected.</p>
         </div>
       </div>
       <ul v-if="workflow!.dependencies.length" class="mt-3 space-y-2">
-        <li v-for="dep in workflow!.dependencies" :key="dep.id" class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
-          <span class="text-slate-700">
+        <li v-for="dep in workflow!.dependencies" :key="dep.id" class="flex items-center justify-between rounded-lg bg-elevated px-3 py-2 text-sm">
+          <span class="text-body">
             <span class="font-medium">{{ itemTitle(dep.successor_id) }}</span>
-            <span class="mx-1 text-slate-400">is blocked until</span>
+            <span class="mx-1 text-faint">is blocked until</span>
             <span class="font-medium">{{ itemTitle(dep.predecessor_id) }}</span>
-            <span class="text-slate-400">completes</span>
+            <span class="text-faint">completes</span>
           </span>
           <button v-if="canManage" type="button" class="stage-btn danger" @click="removeDependency(dep)">Remove</button>
         </li>
       </ul>
-      <p v-else class="mt-3 text-sm text-slate-400">No dependencies defined.</p>
+      <p v-else class="mt-3 text-sm text-faint">No dependencies defined.</p>
 
       <form v-if="canManage && workflow!.items.length >= 2" class="mt-4 flex flex-wrap items-end gap-2" @submit.prevent="addDependency">
         <label class="block">
-          <span class="text-xs font-medium text-slate-600">Work item</span>
+          <span class="text-xs font-medium text-body">Work item</span>
           <select v-model="depForm.successor_id" class="dep-select">
             <option value="">Select…</option>
             <option v-for="i in workflow!.items" :key="i.id" :value="i.id">{{ itemTitle(i.id) }}</option>
           </select>
         </label>
-        <span class="pb-2 text-xs text-slate-400">cannot start until</span>
+        <span class="pb-2 text-xs text-faint">cannot start until</span>
         <label class="block">
-          <span class="text-xs font-medium text-slate-600">Predecessor</span>
+          <span class="text-xs font-medium text-body">Predecessor</span>
           <select v-model="depForm.predecessor_id" class="dep-select">
             <option value="">Select…</option>
             <option v-for="i in workflow!.items" :key="i.id" :value="i.id">{{ itemTitle(i.id) }}</option>
@@ -199,7 +199,7 @@
     <!-- Stage modal -->
     <div v-if="stageModal" class="modal-backdrop" @click.self="stageModal = null">
       <div class="modal-card">
-        <h2 class="text-lg font-semibold text-slate-900">{{ stageModal.existing ? 'Edit stage' : 'Add stage' }}</h2>
+        <h2 class="text-lg font-semibold text-ink">{{ stageModal.existing ? 'Edit stage' : 'Add stage' }}</h2>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label class="sm:col-span-2 block">
             <span class="field-label">Name</span>
@@ -237,7 +237,7 @@
             <input v-model="stageForm.due_date" type="date" class="field">
           </label>
         </div>
-        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ modalError }}</p>
+        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ modalError }}</p>
         <div class="mt-5 flex justify-end gap-3">
           <button type="button" class="btn-ghost" @click="stageModal = null">Cancel</button>
           <button type="button" class="btn-primary" @click="submitStage">{{ stageModal.existing ? 'Save' : 'Add stage' }}</button>
@@ -248,7 +248,7 @@
     <!-- Item modal -->
     <div v-if="itemModal" class="modal-backdrop" @click.self="itemModal = null">
       <div class="modal-card">
-        <h2 class="text-lg font-semibold text-slate-900">{{ itemModal.existing ? 'Edit work item' : 'Add work item' }}</h2>
+        <h2 class="text-lg font-semibold text-ink">{{ itemModal.existing ? 'Edit work item' : 'Add work item' }}</h2>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label class="block">
             <span class="field-label">Type</span>
@@ -273,8 +273,8 @@
             <input v-model.number="itemForm.weight" type="number" min="1" max="100" class="field">
           </label>
           <label class="flex items-center gap-2 pb-2">
-            <input v-model="itemForm.is_required" type="checkbox" class="h-4 w-4 rounded border-slate-300">
-            <span class="text-xs font-medium text-slate-600">Required (counts toward progress, gates completion)</span>
+            <input v-model="itemForm.is_required" type="checkbox" class="h-4 w-4 rounded border-line-strong">
+            <span class="text-xs font-medium text-body">Required (counts toward progress, gates completion)</span>
           </label>
           <label class="block">
             <span class="field-label">Start date</span>
@@ -285,7 +285,7 @@
             <input v-model="itemForm.due_date" type="date" class="field">
           </label>
         </div>
-        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ modalError }}</p>
+        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ modalError }}</p>
         <div class="mt-5 flex justify-end gap-3">
           <button type="button" class="btn-ghost" @click="itemModal = null">Cancel</button>
           <button type="button" class="btn-primary" @click="submitItem">{{ itemModal.existing ? 'Save' : 'Add item' }}</button>
@@ -295,7 +295,7 @@
 
     <div v-if="assignModal" class="modal-backdrop" @click.self="assignModal = null">
       <div class="modal-card max-w-md">
-        <h2 class="text-lg font-semibold text-slate-900">Assign “{{ assignModal.item.title }}”</h2>
+        <h2 class="text-lg font-semibold text-ink">Assign “{{ assignModal.item.title }}”</h2>
         <label class="mt-4 block">
           <span class="field-label">Person</span>
           <select v-model="assignForm.user_id" class="field">
@@ -303,7 +303,7 @@
             <option v-for="u in assignees" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
           </select>
         </label>
-        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ modalError }}</p>
+        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ modalError }}</p>
         <div class="mt-5 flex justify-end gap-3">
           <button type="button" class="btn-ghost" @click="assignModal = null">Cancel</button>
           <button type="button" class="btn-primary" @click="submitAssign">Save</button>
@@ -314,12 +314,12 @@
     <!-- Reason modal (stage/item transitions needing justification) -->
     <div v-if="reasonModal" class="modal-backdrop" @click.self="reasonModal = null">
       <div class="modal-card max-w-md">
-        <h2 class="text-lg font-semibold text-slate-900">{{ reasonModal.summary }}</h2>
-        <p class="mt-1 text-sm text-slate-500">
+        <h2 class="text-lg font-semibold text-ink">{{ reasonModal.summary }}</h2>
+        <p class="mt-1 text-sm text-muted">
           {{ reasonModal.needsReason ? 'This change is recorded with a required reason.' : 'Optional context, recorded on the task history.' }}
         </p>
         <textarea v-model="reasonForm.reason" rows="3" class="field mt-3" placeholder="Recorded on the task history…" />
-        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ modalError }}</p>
+        <p v-if="modalError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ modalError }}</p>
         <div class="mt-5 flex justify-end gap-3">
           <button type="button" class="btn-ghost" @click="reasonModal = null">Cancel</button>
           <button type="button" class="btn-primary" @click="confirmReasonTransition">Confirm</button>

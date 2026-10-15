@@ -2,13 +2,13 @@
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
-          <NuxtLink to="/" class="hover:text-slate-600">Dashboard</NuxtLink>
+        <nav class="text-xs text-faint" aria-label="Breadcrumb">
+          <NuxtLink to="/" class="hover:text-body">Dashboard</NuxtLink>
           <span class="mx-1">/</span>
-          <span class="text-slate-600">Departments</span>
+          <span class="text-body">Departments</span>
         </nav>
-        <h1 class="mt-1 text-xl font-semibold text-slate-900">Department management</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="mt-1 text-xl font-semibold text-ink">Department management</h1>
+        <p class="mt-1 text-sm text-muted">
           Departments, leads, and employee memberships (MOD-002). All changes are audited.
         </p>
       </div>
@@ -23,48 +23,48 @@
     </section>
 
     <section class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div v-if="loading" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-400 lg:col-span-2">
+      <div v-if="loading" class="rounded-2xl border border-line bg-surface p-8 text-center text-faint lg:col-span-2">
         Loading…
       </div>
-      <div v-else-if="!departments.length" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-400 lg:col-span-2">
+      <div v-else-if="!departments.length" class="rounded-2xl border border-line bg-surface p-8 text-center text-faint lg:col-span-2">
         No departments yet. Create the first one to start assigning employees.
       </div>
 
       <article
         v-for="d in departments"
         :key="d.id"
-        class="rounded-2xl border border-slate-200 bg-white p-5"
+        class="rounded-2xl border border-line bg-surface p-5"
         :class="d.status === 'inactive' ? 'opacity-70' : ''"
       >
         <header class="flex items-start justify-between gap-3">
           <div>
-            <h2 class="text-base font-semibold text-slate-900">{{ d.name }}</h2>
-            <p class="mt-0.5 text-sm text-slate-500">{{ d.description || 'No description' }}</p>
+            <h2 class="text-base font-semibold text-ink">{{ d.name }}</h2>
+            <p class="mt-0.5 text-sm text-muted">{{ d.description || 'No description' }}</p>
           </div>
           <AppBadge :tone="d.status === 'active' ? 'green' : 'gray'">{{ d.status }}</AppBadge>
         </header>
 
         <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Lead</dt>
-            <dd class="mt-0.5 text-slate-800">{{ d.lead?.full_name || 'Unassigned' }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-faint">Lead</dt>
+            <dd class="mt-0.5 text-ink">{{ d.lead?.full_name || 'Unassigned' }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Members</dt>
-            <dd class="mt-0.5 text-slate-800">{{ d.member_count }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-faint">Members</dt>
+            <dd class="mt-0.5 text-ink">{{ d.member_count }}</dd>
           </div>
         </dl>
 
         <!-- Members -->
-        <div v-if="detailOf(d.id)?.memberships?.length" class="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+        <div v-if="detailOf(d.id)?.memberships?.length" class="mt-3 space-y-1.5 border-t border-line pt-3">
           <div
             v-for="m in detailOf(d.id)!.memberships"
             :key="m.id"
             class="flex items-center justify-between text-sm"
           >
-            <span class="text-slate-700">
+            <span class="text-body">
               {{ m.user?.full_name || m.user_id }}
-              <span class="ml-1 text-xs text-slate-400">({{ m.membership_role }})</span>
+              <span class="ml-1 text-xs text-faint">({{ m.membership_role }})</span>
             </span>
             <button
               v-if="canManage"
@@ -78,19 +78,19 @@
         </div>
 
         <!-- Add member -->
-        <div v-if="canManage" class="mt-3 flex gap-2 border-t border-slate-100 pt-3">
-          <select v-model="memberPick[d.id]" class="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+        <div v-if="canManage" class="mt-3 flex gap-2 border-t border-line pt-3">
+          <select v-model="memberPick[d.id]" class="flex-1 rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand-500">
             <option value="" disabled>Add employee…</option>
             <option v-for="u in addableUsers(d)" :key="u.id" :value="u.id">{{ u.full_name }}</option>
           </select>
-          <select v-model="rolePick[d.id]" class="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+          <select v-model="rolePick[d.id]" class="rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand-500">
             <option value="member">member</option>
             <option value="lead">lead</option>
           </select>
           <button
             type="button"
             :disabled="!memberPick[d.id]"
-            class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40"
+            class="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-canvas disabled:opacity-40"
             @click="addMember(d)"
           >
             Add
@@ -99,20 +99,20 @@
       </article>
     </section>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-base font-semibold text-slate-900">Create department</h2>
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-base font-semibold text-ink">Create department</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createDepartment">
           <div>
-            <label class="text-xs font-medium text-slate-600" for="dep-name">Name</label>
+            <label class="text-xs font-medium text-body" for="dep-name">Name</label>
             <input id="dep-name" v-model="depForm.name" required class="input-field mt-1" />
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-600" for="dep-desc">Description</label>
+            <label class="text-xs font-medium text-body" for="dep-desc">Description</label>
             <textarea id="dep-desc" v-model="depForm.description" rows="2" class="input-field mt-1"></textarea>
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-600" for="dep-lead">Department lead</label>
+            <label class="text-xs font-medium text-body" for="dep-lead">Department lead</label>
             <select id="dep-lead" v-model="depForm.lead_user_id" class="input-field mt-1">
               <option value="">No lead yet</option>
               <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
@@ -120,7 +120,7 @@
           </div>
           <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
+            <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
             <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create department' }}
             </button>

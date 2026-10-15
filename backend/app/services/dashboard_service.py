@@ -161,6 +161,49 @@ def _activity_rows(db: Session, visible: list[Task]) -> list[dict]:
     return rows
 
 
+CHART_WEEKS = 8
+CHART_DEPARTMENTS = 6
+
+
+def chart_payload(visible: list[Task]) -> dict:
+    """Chart-friendly aggregates over the authorized set (dashboard visualizations)."""
+    today = datetime.now(UTC).date()
+    current_week_start = today - timedelta(days=today.weekday())
+    window_start = current_week_start - timedelta(weeks=CHART_WEEKS - 1)
+    buckets: dict[date, dict[str, int]] = {
+        window_start + timedelta(weeks=i): {"created": 0, "completed": 0}
+        for i in range(CHART_WEEKS)
+    }
+    by_priority: dict[str, int] = {}
+    by_department: dict[str, dict[str, int]] = {}
+    for t in visible:
+        if t.created_at:
+            week = t.created_at.date() - timedelta(days=t.created_at.date().weekday())
+            if week in buckets:
+                buckets[week]["created"] += 1
+        if _status_of(t) is TaskStatus.completed and t.completed_at:
+            week = t.completed_at.date() - timedelta(days=t.completed_at.date().weekday())
+            if week in buckets:
+                buckets[week]["completed"] += 1
+        priority = t.priority.value if hasattr(t.priority, "value") else str(t.priority)
+        by_priority[priority] = by_priority.get(priority, 0) + 1
+        for td in t.task_departments:
+            name = td.department.name if td.department else "Unassigned"
+            entry = by_department.setdefault(name, {"total": 0, "active": 0})
+            entry["total"] += 1
+            if _is_active(t):
+                entry["active"] += 1
+    trend = [
+        {"week_start": day, "created": v["created"], "completed": v["completed"]}
+        for day, v in sorted(buckets.items())
+    ]
+    departments = sorted(
+        ({"name": name, **counts} for name, counts in by_department.items()),
+        key=lambda row: (-row["total"], row["name"]),
+    )[:CHART_DEPARTMENTS]
+    return {"trend": trend, "by_priority": by_priority, "by_department": departments}
+
+
 def management_overview(visible: list[Task]) -> dict:
     """Company-wide aggregates for dashboards.view holders. Computed from the
     same visible set, so it reconciles with the administrator's authorized
@@ -209,6 +252,7 @@ def dashboard_summary(db: Session, actor: User, *, include_management: bool) -> 
         "blocked_tasks": [deadline_row(t) for t in blocked],
         "recent_activity": _activity_rows(db, visible),
         "management_overview": management_overview(visible) if include_management else None,
+        "charts": chart_payload(visible),
     }
     return summary
 

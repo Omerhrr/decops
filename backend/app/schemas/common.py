@@ -42,6 +42,7 @@ class MeResponse(BaseModel):
     last_login_at: datetime | None = None
     roles: list[RoleBrief] = []
     permissions: list[str] = []
+    preferences: dict = {}
 
 
 class AuthErrorResponse(BaseModel):

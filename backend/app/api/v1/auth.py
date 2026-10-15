@@ -8,7 +8,7 @@ from app.api.deps import CurrentUser, DbSession, get_user_permission_codes
 from app.core.config import Settings
 from app.core.errors import AppError
 from app.schemas.common import LoginRequest, MeResponse, RoleBrief
-from app.services import audit_service, auth_service
+from app.services import audit_service, auth_service, settings_service
 
 logger = logging.getLogger("decops.api.auth")
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -36,6 +36,7 @@ def _me_response(user, permission_codes: set[str]) -> MeResponse:
         last_login_at=user.last_login_at,
         roles=[RoleBrief.model_validate(ur.role) for ur in user.roles],
         permissions=sorted(permission_codes),
+        preferences=settings_service.get_user_preferences(user),
     )
 
 

@@ -8,7 +8,7 @@
             Quick access to the work assigned to you; the same engine-authorized set as the register.
           </p>
         </div>
-        <div class="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1" role="tablist" aria-label="Task scope">
+        <div class="inline-flex rounded-xl border border-line bg-elevated p-1" role="tablist" aria-label="Task scope">
           <button
             v-for="option in scopeOptions"
             :key="option.value"
@@ -16,7 +16,7 @@
             role="tab"
             :aria-selected="scope === option.value"
             class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            :class="scope === option.value ? 'bg-white text-brand-700 shadow-sm' : 'text-slate-500 hover:text-slate-800'"
+            :class="scope === option.value ? 'bg-surface text-brand-700 dark:text-brand-300 shadow-sm' : 'text-muted hover:text-ink'"
             @click="switchScope(option.value)"
           >
             {{ option.label }}
@@ -28,14 +28,14 @@
     <section class="card mt-6">
       <div v-if="pending" class="p-10">
         <div class="space-y-2" aria-busy="true" aria-label="Loading tasks">
-          <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-slate-100" />
+          <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-hover" />
         </div>
       </div>
-      <div v-else-if="error" class="p-10 text-center text-sm text-rose-600">{{ error.message }}</div>
+      <div v-else-if="error" class="p-10 text-center text-sm text-rose-600 dark:text-rose-400">{{ error.message }}</div>
 
       <template v-else>
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <table class="min-w-full divide-y divide-line text-sm">
             <thead>
               <tr class="table-head">
                 <th class="px-6 py-4">Task</th>
@@ -45,7 +45,7 @@
                 <th class="px-6 py-4">Due date</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-line">
               <tr v-if="!page?.items.length">
                 <td colspan="5">
                   <div class="empty-state">
@@ -53,12 +53,12 @@
                   </div>
                 </td>
               </tr>
-              <tr v-for="task in page?.items" :key="task.id" class="transition-colors hover:bg-slate-50">
+              <tr v-for="task in page?.items" :key="task.id" class="transition-colors hover:bg-hover">
                 <td class="px-6 py-4">
-                  <NuxtLink :to="`/tasks/${task.id}`" class="font-medium text-slate-800 hover:text-brand-700">
+                  <NuxtLink :to="`/tasks/${task.id}`" class="font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300">
                     {{ task.title }}
                   </NuxtLink>
-                  <p class="mt-0.5 text-xs text-slate-400">
+                  <p class="mt-0.5 text-xs text-faint">
                     {{ task.task_number }}
                     <span v-if="task.department_names.length"> · {{ task.department_names.join(', ') }}</span>
                   </p>
@@ -67,14 +67,14 @@
                 <td class="px-6 py-4"><AppBadge :tone="priorityTone(task.priority)">{{ capitalize(task.priority) }}</AppBadge></td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
-                    <div class="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-1.5 w-24 overflow-hidden rounded-full bg-hover">
                       <div class="h-full rounded-full bg-brand-500" :style="{ width: `${task.percent_complete}%` }" />
                     </div>
-                    <span class="text-xs text-slate-500">{{ task.percent_complete }}%</span>
+                    <span class="text-xs text-muted">{{ task.percent_complete }}%</span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <span v-if="task.due_date" class="text-slate-600">{{ formatDate(task.due_date) }}</span>
+                  <span v-if="task.due_date" class="text-body">{{ formatDate(task.due_date) }}</span>
                   <AppBadge v-if="isOverdue(task)" tone="rose" class="ml-2">overdue</AppBadge>
                 </td>
               </tr>
@@ -82,8 +82,8 @@
           </table>
         </div>
 
-        <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-slate-100 px-6 py-4">
-          <p class="text-xs text-slate-500">Page {{ page?.page }} of {{ totalPages }} · {{ page?.total }} task(s)</p>
+        <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-line px-6 py-4">
+          <p class="text-xs text-muted">Page {{ page?.page }} of {{ totalPages }} · {{ page?.total }} task(s)</p>
           <div class="flex gap-2">
             <button
               type="button"

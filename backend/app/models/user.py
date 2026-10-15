@@ -8,7 +8,7 @@ from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, utcnow
-from app.db.types import UTCDateTime
+from app.db.types import JSONType, UTCDateTime
 
 
 class AccountStatus(str, enum.Enum):
@@ -36,6 +36,10 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+
+    # Appearance preferences (theme mode, accent color, font). JSON so the
+    # set of tunable keys can grow without migrations.
+    preferences: Mapped[dict] = mapped_column(JSONType, default=dict, nullable=False)
 
     memberships = relationship(
         "DepartmentMembership", back_populates="user", lazy="selectin"

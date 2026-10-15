@@ -31,6 +31,7 @@ export function useAuth() {
   async function login(email: string, password: string): Promise<void> {
     user.value = await api.post<Me>('/api/v1/auth/login', { email, password })
     loaded.value = true
+    useAppearance().hydrateFromUser(user.value?.preferences)
   }
 
   async function logout(): Promise<void> {

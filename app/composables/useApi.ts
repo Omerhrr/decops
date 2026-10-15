@@ -49,11 +49,12 @@ export function useApi() {
   return {
     get: <T>(path: string) => request<T>(path),
     post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
+    put: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PUT', body }),
     patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
     delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
-    // Binary download (CSV exports): returns the blob plus a filename parsed
+    // Binary download (CSV/PDF exports): returns the blob plus a filename parsed
     // from Content-Disposition so the caller can trigger a client-side save.
-    download: async (path: string, body?: unknown): Promise<{ blob: Blob, filename: string }> => {
+    download: async (path: string, body?: unknown): Promise<{ blob: Blob, filename: string, contentType: string }> => {
       const response = await $fetch.raw(path, {
         method: 'POST',
         body,
@@ -67,14 +68,15 @@ export function useApi() {
           message: 'Unexpected response from the server.',
         })
       }
-      const blob = new Blob([response._data as BlobPart], { type: 'text/csv;charset=utf-8' })
+      const contentType = response.headers.get('content-type') ?? 'text/csv;charset=utf-8'
+      const blob = new Blob([response._data as BlobPart], { type: contentType })
       const disposition = (response.headers.get('content-disposition') ?? '')
       const match = /filename="?([^";]+)"?/.exec(disposition)
-      return { blob, filename: match?.[1] ?? 'decops_export.csv' }
+      return { blob, filename: match?.[1] ?? 'decops_export', contentType }
     },
     // GET variant for server-generated downloads (import reconciliation
     // summaries) that need no request body.
-    downloadGet: async (path: string): Promise<{ blob: Blob, filename: string }> => {
+    downloadGet: async (path: string): Promise<{ blob: Blob, filename: string, contentType: string }> => {
       const response = await $fetch.raw(path, {
         method: 'GET',
         credentials: 'include',
@@ -87,10 +89,11 @@ export function useApi() {
           message: 'Unexpected response from the server.',
         })
       }
-      const blob = new Blob([response._data as BlobPart], { type: 'text/csv;charset=utf-8' })
+      const contentType = response.headers.get('content-type') ?? 'text/csv;charset=utf-8'
+      const blob = new Blob([response._data as BlobPart], { type: contentType })
       const disposition = (response.headers.get('content-disposition') ?? '')
       const match = /filename="?([^";]+)"?/.exec(disposition)
-      return { blob, filename: match?.[1] ?? 'decops_download.csv' }
+      return { blob, filename: match?.[1] ?? 'decops_download', contentType }
     },
   }
 }

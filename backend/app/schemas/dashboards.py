@@ -78,6 +78,24 @@ class ActivityRow(BaseModel):
     created_at: datetime
 
 
+class TrendPoint(BaseModel):
+    week_start: date
+    created: int
+    completed: int
+
+
+class DepartmentLoad(BaseModel):
+    name: str
+    total: int
+    active: int
+
+
+class DashboardCharts(BaseModel):
+    trend: list[TrendPoint] = []
+    by_priority: dict[str, int] = {}
+    by_department: list[DepartmentLoad] = []
+
+
 class DashboardSummary(BaseModel):
     me: PersonalSummary
     visible_totals: StatusBreakdown
@@ -88,6 +106,7 @@ class DashboardSummary(BaseModel):
     blocked_tasks: list[BlockedTaskRow] = []
     recent_activity: list[ActivityRow] = []
     management_overview: ManagementOverview | None = None
+    charts: DashboardCharts = DashboardCharts()
 
 
 class MyTaskPage(BaseModel):

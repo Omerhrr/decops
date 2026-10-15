@@ -350,7 +350,12 @@ TASK_REGISTER_COLUMNS = [
 ]
 
 
-def export_task_register(
+def task_register_row(task: Task) -> dict[str, str]:
+    """Public row builder (CSV and PDF exports share the same field values)."""
+    return _task_row(task)
+
+
+def filter_visible_tasks(
     db: Session,
     actor: User,
     *,
@@ -358,8 +363,8 @@ def export_task_register(
     priority: str | None = None,
     department_id: uuid.UUID | None = None,
     q: str | None = None,
-) -> tuple[str, int]:
-    """CSV of the authorized task register (same engine as the register UI)."""
+) -> list[Task]:
+    """Engine-visible tasks with the shared register filters (CSV and PDF exports)."""
     visible = visible_tasks(db, actor)
 
     if status:
@@ -385,6 +390,22 @@ def export_task_register(
             t for t in visible
             if needle in t.title.lower() or needle in t.task_number.lower()
         ]
+    return visible
+
+
+def export_task_register(
+    db: Session,
+    actor: User,
+    *,
+    status: str | None = None,
+    priority: str | None = None,
+    department_id: uuid.UUID | None = None,
+    q: str | None = None,
+) -> tuple[str, int]:
+    """CSV of the authorized task register (same engine as the register UI)."""
+    visible = filter_visible_tasks(
+        db, actor, status=status, priority=priority, department_id=department_id, q=q
+    )
 
     buffer = io.StringIO()
     writer = csv.writer(buffer)

@@ -70,6 +70,13 @@ class RoleOut(BaseModel):
     permissions: list[str] = []
 
 
+class RoleWriteRequest(BaseModel):
+    # Optional so PATCH can send partial updates; POST requires it explicitly.
+    name: str | None = Field(default=None, min_length=2, max_length=100)
+    description: str | None = Field(default=None, max_length=500)
+    permissions: list[str] | None = None
+
+
 class RoleAssignRequest(BaseModel):
     role_id: uuid.UUID
 

@@ -2,13 +2,13 @@
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
-          <NuxtLink to="/" class="hover:text-slate-600">Dashboard</NuxtLink>
+        <nav class="text-xs text-faint" aria-label="Breadcrumb">
+          <NuxtLink to="/" class="hover:text-body">Dashboard</NuxtLink>
           <span class="mx-1">/</span>
-          <span class="text-slate-600">Users</span>
+          <span class="text-body">Users</span>
         </nav>
-        <h1 class="mt-1 text-xl font-semibold text-slate-900">User administration</h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <h1 class="mt-1 text-xl font-semibold text-ink">User administration</h1>
+        <p class="mt-1 text-sm text-muted">
           Employees, account status, and global role assignment (MOD-002). All changes are audited.
         </p>
       </div>
@@ -22,17 +22,17 @@
       </button>
     </section>
 
-    <section class="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
+    <section class="mt-6 flex flex-col gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex-row sm:items-center">
       <input
         v-model="query"
         type="search"
         placeholder="Search by name or email…"
-        class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500 sm:max-w-sm"
+        class="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500 sm:max-w-sm"
         @input="debouncedLoad"
       />
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
+        class="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500"
         @change="loadUsers"
       >
         <option value="">All statuses</option>
@@ -40,13 +40,13 @@
         <option value="disabled">Disabled</option>
         <option value="deactivated">Deactivated</option>
       </select>
-      <span class="text-sm text-slate-400 sm:ml-auto">{{ total }} employees</span>
+      <span class="text-sm text-faint sm:ml-auto">{{ total }} employees</span>
     </section>
 
     <!-- Directory table -->
-    <section class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+    <section class="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
+      <table class="min-w-full divide-y divide-line text-sm">
+        <thead class="bg-elevated text-left text-xs uppercase tracking-wide text-muted">
           <tr>
             <th class="px-4 py-3">Employee</th>
             <th class="px-4 py-3">Code</th>
@@ -56,19 +56,19 @@
             <th class="px-4 py-3 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-line">
           <tr v-if="loading">
-            <td colspan="6" class="px-4 py-8 text-center text-slate-400">Loading…</td>
+            <td colspan="6" class="px-4 py-8 text-center text-faint">Loading…</td>
           </tr>
           <tr v-else-if="!users.length">
-            <td colspan="6" class="px-4 py-8 text-center text-slate-400">No employees match the filters.</td>
+            <td colspan="6" class="px-4 py-8 text-center text-faint">No employees match the filters.</td>
           </tr>
-          <tr v-for="u in users" :key="u.id" class="hover:bg-slate-50/60">
+          <tr v-for="u in users" :key="u.id" class="hover:bg-hover/60">
             <td class="px-4 py-3">
-              <p class="font-medium text-slate-900">{{ u.full_name }}</p>
-              <p class="text-xs text-slate-500">{{ u.email }}</p>
+              <p class="font-medium text-ink">{{ u.full_name }}</p>
+              <p class="text-xs text-muted">{{ u.email }}</p>
             </td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-600">{{ u.employee_code }}</td>
+            <td class="px-4 py-3 font-mono text-xs text-body">{{ u.employee_code }}</td>
             <td class="px-4 py-3">
               <AppBadge :tone="statusTone(u.account_status)">{{ u.account_status }}</AppBadge>
             </td>
@@ -79,16 +79,16 @@
                   :key="r.id"
                   tone="gray"
                 >{{ r.name }}</AppBadge>
-                <span v-if="!detailRoles(u.id).length" class="text-xs text-slate-400"> - </span>
+                <span v-if="!detailRoles(u.id).length" class="text-xs text-faint"> - </span>
               </div>
             </td>
-            <td class="px-4 py-3 text-xs text-slate-500">{{ formatDate(u.last_login_at) }}</td>
+            <td class="px-4 py-3 text-xs text-muted">{{ formatDate(u.last_login_at) }}</td>
             <td class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <button
                   v-if="canManage"
                   type="button"
-                  class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                  class="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-body hover:bg-hover"
                   @click="openRoles(u)"
                 >
                   Roles
@@ -111,16 +111,16 @@
     <div v-if="totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
       <button
         type="button"
-        class="rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-40"
+        class="rounded-lg border border-line px-3 py-1.5 disabled:opacity-40"
         :disabled="page <= 1"
         @click="page--; loadUsers()"
       >
         Previous
       </button>
-      <span class="text-slate-500">Page {{ page }} of {{ totalPages }}</span>
+      <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
       <button
         type="button"
-        class="rounded-lg border border-slate-200 px-3 py-1.5 disabled:opacity-40"
+        class="rounded-lg border border-line px-3 py-1.5 disabled:opacity-40"
         :disabled="page >= totalPages"
         @click="page++; loadUsers()"
       >
@@ -128,30 +128,30 @@
       </button>
     </div>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-base font-semibold text-slate-900">Create employee</h2>
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-base font-semibold text-ink">Create employee</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createUser">
           <div>
-            <label class="text-xs font-medium text-slate-600" for="new-name">Full name</label>
+            <label class="text-xs font-medium text-body" for="new-name">Full name</label>
             <input id="new-name" v-model="form.full_name" required class="input-field mt-1" />
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-600" for="new-email">Email</label>
+            <label class="text-xs font-medium text-body" for="new-email">Email</label>
             <input id="new-email" v-model="form.email" type="email" required class="input-field mt-1" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-medium text-slate-600" for="new-code">Employee code</label>
+              <label class="text-xs font-medium text-body" for="new-code">Employee code</label>
               <input id="new-code" v-model="form.employee_code" required class="input-field mt-1" placeholder="INT-0000" />
             </div>
             <div>
-              <label class="text-xs font-medium text-slate-600" for="new-password">Temp password</label>
+              <label class="text-xs font-medium text-body" for="new-password">Temp password</label>
               <input id="new-password" v-model="form.password" type="password" required minlength="10" class="input-field mt-1" />
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-600" for="new-role">Initial role</label>
+            <label class="text-xs font-medium text-body" for="new-role">Initial role</label>
             <select id="new-role" v-model="form.roleId" class="input-field mt-1">
               <option value="">No role yet</option>
               <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
@@ -159,7 +159,7 @@
           </div>
           <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
+            <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
             <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create employee' }}
             </button>
@@ -169,25 +169,25 @@
     </div>
 
     <!-- Roles modal -->
-    <div v-if="rolesTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-base font-semibold text-slate-900">Global roles - {{ rolesTarget.full_name }}</h2>
-        <p class="mt-1 text-xs text-slate-500">Permission changes are audited and take effect on the next request.</p>
+    <div v-if="rolesTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-base font-semibold text-ink">Global roles - {{ rolesTarget.full_name }}</h2>
+        <p class="mt-1 text-xs text-muted">Permission changes are audited and take effect on the next request.</p>
 
         <div class="mt-4 flex flex-wrap gap-2">
           <span
             v-for="r in rolesTargetRoles"
             :key="r.id"
-            class="flex items-center gap-1.5 rounded-full bg-brand-50 py-1 pl-3 pr-2 text-xs font-medium text-brand-700"
+            class="flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 py-1 pl-3 pr-2 text-xs font-medium text-brand-700 dark:text-brand-300"
           >
             {{ r.name }}
-            <button type="button" class="text-brand-400 hover:text-brand-700" aria-label="Revoke role" @click="revokeRole(r)">✕</button>
+            <button type="button" class="text-brand-400 hover:text-brand-700 dark:hover:text-brand-300" aria-label="Revoke role" @click="revokeRole(r)">✕</button>
           </span>
-          <span v-if="!rolesTargetRoles.length" class="text-xs text-slate-400">No global roles assigned.</span>
+          <span v-if="!rolesTargetRoles.length" class="text-xs text-faint">No global roles assigned.</span>
         </div>
 
         <div class="mt-4 flex gap-2">
-          <select v-model="roleToAdd" class="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="roleToAdd" class="flex-1 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500">
             <option value="" disabled>Select a role to assign…</option>
             <option v-for="r in assignableRoles" :key="r.id" :value="r.id">{{ r.name }}</option>
           </select>
@@ -202,7 +202,7 @@
         </div>
         <p v-if="formError" class="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
         <div class="mt-4 flex justify-end">
-          <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="closeRoles">Done</button>
+          <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="closeRoles">Done</button>
         </div>
       </div>
     </div>

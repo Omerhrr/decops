@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 # ---------- Requests ----------
 class ExportRequest(BaseModel):
     export_type: str = Field(pattern="^(task_register|department_workload|task_completion)$")
+    format: str = Field(default="csv", pattern="^(csv|pdf)$")
     # Optional register filters (task_register only)
     status: str | None = None
     priority: str | None = None

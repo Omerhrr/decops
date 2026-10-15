@@ -12,6 +12,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  components: [
+    // Flat names: components are addressed by file name only, so nested
+    // folders (charts/, settings/) stay organizational, not part of the tag.
+    { path: '~/components', pathPrefix: false },
+  ],
+
   vite: {
     plugins: [tailwindcss()],
     server: {
@@ -29,12 +35,22 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'DecOps — Interdec Operations Management',
+      title: 'DecOps | Interdec Operations Management',
       htmlAttrs: { lang: 'en' },
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'DecOps Operations Management System for Interdec' },
+        { name: 'theme-color', content: '#0b1220' },
+      ],
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      script: [
+        {
+          // Apply the saved theme before first paint to avoid a flash of the
+          // wrong mode. Kept tiny and dependency-free on purpose.
+          innerHTML: `(function(){try{var s=JSON.parse(localStorage.getItem('decops.appearance')||'{}');var m=s.mode||'system';var dark=m==='dark'||(m!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var el=document.documentElement;if(dark)el.classList.add('dark');el.dataset.mode=m;el.dataset.accent=s.accent||'emerald';el.dataset.font=s.font||'inter';}catch(e){}})();`,
+          tagPosition: 'head',
+        },
       ],
     },
   },

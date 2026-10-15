@@ -23,7 +23,7 @@ from app.core.errors import ValidationFailedError
 from app.core.context import current_request_id
 from app.models import Department
 from app.schemas.reports import DepartmentWorkloadReport, ExportRequest, TaskCompletionReport
-from app.services import audit_service, report_service
+from app.services import audit_service, pdf_service, report_service, settings_service
 from app.services.task_service import get_user_permission_codes
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
@@ -69,24 +69,19 @@ def create_export(
     codes = get_user_permission_codes(db, user)
 
     if body.export_type == "task_register":
-        csv_text, rows = report_service.export_task_register(
-            db, user,
-            status=body.status,
-            priority=body.priority,
-            department_id=body.department_id,
-            q=body.q,
-        )
         description = "Task register export"
     elif body.export_type == "department_workload":
-        csv_text, rows = report_service.export_department_workload(
-            db, user, management_scope="reports.view" in codes
-        )
         description = "Department workload export"
     elif body.export_type == "task_completion":
-        csv_text, rows = report_service.export_task_completion(db, user, weeks=body.weeks)
         description = "Task completion export"
     else:  # guarded by schema pattern, defensive only
         raise ValidationFailedError("Unknown export type.")
+
+    if body.format == "pdf":
+        content, rows = _pdf_export(db, user, body)
+    else:
+        csv_text, rows = _csv_export(db, user, body, codes)
+        content = csv_text.encode("utf-8")
 
     audit_service.record_audit_event(
         db,
@@ -95,18 +90,64 @@ def create_export(
         resource_id=body.export_type,
         actor=user,
         request_id=current_request_id(),
-        change_summary=f"{description}: {rows} row(s)",
-        metadata={"export_type": body.export_type, "rows": rows},
+        change_summary=f"{description}: {rows} row(s), {body.format}",
+        metadata={"export_type": body.export_type, "rows": rows, "format": body.format},
     )
     db.commit()
 
     stamp = datetime.now(UTC).strftime("%Y%m%d")
-    filename = f"decops_{body.export_type}_{stamp}.csv"
+    extension = "pdf" if body.format == "pdf" else "csv"
+    media = "application/pdf" if body.format == "pdf" else "text/csv; charset=utf-8"
+    filename = f"decops_{body.export_type}_{stamp}.{extension}"
     return Response(
-        content=csv_text,
-        media_type="text/csv; charset=utf-8",
+        content=content,
+        media_type=media,
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+def _csv_export(db, user, body: ExportRequest, codes: set[str]) -> tuple[str, int]:
+    if body.export_type == "task_register":
+        return report_service.export_task_register(
+            db, user,
+            status=body.status,
+            priority=body.priority,
+            department_id=body.department_id,
+            q=body.q,
+        )
+    if body.export_type == "department_workload":
+        return report_service.export_department_workload(
+            db, user, management_scope="reports.view" in codes
+        )
+    return report_service.export_task_completion(db, user, weeks=body.weeks)
+
+
+def _pdf_export(db, user, body: ExportRequest) -> tuple[bytes, int]:
+    org = settings_service.get_org_settings(db)
+    design = settings_service.get_pdf_design(db)
+    if body.export_type == "task_register":
+        visible = report_service.filter_visible_tasks(
+            db, user,
+            status=body.status,
+            priority=body.priority,
+            department_id=body.department_id,
+            q=body.q,
+        )
+        rows = [report_service.task_register_row(t) for t in visible]
+        content = pdf_service.task_register_pdf(
+            db, user, org, design, rows=rows, row_count=len(rows)
+        )
+        return content, len(rows)
+    if body.export_type == "department_workload":
+        codes = get_user_permission_codes(db, user)
+        report = report_service.department_workload_report(
+            db, user, management_scope="reports.view" in codes
+        )
+        content = pdf_service.department_workload_pdf(db, user, org, design, report)
+        return content, len(report["departments"])
+    report = report_service.task_completion_report(db, user, weeks=body.weeks)
+    content = pdf_service.task_completion_pdf(db, user, org, design, report)
+    return content, len(report["series"])
 
 
 # Department Workspace data (spec frontend_pages.Department Workspace) lives

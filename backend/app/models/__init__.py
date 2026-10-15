@@ -13,6 +13,7 @@ from app.models.collaboration import (
 from app.models.department import Department, DepartmentMembership, DepartmentStatus, MembershipRole
 from app.models.import_job import ImportJob, ImportJobStatus
 from app.models.rbac import Permission, Role, RolePermission, ScopeType, UserRole
+from app.models.settings import AppSetting
 from app.models.task import (
     AccessLevel,
     AssignmentRoleType,
@@ -41,6 +42,7 @@ from app.models.workflow import (
 __all__ = [
     "AccessLevel",
     "AccountStatus",
+    "AppSetting",
     "AssignmentRoleType",
     "Attachment",
     "AuditEvent",

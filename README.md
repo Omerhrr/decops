@@ -375,11 +375,39 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 ## Application shell (collapsible sidebar + mobile)
 
-- **Desktop**: fixed collapsible sidebar (full ↔ icon rail) with active-route
+- **Desktop**: fixed collapsible sidebar (full and icon rail) with active-route
   indicator, persisted per browser via `localStorage`
 - **Mobile**: off-canvas drawer behind a hamburger button with backdrop,
   auto-close on navigation, and a responsive single-column content layout
-- Header hosts the notification bell (unread badge), user identity, and sign out
+- Header hosts the theme toggle, notification bell (unread badge), and the
+  account menu (identity, roles, My Tasks, Settings, sign out)
+- Hexagon "D" brand mark as the product logo (sidebar, login, PDF header, favicon)
+
+## Settings & theming (post-launch evolution)
+
+- **Dark / light / system modes** with a pre-paint no-flash script, theme
+  dropdown in the header, and full dark tokens across every screen
+- **Appearance settings** (Settings > Appearance): theme mode, six accent
+  palettes (emerald, blue, violet, rose, amber, slate), and four interface
+  font stacks; saved per user on the server and per device in localStorage
+- **Organization settings** (Settings > Organization): org name and tagline
+  shown in the PDF header and the interface footer
+- **Roles & permissions editor** (Settings > Roles & Permissions): create,
+  edit, and delete custom roles with a grouped, searchable permission matrix;
+  system roles stay read-only to protect the approved spec matrix; all changes
+  audited (`role.created` / `role.updated` / `role.deleted`)
+- **Users & access** (Settings > Users & Access): grant login with a generated
+  initial password, assign or revoke roles, and reactivate or revoke accounts
+- **Customizable PDF design** (Settings > PDF Exports, WeasyPrint): paper size,
+  orientation, accent color, document font, body size, cover page, header logo
+  and org name, footer text, page numbers, and table style, with a live sketch
+  plus a sample-data preview PDF before saving
+- **Dashboard charts**: dependency-free SVG visualizations over the authorized
+  task set: weekly created-vs-completed trend, tasks-by-status donut, and
+  workload by department
+- **PDF exports** on the Reports page for the task register, completion trend,
+  and department workload; every PDF uses the saved design and the same
+  engine-authorized rows as CSV exports (audited)
 
 ## Decisions defaulted (from spec §decisions_to_confirm_with_interdec)
 

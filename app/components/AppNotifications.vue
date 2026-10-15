@@ -2,7 +2,7 @@
   <div ref="rootEl" class="relative">
     <button
       type="button"
-      class="relative rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
+      class="relative rounded-lg p-2 text-muted transition-colors hover:bg-hover hover:text-ink"
       aria-label="Notifications"
       :aria-expanded="open"
       data-test="notification-bell"
@@ -30,31 +30,31 @@
     >
       <div
         v-if="open"
-        class="absolute right-0 z-50 mt-2 w-[21rem] origin-top-right overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:w-96"
+        class="absolute right-0 z-50 mt-2 w-[21rem] origin-top-right overflow-hidden rounded-xl border border-line bg-surface shadow-xl sm:w-96"
         data-test="notification-panel"
       >
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <h2 class="text-sm font-semibold text-slate-900">Notifications</h2>
+        <div class="flex items-center justify-between border-b border-line px-4 py-3">
+          <h2 class="text-sm font-semibold text-ink">Notifications</h2>
           <button
             v-if="unread > 0"
             type="button"
-            class="text-xs font-medium text-brand-600 hover:text-brand-700"
+            class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
             @click="onMarkAllRead"
           >
             Mark all read
           </button>
         </div>
 
-        <p v-if="loaded && items.length === 0" class="px-4 py-8 text-center text-sm text-slate-400">
+        <p v-if="loaded && items.length === 0" class="px-4 py-8 text-center text-sm text-faint">
           You're all caught up - no notifications yet.
         </p>
 
-        <ul v-else class="max-h-96 divide-y divide-slate-100 overflow-y-auto">
+        <ul v-else class="max-h-96 divide-y divide-line overflow-y-auto">
           <li v-for="item in items" :key="item.id">
             <button
               type="button"
-              class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50"
-              :class="{ 'bg-brand-50/40': !item.read_at }"
+              class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-hover"
+              :class="{ ' dark:bg-brand-500/5': !item.read_at }"
               @click="onItemClick(item)"
             >
               <span
@@ -63,11 +63,11 @@
                 aria-hidden="true"
               />
               <span class="min-w-0 flex-1">
-                <span class="block truncate text-sm font-medium" :class="item.read_at ? 'text-slate-600' : 'text-slate-900'">
+                <span class="block truncate text-sm font-medium" :class="item.read_at ? 'text-muted' : 'text-ink'">
                   {{ item.payload?.title ?? eventLabel(item.event_type) }}
                 </span>
-                <span class="mt-0.5 block text-xs text-slate-500">{{ item.payload?.summary ?? eventLabel(item.event_type) }}</span>
-                <span class="mt-1 block text-[11px] text-slate-400">{{ relativeTime(item.created_at) }}</span>
+                <span class="mt-0.5 block text-xs text-muted">{{ item.payload?.summary ?? eventLabel(item.event_type) }}</span>
+                <span class="mt-1 block text-[11px] text-faint">{{ relativeTime(item.created_at) }}</span>
               </span>
             </button>
           </li>

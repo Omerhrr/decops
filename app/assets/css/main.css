@@ -1,19 +1,115 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-300: #6ee7b7;
-  --color-brand-400: #34d399;
-  --color-brand-500: #10b981;
-  --color-brand-600: #059669;
-  --color-brand-700: #047857;
-  --color-brand-800: #065f46;
-  --color-brand-900: #064e3b;
+@custom-variant dark (&:where(.dark, .dark *));
 
-  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue",
-    Arial, sans-serif;
+/* ---------------------------------------------------------------------------
+ * Theme tokens. Semantic surface/ink tokens switch with .dark; the brand
+ * scale switches with data-accent; the UI font switches with data-font.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  --canvas: #eef1f5;
+  --surface: #ffffff;
+  --elevated: #f8fafc;
+  --hover: #f1f5f9;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --ink: #0f172a;
+  --body: #334155;
+  --muted: #5b6b80;
+  --faint: #8a97a8;
+  --overlay: rgb(15 23 42 / 0.45);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --canvas: #0b1220;
+  --surface: #111a2c;
+  --elevated: #16213a;
+  --hover: #1b2740;
+  --line: #24314d;
+  --line-strong: #354463;
+  --ink: #eef2f7;
+  --body: #c4cedd;
+  --muted: #8fa0b5;
+  --faint: #64748b;
+  --overlay: rgb(2 6 16 / 0.65);
+}
+
+/* Accent scales (data-accent on <html>) */
+:root, :root[data-accent="emerald"] {
+  --brand-50: #ecfdf5; --brand-100: #d1fae5; --brand-200: #a7f3d0; --brand-300: #6ee7b7;
+  --brand-400: #34d399; --brand-500: #10b981; --brand-600: #059669; --brand-700: #047857;
+  --brand-800: #065f46; --brand-900: #064e3b;
+}
+:root[data-accent="blue"] {
+  --brand-50: #eff6ff; --brand-100: #dbeafe; --brand-200: #bfdbfe; --brand-300: #93c5fd;
+  --brand-400: #60a5fa; --brand-500: #3b82f6; --brand-600: #2563eb; --brand-700: #1d4ed8;
+  --brand-800: #1e40af; --brand-900: #1e3a8a;
+}
+:root[data-accent="violet"] {
+  --brand-50: #f5f3ff; --brand-100: #ede9fe; --brand-200: #ddd6fe; --brand-300: #c4b5fd;
+  --brand-400: #a78bfa; --brand-500: #8b5cf6; --brand-600: #7c3aed; --brand-700: #6d28d9;
+  --brand-800: #5b21b6; --brand-900: #4c1d95;
+}
+:root[data-accent="rose"] {
+  --brand-50: #fff1f2; --brand-100: #ffe4e6; --brand-200: #fecdd3; --brand-300: #fda4af;
+  --brand-400: #fb7185; --brand-500: #f43f5e; --brand-600: #e11d48; --brand-700: #be123c;
+  --brand-800: #9f1239; --brand-900: #881337;
+}
+:root[data-accent="amber"] {
+  --brand-50: #fffbeb; --brand-100: #fef3c7; --brand-200: #fde68a; --brand-300: #fcd34d;
+  --brand-400: #fbbf24; --brand-500: #f59e0b; --brand-600: #d97706; --brand-700: #b45309;
+  --brand-800: #92400e; --brand-900: #78350f;
+}
+:root[data-accent="slate"] {
+  --brand-50: #f8fafc; --brand-100: #f1f5f9; --brand-200: #e2e8f0; --brand-300: #cbd5e1;
+  --brand-400: #94a3b8; --brand-500: #64748b; --brand-600: #475569; --brand-700: #334155;
+  --brand-800: #1e293b; --brand-900: #0f172a;
+}
+
+/* UI font choices (data-font on <html>) */
+:root, :root[data-font="inter"] {
+  --app-font: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+:root[data-font="system"] {
+  --app-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+:root[data-font="serif"] {
+  --app-font: Georgia, Cambria, "Times New Roman", Times, serif;
+}
+:root[data-font="mono"] {
+  --app-font: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@theme inline {
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-200: var(--brand-200);
+  --color-brand-300: var(--brand-300);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-body: var(--body);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-overlay: var(--overlay);
+
+  --font-sans: var(--app-font);
 }
 
 html {
@@ -23,7 +119,7 @@ html {
 }
 
 body {
-  @apply bg-slate-100 text-slate-800 font-sans;
+  @apply bg-canvas text-body font-sans;
 }
 
 /* Consistent focus ring for accessibility (spec: accessible forms and navigation) */
@@ -31,18 +127,17 @@ body {
   @apply outline-2 outline-offset-2 outline-brand-600;
 }
 
-/* Surface: the standard white panel every screen builds from */
+/* Surface: the standard panel every screen builds from */
 @utility card {
-  @apply rounded-2xl border border-slate-200 bg-white;
+  @apply rounded-2xl border border-line bg-surface;
 }
 
-/* Page scaffold: title and supporting line */
 @utility page-title {
-  @apply text-xl font-semibold tracking-tight text-slate-900;
+  @apply text-xl font-semibold tracking-tight text-ink;
 }
 
 @utility page-subtitle {
-  @apply mt-1 text-sm text-slate-500;
+  @apply mt-1 text-sm text-muted;
 }
 
 /* Buttons */
@@ -56,17 +151,22 @@ body {
 }
 
 @utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50;
+  @apply btn border border-line-strong bg-surface text-body hover:border-faint hover:bg-hover;
 }
 
 @utility btn-ghost {
-  @apply btn text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+  @apply btn text-muted hover:bg-hover hover:text-ink;
+}
+
+@utility btn-danger {
+  @apply btn border border-rose-200 bg-surface text-rose-600 hover:bg-rose-50
+    dark:border-rose-900 dark:bg-surface dark:hover:bg-rose-950/40;
 }
 
 /* Form controls */
 @utility input-field {
-  @apply block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900
-    placeholder-slate-400 transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-100
+  @apply block w-full rounded-lg border border-line-strong bg-surface px-3 py-2.5 text-sm text-ink
+    placeholder-faint transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25
     focus:outline-none;
 }
 
@@ -76,7 +176,7 @@ body {
 
 /* Table cells */
 @utility table-head {
-  @apply bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+  @apply bg-elevated text-left text-xs font-semibold uppercase tracking-wide text-muted;
 }
 
 @utility table-cell {
@@ -85,5 +185,14 @@ body {
 
 /* Friendly empty states inside cards and tables */
 @utility empty-state {
-  @apply flex flex-col items-center justify-center px-6 py-10 text-center text-sm text-slate-500;
+  @apply flex flex-col items-center justify-center px-6 py-10 text-center text-sm text-muted;
 }
+
+/* Scrollbars that match the theme (WebKit + Firefox) */
+* {
+  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-width: thin;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
+*::-webkit-scrollbar-track { background: transparent; }

@@ -1,21 +1,21 @@
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5">
+  <section class="rounded-2xl border border-line bg-surface p-5">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <h2 class="text-sm font-semibold text-slate-900">Timeline (Gantt)</h2>
-        <p class="mt-1 text-xs text-slate-400">
+        <h2 class="text-sm font-semibold text-ink">Timeline (Gantt)</h2>
+        <p class="mt-1 text-xs text-faint">
           Stage bars with milestones as diamonds; lines show which work blocks which.
         </p>
       </div>
-      <div class="flex items-center gap-3 text-xs text-slate-400">
+      <div class="flex items-center gap-3 text-xs text-faint">
         <span class="flex items-center gap-1"><span class="inline-block h-2 w-4 rounded-sm bg-brand-500" /> stage</span>
-        <span class="flex items-center gap-1"><span class="inline-block h-2 w-4 rounded-sm bg-slate-300" /> done/cancelled</span>
+        <span class="flex items-center gap-1"><span class="inline-block h-2 w-4 rounded-sm bg-line-strong" /> done/cancelled</span>
         <span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rotate-45 bg-amber-500" /> milestone</span>
         <span class="flex items-center gap-1"><span class="inline-block h-3 w-px bg-rose-400" /> today</span>
       </div>
     </div>
 
-    <div v-if="!rows.length" class="mt-4 rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">
+    <div v-if="!rows.length" class="mt-4 rounded-xl bg-elevated px-4 py-6 text-center text-sm text-faint">
       Add stages with dates to see the timeline.
     </div>
 
@@ -24,7 +24,7 @@
         <!-- month/week grid -->
         <g v-for="tick in ticks" :key="`tick-${tick.x}`">
           <line :x1="tick.x" :x2="tick.x" y1="18" :y2="height - 8" stroke="#e2e8f0" stroke-width="1" />
-          <text :x="tick.x + 4" y="12" class="fill-slate-400" font-size="10">{{ tick.label }}</text>
+          <text :x="tick.x + 4" y="12" class="fill-faint" font-size="10">{{ tick.label }}</text>
         </g>
 
         <!-- today marker -->
@@ -42,7 +42,7 @@
 
         <!-- rows -->
         <g v-for="(row, index) in rows" :key="row.key">
-          <text x="0" :y="rowY(index) + 14" class="fill-slate-600" font-size="11" font-weight="600">
+          <text x="0" :y="rowY(index) + 14" class="fill-body" font-size="11" font-weight="600">
             {{ row.label.length > 34 ? `${row.label.slice(0, 33)}…` : row.label }}
           </text>
           <template v-if="row.kind === 'stage' && row.x1 !== null && row.x2 !== null">
@@ -63,7 +63,7 @@
         </g>
       </svg>
     </div>
-    <p v-if="undatedCount" class="mt-2 text-xs text-slate-400">
+    <p v-if="undatedCount" class="mt-2 text-xs text-faint">
       {{ undatedCount }} item(s) without dates are not shown on the timeline.
     </p>
   </section>

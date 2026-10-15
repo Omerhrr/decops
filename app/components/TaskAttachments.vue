@@ -1,13 +1,13 @@
 <template>
-  <section class="rounded-2xl border border-slate-200 bg-white p-5" data-test="task-attachments">
+  <section class="rounded-2xl border border-line bg-surface p-5" data-test="task-attachments">
     <div class="flex items-center justify-between">
-      <h2 class="text-sm font-semibold text-slate-900">Attachments</h2>
-      <span v-if="attachments.length" class="text-xs text-slate-400">{{ attachments.length }}</span>
+      <h2 class="text-sm font-semibold text-ink">Attachments</h2>
+      <span v-if="attachments.length" class="text-xs text-faint">{{ attachments.length }}</span>
     </div>
-    <p class="mt-1 text-xs text-slate-400">Private to this task. Downloads are authorization-checked; files up to 25 MB (pdf, images, office, txt/csv, zip).</p>
+    <p class="mt-1 text-xs text-faint">Private to this task. Downloads are authorization-checked; files up to 25 MB (pdf, images, office, txt/csv, zip).</p>
 
     <label
-      class="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-4 text-sm text-slate-500 transition-colors hover:border-brand-300 hover:text-brand-600"
+      class="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-line px-4 py-4 text-sm text-muted transition-colors hover:border-brand-300 hover:text-brand-600 dark:hover:text-brand-400"
       :class="{ 'pointer-events-none opacity-60': uploading }"
     >
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
@@ -16,22 +16,22 @@
       {{ uploading ? 'Uploading…' : 'Click to attach a file' }}
       <input type="file" class="hidden" :disabled="uploading" data-test="attachment-input" @change="onFileChange">
     </label>
-    <p v-if="error" class="mt-2 text-xs text-rose-600" data-test="attachment-error">{{ error }}</p>
+    <p v-if="error" class="mt-2 text-xs text-rose-600 dark:text-rose-400" data-test="attachment-error">{{ error }}</p>
 
-    <ul v-if="attachments.length" class="mt-4 divide-y divide-slate-100">
+    <ul v-if="attachments.length" class="mt-4 divide-y divide-line">
       <li v-for="attachment in attachments" :key="attachment.id" class="flex items-center gap-3 py-3">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-bold uppercase text-slate-500">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-hover text-[10px] font-bold uppercase text-muted">
           {{ extension(attachment.original_filename) }}
         </span>
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium text-slate-800">{{ attachment.original_filename }}</p>
-          <p class="text-[11px] text-slate-400">
+          <p class="truncate text-sm font-medium text-ink">{{ attachment.original_filename }}</p>
+          <p class="text-[11px] text-faint">
             {{ formatSize(attachment.size_bytes) }} · {{ attachment.uploaded_by?.full_name ?? 'Unknown' }} · {{ new Date(attachment.created_at).toLocaleDateString() }}
           </p>
         </div>
         <a
           :href="`/api/v1/tasks/${taskId}/attachments/${attachment.id}/download`"
-          class="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100"
+          class="shrink-0 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-body transition-colors hover:bg-hover"
           :data-test="`attachment-download-${attachment.id}`"
         >
           Download
@@ -39,7 +39,7 @@
         <button
           v-if="auth.user.value && attachment.uploaded_by?.id === auth.user.value.id"
           type="button"
-          class="shrink-0 rounded-lg border border-transparent px-2 py-1.5 text-xs text-slate-400 transition-colors hover:text-rose-600"
+          class="shrink-0 rounded-lg border border-transparent px-2 py-1.5 text-xs text-faint transition-colors hover:text-rose-600 dark:text-rose-400"
           :data-test="`attachment-delete-${attachment.id}`"
           @click="remove(attachment)"
         >

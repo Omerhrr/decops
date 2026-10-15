@@ -5,9 +5,9 @@
       :class="accentClass"
       aria-hidden="true"
     />
-    <p class="text-sm font-medium text-slate-500">{{ label }}</p>
+    <p class="text-sm font-medium text-muted">{{ label }}</p>
     <p class="mt-2 text-3xl font-semibold tracking-tight" :class="valueClass">{{ value }}</p>
-    <p v-if="note" class="mt-2 text-xs text-slate-500">{{ note }}</p>
+    <p v-if="note" class="mt-2 text-xs text-muted">{{ note }}</p>
   </div>
 </template>
 
@@ -23,16 +23,16 @@ const props = withDefaults(
 )
 
 const accentClass = computed(() => ({
-  neutral: 'bg-slate-300',
+  neutral: 'bg-line-strong',
   positive: 'bg-brand-500',
   warning: 'bg-amber-400',
   danger: 'bg-rose-500',
 }[props.tone]))
 
 const valueClass = computed(() => ({
-  neutral: 'text-slate-900',
-  positive: 'text-slate-900',
-  warning: 'text-slate-900',
-  danger: 'text-rose-600',
+  neutral: 'text-ink',
+  positive: 'text-ink',
+  warning: 'text-ink',
+  danger: 'text-rose-600 dark:text-rose-400',
 }[props.tone]))
 </script>

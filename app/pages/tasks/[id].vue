@@ -2,20 +2,20 @@
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
-          <NuxtLink to="/" class="hover:text-slate-600">Dashboard</NuxtLink>
+        <nav class="text-xs text-faint" aria-label="Breadcrumb">
+          <NuxtLink to="/" class="hover:text-body">Dashboard</NuxtLink>
           <span class="mx-1">/</span>
-          <NuxtLink to="/tasks" class="hover:text-slate-600">Tasks</NuxtLink>
+          <NuxtLink to="/tasks" class="hover:text-body">Tasks</NuxtLink>
           <span class="mx-1">/</span>
-          <span class="text-slate-600">{{ task?.task_number ?? '…' }}</span>
+          <span class="text-body">{{ task?.task_number ?? '…' }}</span>
         </nav>
-        <h1 class="mt-1 text-xl font-semibold text-slate-900">{{ task?.title ?? 'Task' }}</h1>
-        <p v-if="task" class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-          <span class="font-mono text-xs text-slate-600">{{ task.task_number }}</span>
+        <h1 class="mt-1 text-xl font-semibold text-ink">{{ task?.title ?? 'Task' }}</h1>
+        <p v-if="task" class="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+          <span class="font-mono text-xs text-body">{{ task.task_number }}</span>
           <AppBadge :tone="statusTone(task.status)">{{ statusLabel(task.status) }}</AppBadge>
           <AppBadge :tone="priorityTone(task.priority)">{{ task.priority }} priority</AppBadge>
           <AppBadge tone="gray">{{ visibilityLabel(task.visibility_mode) }}</AppBadge>
-          <span class="text-xs text-slate-400">v{{ task.version }}</span>
+          <span class="text-xs text-faint">v{{ task.version }}</span>
         </p>
       </div>
       <div v-if="task && canManage(task)" class="flex flex-wrap justify-start gap-2 sm:justify-end">
@@ -32,94 +32,94 @@
       </div>
     </section>
 
-    <p v-if="loadError" class="mt-6 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ loadError }}</p>
+    <p v-if="loadError" class="mt-6 rounded-xl bg-rose-50 dark:bg-rose-500/10 px-4 py-3 text-sm text-rose-700 dark:text-rose-300">{{ loadError }}</p>
 
     <div v-if="task" class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div class="space-y-6 lg:col-span-2">
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <section class="rounded-2xl border border-line bg-surface p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-900">Summary</h2>
+            <h2 class="text-sm font-semibold text-ink">Summary</h2>
             <button
               v-if="canManage(task) && !editing"
               type="button"
-              class="text-xs font-medium text-brand-600 hover:text-brand-700"
+              class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
               @click="startEdit"
             >
               Edit
             </button>
           </div>
           <template v-if="!editing">
-            <p class="mt-3 whitespace-pre-line text-sm text-slate-600">{{ task.description || 'No description yet.' }}</p>
+            <p class="mt-3 whitespace-pre-line text-sm text-body">{{ task.description || 'No description yet.' }}</p>
             <dl class="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
               <div>
-                <dt class="text-xs text-slate-400">Accountable PM</dt>
-                <dd class="mt-0.5 font-medium text-slate-800">{{ task.accountable_pm?.full_name ?? '-' }}</dd>
+                <dt class="text-xs text-faint">Accountable PM</dt>
+                <dd class="mt-0.5 font-medium text-ink">{{ task.accountable_pm?.full_name ?? '-' }}</dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">Start</dt>
-                <dd class="mt-0.5 text-slate-800">{{ formatDate(task.start_date) }}</dd>
+                <dt class="text-xs text-faint">Start</dt>
+                <dd class="mt-0.5 text-ink">{{ formatDate(task.start_date) }}</dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">Due</dt>
-                <dd class="mt-0.5" :class="isOverdue ? 'font-medium text-rose-600' : 'text-slate-800'">{{ formatDate(task.due_date) }}</dd>
+                <dt class="text-xs text-faint">Due</dt>
+                <dd class="mt-0.5" :class="isOverdue ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-ink'">{{ formatDate(task.due_date) }}</dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">Next follow-up</dt>
-                <dd class="mt-0.5 text-slate-800">{{ formatDate(task.next_follow_up_date) }}</dd>
+                <dt class="text-xs text-faint">Next follow-up</dt>
+                <dd class="mt-0.5 text-ink">{{ formatDate(task.next_follow_up_date) }}</dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">Progress ({{ task.progress_mode }})</dt>
+                <dt class="text-xs text-faint">Progress ({{ task.progress_mode }})</dt>
                 <dd class="mt-1 flex items-center gap-2">
-                  <div class="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                  <div class="h-1.5 w-24 overflow-hidden rounded-full bg-hover">
                     <div class="h-full rounded-full bg-brand-500" :style="{ width: `${task.percent_complete}%` }" />
                   </div>
-                  <span class="text-xs text-slate-500">{{ task.percent_complete }}%</span>
+                  <span class="text-xs text-muted">{{ task.percent_complete }}%</span>
                 </dd>
               </div>
               <div>
-                <dt class="text-xs text-slate-400">Created</dt>
-                <dd class="mt-0.5 text-slate-800">{{ formatDateTime(task.created_at) }}</dd>
+                <dt class="text-xs text-faint">Created</dt>
+                <dd class="mt-0.5 text-ink">{{ formatDateTime(task.created_at) }}</dd>
               </div>
               <div v-if="task.dependency_summary" class="col-span-2">
-                <dt class="text-xs text-slate-400">Dependencies &amp; blockers</dt>
-                <dd class="mt-0.5 text-slate-800">{{ task.dependency_summary }}</dd>
+                <dt class="text-xs text-faint">Dependencies &amp; blockers</dt>
+                <dd class="mt-0.5 text-ink">{{ task.dependency_summary }}</dd>
               </div>
             </dl>
           </template>
           <template v-else>
             <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label class="sm:col-span-2 block">
-                <span class="text-xs font-medium text-slate-600">Title</span>
+                <span class="text-xs font-medium text-body">Title</span>
                 <input v-model="editForm.title" type="text" class="input-field mt-1" />
               </label>
               <label class="sm:col-span-2 block">
-                <span class="text-xs font-medium text-slate-600">Description</span>
+                <span class="text-xs font-medium text-body">Description</span>
                 <textarea v-model="editForm.description" rows="4" class="input-field mt-1" />
               </label>
               <label class="block">
-                <span class="text-xs font-medium text-slate-600">Priority</span>
+                <span class="text-xs font-medium text-body">Priority</span>
                 <select v-model="editForm.priority" class="input-field mt-1">
                   <option v-for="p in PRIORITIES" :key="p" :value="p">{{ p }}</option>
                 </select>
               </label>
               <label class="block">
-                <span class="text-xs font-medium text-slate-600">Percent complete</span>
+                <span class="text-xs font-medium text-body">Percent complete</span>
                 <input v-model.number="editForm.percent_complete" type="number" min="0" max="100" class="input-field mt-1" />
               </label>
               <label class="block">
-                <span class="text-xs font-medium text-slate-600">Due date</span>
+                <span class="text-xs font-medium text-body">Due date</span>
                 <input v-model="editForm.due_date" type="date" class="input-field mt-1" />
               </label>
               <label class="block">
-                <span class="text-xs font-medium text-slate-600">Next follow-up</span>
+                <span class="text-xs font-medium text-body">Next follow-up</span>
                 <input v-model="editForm.next_follow_up_date" type="date" class="input-field mt-1" />
               </label>
               <label class="sm:col-span-2 block">
-                <span class="text-xs font-medium text-slate-600">Dependencies / blockers note</span>
+                <span class="text-xs font-medium text-body">Dependencies / blockers note</span>
                 <textarea v-model="editForm.dependency_summary" rows="2" class="input-field mt-1" />
               </label>
             </div>
-            <p v-if="editError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ editError }}</p>
+            <p v-if="editError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ editError }}</p>
             <div class="mt-4 flex justify-end gap-2">
               <button type="button" class="btn-secondary" @click="editing = false">Cancel</button>
               <button type="button" class="btn-primary" @click="saveEdit">Save changes</button>
@@ -138,30 +138,30 @@
         <TaskComments :task-id="task.id" />
         <TaskAttachments :task-id="task.id" />
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 class="text-sm font-semibold text-slate-900">Activity history</h2>
-          <p class="mt-1 text-xs text-slate-400">Every creation, transition, assignment, and access change on this task (AC-12).</p>
+        <section class="rounded-2xl border border-line bg-surface p-5">
+          <h2 class="text-sm font-semibold text-ink">Activity history</h2>
+          <p class="mt-1 text-xs text-faint">Every creation, transition, assignment, and access change on this task (AC-12).</p>
           <ol v-if="activity.length" class="mt-4 space-y-4">
-            <li v-for="a in activity" :key="a.id" class="relative border-l-2 border-slate-100 pl-4">
+            <li v-for="a in activity" :key="a.id" class="relative border-l-2 border-line pl-4">
               <span class="absolute -left-[7px] top-1 h-3 w-3 rounded-full border-2 border-white" :class="activityDot(a.activity_type)" />
-              <p class="text-sm text-slate-700">{{ a.summary }}</p>
-              <p class="mt-0.5 text-xs text-slate-400">
+              <p class="text-sm text-body">{{ a.summary }}</p>
+              <p class="mt-0.5 text-xs text-faint">
                 {{ a.actor?.full_name ?? 'System' }} · {{ formatDateTime(a.created_at) }}
               </p>
             </li>
           </ol>
-          <p v-else class="mt-4 text-sm text-slate-400">No activity recorded yet.</p>
+          <p v-else class="mt-4 text-sm text-faint">No activity recorded yet.</p>
         </section>
       </div>
 
       <div class="space-y-6">
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <section class="rounded-2xl border border-line bg-surface p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-900">Assignments</h2>
+            <h2 class="text-sm font-semibold text-ink">Assignments</h2>
             <button
               v-if="canManage(task)"
               type="button"
-              class="text-xs font-medium text-brand-600 hover:text-brand-700"
+              class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
               @click="showAssign = true"
             >
               + Assign
@@ -170,83 +170,83 @@
           <ul class="mt-3 space-y-3">
             <li v-for="a in activeAssignments" :key="a.id" class="flex items-start justify-between gap-2">
               <div>
-                <p class="text-sm font-medium text-slate-800">{{ a.user.full_name }}</p>
-                <p class="text-xs text-slate-400">{{ roleLabel(a.assignment_role) }} · assigned by {{ assignerName(a.assigned_by_id) }}</p>
+                <p class="text-sm font-medium text-ink">{{ a.user.full_name }}</p>
+                <p class="text-xs text-faint">{{ roleLabel(a.assignment_role) }} · assigned by {{ assignerName(a.assigned_by_id) }}</p>
               </div>
               <button
                 v-if="canManage(task) && a.assignment_role !== 'accountable_pm'"
                 type="button"
-                class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                class="rounded-lg border border-line px-2 py-1 text-xs text-body hover:bg-hover"
                 @click="removeAssignment(a)"
               >
                 Remove
               </button>
             </li>
           </ul>
-          <p v-if="!activeAssignments.length" class="mt-3 text-sm text-slate-400">No active assignments.</p>
-          <p class="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">
+          <p v-if="!activeAssignments.length" class="mt-3 text-sm text-faint">No active assignments.</p>
+          <p class="mt-3 rounded-lg bg-elevated px-3 py-2 text-xs text-muted">
             One accountable PM per task (DEC-02). Replace the accountable PM from the Assign dialog.
           </p>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <section class="rounded-2xl border border-line bg-surface p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-900">Departments</h2>
+            <h2 class="text-sm font-semibold text-ink">Departments</h2>
           </div>
           <ul class="mt-3 space-y-2">
             <li v-for="td in task.task_departments" :key="td.id" class="flex items-center justify-between">
-              <span class="text-sm text-slate-700">{{ td.department_name ?? td.department_id }}</span>
+              <span class="text-sm text-body">{{ td.department_name ?? td.department_id }}</span>
               <AppBadge tone="gray">{{ td.participation_type }}</AppBadge>
             </li>
           </ul>
-          <p v-if="!task.task_departments.length" class="mt-2 text-sm text-slate-400">No departments linked.</p>
+          <p v-if="!task.task_departments.length" class="mt-2 text-sm text-faint">No departments linked.</p>
         </section>
 
-        <section class="rounded-2xl border border-slate-200 bg-white p-5">
+        <section class="rounded-2xl border border-line bg-surface p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold text-slate-900">Access grants</h2>
+            <h2 class="text-sm font-semibold text-ink">Access grants</h2>
             <button
               v-if="canChangeVisibility(task)"
               type="button"
-              class="text-xs font-medium text-brand-600 hover:text-brand-700"
+              class="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
               @click="showGrant = true"
             >
               + Grant
             </button>
           </div>
-          <p class="mt-1 text-xs text-slate-400">
+          <p class="mt-1 text-xs text-faint">
             Explicit per-user access; revocation is immediate. Denials always win.
           </p>
           <ul class="mt-3 space-y-3">
             <li v-for="g in activeGrants" :key="g.id" class="flex items-start justify-between gap-2">
               <div>
-                <p class="text-sm font-medium text-slate-800">
+                <p class="text-sm font-medium text-ink">
                   {{ g.principal.full_name }}
                   <AppBadge :tone="g.access_level === 'denied' ? 'rose' : g.access_level === 'manage' ? 'amber' : 'gray'" class="ml-1">
                     {{ g.access_level }}
                   </AppBadge>
                 </p>
-                <p class="text-xs text-slate-400">granted {{ formatDateTime(g.granted_at) }}</p>
+                <p class="text-xs text-faint">granted {{ formatDateTime(g.granted_at) }}</p>
               </div>
               <button
                 v-if="canChangeVisibility(task)"
                 type="button"
-                class="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
+                class="rounded-lg border border-line px-2 py-1 text-xs text-body hover:bg-hover"
                 @click="revokeGrant(g)"
               >
                 Revoke
               </button>
             </li>
           </ul>
-          <p v-if="!activeGrants.length" class="mt-3 text-sm text-slate-400">No explicit grants.</p>
+          <p v-if="!activeGrants.length" class="mt-3 text-sm text-faint">No explicit grants.</p>
         </section>
       </div>
     </div>
 
-    <div v-if="pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="pendingTransition = null">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-lg font-semibold text-slate-900">{{ transitionLabel(pendingTransition) }}</h2>
-        <p class="mt-1 text-sm text-slate-500">
+    <div v-if="pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="pendingTransition = null">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-lg font-semibold text-ink">{{ transitionLabel(pendingTransition) }}</h2>
+        <p class="mt-1 text-sm text-muted">
           {{ reasonHint(pendingTransition) }}
         </p>
         <textarea
@@ -255,7 +255,7 @@
           class="input-field mt-4"
           placeholder="Recorded on the task history…"
         />
-        <p v-if="transitionError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ transitionError }}</p>
+        <p v-if="transitionError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ transitionError }}</p>
         <div class="mt-5 flex justify-end gap-3">
           <button type="button" class="btn-secondary" @click="pendingTransition = null">Cancel</button>
           <button type="button" class="btn-primary" @click="confirmTransition">Confirm</button>
@@ -263,26 +263,26 @@
       </div>
     </div>
 
-    <div v-if="showAssign" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="showAssign = false">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-lg font-semibold text-slate-900">Assign a person</h2>
-        <p v-if="assignError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ assignError }}</p>
+    <div v-if="showAssign" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showAssign = false">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-lg font-semibold text-ink">Assign a person</h2>
+        <p v-if="assignError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ assignError }}</p>
         <label class="mt-4 block">
-          <span class="text-xs font-medium text-slate-600">Person</span>
+          <span class="text-xs font-medium text-body">Person</span>
           <select v-model="assignForm.user_id" class="input-field mt-1">
             <option value="">Select…</option>
             <option v-for="u in directoryUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
           </select>
         </label>
         <label class="mt-4 block">
-          <span class="text-xs font-medium text-slate-600">Role</span>
+          <span class="text-xs font-medium text-body">Role</span>
           <select v-model="assignForm.role" class="input-field mt-1">
             <option value="supporting_pm">Supporting PM</option>
             <option value="accountable_pm">Accountable PM (replaces current)</option>
             <option value="work_item_assignee">Work item assignee</option>
           </select>
         </label>
-        <p v-if="assignForm.role === 'accountable_pm'" class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+        <p v-if="assignForm.role === 'accountable_pm'" class="mt-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
           DEC-02: the previous accountable PM's assignment is revoked and recorded on the history.
         </p>
         <div class="mt-5 flex justify-end gap-3">
@@ -292,19 +292,19 @@
       </div>
     </div>
 
-    <div v-if="showGrant" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="showGrant = false">
-      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-lg font-semibold text-slate-900">Grant task access</h2>
-        <p v-if="grantError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ grantError }}</p>
+    <div v-if="showGrant" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showGrant = false">
+      <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+        <h2 class="text-lg font-semibold text-ink">Grant task access</h2>
+        <p v-if="grantError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ grantError }}</p>
         <label class="mt-4 block">
-          <span class="text-xs font-medium text-slate-600">Person</span>
+          <span class="text-xs font-medium text-body">Person</span>
           <select v-model="grantForm.user_id" class="input-field mt-1">
             <option value="">Select…</option>
             <option v-for="u in directoryUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
           </select>
         </label>
         <label class="mt-4 block">
-          <span class="text-xs font-medium text-slate-600">Access level</span>
+          <span class="text-xs font-medium text-body">Access level</span>
           <select v-model="grantForm.level" class="input-field mt-1">
             <option value="view">View - see and comment</option>
             <option value="operate">Operate - update and coordinate</option>
@@ -423,8 +423,8 @@ function transitionLabel(s: TaskStatus): string {
 function transitionClass(s: TaskStatus): string {
   if (s === 'cancelled') return 'border-red-200 text-red-600 hover:bg-red-50'
   if (s === 'completed') return 'border-brand-200 bg-brand-600 text-white hover:bg-brand-700'
-  if (s === 'archived') return 'border-slate-200 text-slate-600 hover:bg-slate-100'
-  return 'border-brand-200 text-brand-700 hover:bg-brand-50'
+  if (s === 'archived') return 'border-line text-body hover:bg-hover'
+  return 'border-brand-200 text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10'
 }
 
 function reasonHint(s: TaskStatus): string {
@@ -439,7 +439,7 @@ function activityDot(type: string): string {
   if (type === 'task.status_changed') return 'bg-amber-500'
   if (type === 'task.assigned' || type === 'task.accountable_pm_changed') return 'bg-indigo-500'
   if (type === 'task.access_changed') return 'bg-rose-400'
-  return 'bg-slate-300'
+  return 'bg-line-strong'
 }
 
 function formatDate(value: string | null): string {

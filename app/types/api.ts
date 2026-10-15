@@ -16,6 +16,7 @@ export interface Me {
   last_login_at: string | null
   roles: RoleBrief[]
   permissions: string[]
+  preferences?: UserPreferences
 }
 
 export interface ApiErrorBody {
@@ -442,7 +443,49 @@ export interface DashboardSummary {
   blocked_tasks: DeadlineRow[]
   recent_activity: ActivityRow[]
   management_overview: ManagementOverview | null
+  charts: DashboardCharts
 }
+
+export interface DashboardCharts {
+  trend: CompletionWeekPoint[]
+  by_priority: Record<string, number>
+  by_department: DepartmentLoad[]
+}
+
+export interface DepartmentLoad {
+  name: string
+  total: number
+  active: number
+}
+
+// ---------- Settings (appearance, organization, PDF design) ----------
+
+export interface UserPreferences {
+  theme_mode: 'light' | 'dark' | 'system'
+  accent_color: 'emerald' | 'blue' | 'violet' | 'rose' | 'amber' | 'slate'
+  font_family: 'inter' | 'system' | 'serif' | 'mono'
+}
+
+export interface OrgSettings {
+  org_name: string
+  org_tagline: string
+}
+
+export interface PdfDesign {
+  paper_size: 'A4' | 'Letter'
+  orientation: 'portrait' | 'landscape'
+  accent_color: string
+  font_family: 'sans' | 'serif' | 'mono'
+  font_size_pt: number
+  show_cover_page: boolean
+  header_show_logo: boolean
+  header_show_org_name: boolean
+  footer_text: string
+  show_page_numbers: boolean
+  table_style: 'striped' | 'plain' | 'bordered'
+}
+
+export type PdfDesignPatch = Partial<Omit<PdfDesign, never>>
 
 export interface MyTaskPage {
   items: Task[]
