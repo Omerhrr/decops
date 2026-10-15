@@ -31,6 +31,7 @@ class Department(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     memberships = relationship(
         "DepartmentMembership", back_populates="department", lazy="selectin"
     )
+    lead = relationship("User", foreign_keys=[department_lead_user_id], lazy="joined")
 
 
 class MembershipRole(str, enum.Enum):

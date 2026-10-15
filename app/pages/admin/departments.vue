@@ -1,0 +1,241 @@
+<template>
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <!-- Header -->
+    <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
+          <NuxtLink to="/" class="hover:text-slate-600">Dashboard</NuxtLink>
+          <span class="mx-1">/</span>
+          <span class="text-slate-600">Departments</span>
+        </nav>
+        <h1 class="mt-1 text-xl font-semibold text-slate-900">Department management</h1>
+        <p class="mt-1 text-sm text-slate-500">
+          Departments, leads, and employee memberships (MOD-002). All changes are audited.
+        </p>
+      </div>
+      <button
+        v-if="canManage"
+        type="button"
+        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+        @click="showCreate = true"
+      >
+        + Create department
+      </button>
+    </section>
+
+    <!-- Grid of departments -->
+    <section class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div v-if="loading" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-400 lg:col-span-2">
+        Loading…
+      </div>
+      <div v-else-if="!departments.length" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-400 lg:col-span-2">
+        No departments yet. Create the first one to start assigning employees.
+      </div>
+
+      <article
+        v-for="d in departments"
+        :key="d.id"
+        class="rounded-2xl border border-slate-200 bg-white p-5"
+        :class="d.status === 'inactive' ? 'opacity-70' : ''"
+      >
+        <header class="flex items-start justify-between gap-3">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">{{ d.name }}</h2>
+            <p class="mt-0.5 text-sm text-slate-500">{{ d.description || 'No description' }}</p>
+          </div>
+          <AppBadge :tone="d.status === 'active' ? 'green' : 'gray'">{{ d.status }}</AppBadge>
+        </header>
+
+        <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Lead</dt>
+            <dd class="mt-0.5 text-slate-800">{{ d.lead?.full_name || 'Unassigned' }}</dd>
+          </div>
+          <div>
+            <dt class="text-xs uppercase tracking-wide text-slate-400">Members</dt>
+            <dd class="mt-0.5 text-slate-800">{{ d.member_count }}</dd>
+          </div>
+        </dl>
+
+        <!-- Members -->
+        <div v-if="detailOf(d.id)?.memberships?.length" class="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+          <div
+            v-for="m in detailOf(d.id)!.memberships"
+            :key="m.id"
+            class="flex items-center justify-between text-sm"
+          >
+            <span class="text-slate-700">
+              {{ m.user?.full_name || m.user_id }}
+              <span class="ml-1 text-xs text-slate-400">({{ m.membership_role }})</span>
+            </span>
+            <button
+              v-if="canManage"
+              type="button"
+              class="text-xs text-red-500 hover:text-red-700"
+              @click="removeMember(d, m.user_id, m.user?.full_name)"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+
+        <!-- Add member -->
+        <div v-if="canManage" class="mt-3 flex gap-2 border-t border-slate-100 pt-3">
+          <select v-model="memberPick[d.id]" class="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+            <option value="" disabled>Add employee…</option>
+            <option v-for="u in addableUsers(d)" :key="u.id" :value="u.id">{{ u.full_name }}</option>
+          </select>
+          <select v-model="rolePick[d.id]" class="rounded-lg border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+            <option value="member">member</option>
+            <option value="lead">lead</option>
+          </select>
+          <button
+            type="button"
+            :disabled="!memberPick[d.id]"
+            class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-40"
+            @click="addMember(d)"
+          >
+            Add
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Create modal -->
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
+      <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <h2 class="text-base font-semibold text-slate-900">Create department</h2>
+        <form class="mt-4 space-y-3" @submit.prevent="createDepartment">
+          <div>
+            <label class="text-xs font-medium text-slate-600" for="dep-name">Name</label>
+            <input id="dep-name" v-model="depForm.name" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600" for="dep-desc">Description</label>
+            <textarea id="dep-desc" v-model="depForm.description" rows="2" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"></textarea>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-600" for="dep-lead">Department lead</label>
+            <select id="dep-lead" v-model="depForm.lead_user_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+              <option value="">No lead yet</option>
+              <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
+            </select>
+          </div>
+          <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
+            <button type="submit" :disabled="busy" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
+              {{ busy ? 'Creating…' : 'Create department' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Department, DepartmentDetail, DepartmentMembership, UserOut, UserPage } from '~/types/api'
+
+const auth = useAuth()
+const api = useApi()
+
+const canManage = computed(() => auth.hasPermission('departments.manage'))
+
+const departments = ref<Department[]>([])
+const details = ref<Record<string, DepartmentDetail>>({})
+const allUsers = ref<UserOut[]>([])
+const loading = ref(true)
+const showCreate = ref(false)
+const busy = ref(false)
+const formError = ref('')
+const depForm = reactive({ name: '', description: '', lead_user_id: '' })
+const memberPick = reactive<Record<string, string>>({})
+const rolePick = reactive<Record<string, 'member' | 'lead'>>({})
+
+function detailOf(id: string): DepartmentDetail | undefined {
+  return details.value[id]
+}
+
+function addableUsers(d: Department): UserOut[] {
+  const memberIds = new Set((detailOf(d.id)?.memberships ?? []).map(m => m.user_id))
+  return allUsers.value.filter(u => !memberIds.has(u.id))
+}
+
+async function loadDepartments() {
+  loading.value = true
+  try {
+    departments.value = await api.get<Department[]>('/api/v1/departments')
+    await Promise.all(departments.value.map(async (d) => {
+      try {
+        details.value[d.id] = await api.get<DepartmentDetail>(`/api/v1/departments/${d.id}`)
+      } catch { /* transient */ }
+    }))
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadUsers() {
+  if (!canManage.value) return
+  try {
+    const res = await api.get<UserPage>('/api/v1/users?page=1&page_size=100')
+    allUsers.value = res.items
+  } catch { /* users.manage not held: leave picker empty */ }
+}
+
+async function createDepartment() {
+  busy.value = true
+  formError.value = ''
+  try {
+    await api.post('/api/v1/departments', {
+      name: depForm.name,
+      description: depForm.description || null,
+      lead_user_id: depForm.lead_user_id || null,
+    })
+    showCreate.value = false
+    Object.assign(depForm, { name: '', description: '', lead_user_id: '' })
+    await loadDepartments()
+  } catch (e) {
+    formError.value = e instanceof Error ? e.message : 'Could not create the department.'
+  } finally {
+    busy.value = false
+  }
+}
+
+async function addMember(d: Department) {
+  const userId = memberPick[d.id]
+  if (!userId) return
+  busy.value = true
+  try {
+    const detail = await api.post<DepartmentDetail>(`/api/v1/departments/${d.id}/members`, {
+      user_id: userId,
+      membership_role: rolePick[d.id] ?? 'member',
+    })
+    details.value[d.id] = detail
+    const idx = departments.value.findIndex(x => x.id === d.id)
+    if (idx >= 0) departments.value[idx] = detail
+    memberPick[d.id] = ''
+  } catch (e) {
+    alert(e instanceof Error ? e.message : 'Could not add the member.')
+  } finally {
+    busy.value = false
+  }
+}
+
+async function removeMember(d: Department, userId: string, name?: string) {
+  if (!confirm(`Remove ${name || 'this employee'} from ${d.name}?`)) return
+  try {
+    await api.delete(`/api/v1/departments/${d.id}/members/${userId}`)
+    await loadDepartments()
+  } catch (e) {
+    alert(e instanceof Error ? e.message : 'Could not remove the member.')
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadDepartments(), loadUsers()])
+})
+
+useHead({ title: 'Departments — DecOps' })
+</script>

@@ -6,17 +6,16 @@ business logic lives in services/domain, authorization is centralized.
 
 import logging
 import uuid
-from contextvars import ContextVar
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1 import api_router
 from app.core.config import Settings, settings
+from app.core.context import request_id_ctx
 from app.core.errors import register_exception_handlers
 from app.core.logging import log_event, setup_logging
 
-request_id_ctx: ContextVar[str] = ContextVar("request_id", default="-")
 logger = logging.getLogger("decops.app")
 
 

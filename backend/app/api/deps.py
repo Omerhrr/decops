@@ -53,6 +53,7 @@ def require_permission(*permission_codes: str):
     def checker(request: Request, user: CurrentUser, db: DbSession) -> User:
         codes = get_user_permission_codes(db, user)
         request.state.permission_codes = codes
+        request.state.user = user  # handlers may need the actor for audit trails
         if not codes & set(permission_codes):
             # 404, not 403: do not confirm the existence of protected resources
             from app.core.errors import PermissionDeniedError

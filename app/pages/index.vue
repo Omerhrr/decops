@@ -21,6 +21,34 @@
       <StatCard label="Blocked" value="—" icon="⛔" note="Workflow engine · Phase 5" />
     </section>
 
+    <!-- Administration quick links (permission-gated) -->
+    <section
+      v-if="auth.hasPermission('users.manage', 'departments.manage')"
+      class="mt-6 rounded-2xl border border-slate-200 bg-white p-6"
+      aria-label="Administration"
+    >
+      <h2 class="text-base font-semibold text-slate-900">Administration</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Phase 3 identity administration is permission-gated — these areas are audited.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <NuxtLink
+          v-if="auth.hasPermission('users.manage')"
+          to="/admin/users"
+          class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
+        >
+          👥 User administration →
+        </NuxtLink>
+        <NuxtLink
+          v-if="auth.hasPermission('departments.manage', 'users.manage')"
+          to="/admin/departments"
+          class="rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-brand-300 hover:bg-brand-50"
+        >
+          🏢 Department management →
+        </NuxtLink>
+      </div>
+    </section>
+
     <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Roadmap -->
       <section class="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
@@ -92,7 +120,7 @@ const systemHealth = computed(() =>
 
 const roadmap = [
   { phase: 2, name: 'Application Foundation', detail: 'Auth, users/sessions, RBAC seeds, migrations, audit log, tests', done: true },
-  { phase: 3, name: 'Identity & Authorization', detail: 'User/department administration, task access policies, isolation tests', done: false },
+  { phase: 3, name: 'Identity & Authorization', detail: 'User/department administration, task access policies, isolation tests', done: true },
   { phase: 4, name: 'Task Management', detail: 'Task register, detail pages, assignments, lifecycle transitions', done: false },
   { phase: 5, name: 'Workflow Engine', detail: 'Stages, milestones, subtasks, dependencies, progress calculation', done: false },
   { phase: 6, name: 'Collaboration & Notifications', detail: 'Comments, attachments, notification center, outbox worker', done: false },

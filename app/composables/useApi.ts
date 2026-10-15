@@ -23,10 +23,15 @@ export function useApi() {
     path: string,
     options: { method?: string; body?: unknown; headers?: Record<string, string> } = {},
   ): Promise<T> {
+    // During SSR the request originates from the Nitro server, which has no
+    // cookie jar of its own: forward the incoming request's cookies so
+    // session-dependent fetches (auth middleware, protected pages) resolve
+    // against the visitor's real session. Client-side requests use the jar.
+    const ssfCookieHeader = import.meta.server ? useRequestHeaders(['cookie']) : {}
     const response = await $fetch.raw(path, {
       method: options.method ?? 'GET',
       body: options.body,
-      headers: options.headers,
+      headers: { ...ssfCookieHeader, ...options.headers },
       credentials: 'include',
       ignoreResponseError: true,
     })
@@ -45,5 +50,6 @@ export function useApi() {
     get: <T>(path: string) => request<T>(path),
     post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
     patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
+    delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
   }
 }

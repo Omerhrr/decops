@@ -11,6 +11,17 @@
         </NuxtLink>
 
         <div v-if="auth.isAuthenticated.value" class="flex items-center gap-4">
+          <nav v-if="navItems.length" class="hidden items-center gap-1 md:flex" aria-label="Main">
+            <NuxtLink
+              v-for="item in navItems"
+              :key="item.to"
+              :to="item.to"
+              class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              active-class="bg-slate-100 text-slate-900"
+            >
+              {{ item.label }}
+            </NuxtLink>
+          </nav>
           <div class="hidden text-right sm:block">
             <p class="text-sm font-medium text-slate-900">{{ auth.displayName.value }}</p>
             <p class="text-xs text-slate-500">{{ auth.roleNames.value.join(' · ') || 'No roles assigned' }}</p>
@@ -32,8 +43,8 @@
 
     <footer class="border-t border-slate-200 bg-white">
       <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p>DecOps v1.0.0 — Internal Operations Management System</p>
-        <p>Interdec · Foundation release (Phase 2)</p>
+        <p>DecOps v1.1.0 — Internal Operations Management System</p>
+        <p>Interdec · Phase 3 release (Identity &amp; Authorization)</p>
       </div>
     </footer>
   </div>
@@ -41,6 +52,13 @@
 
 <script setup lang="ts">
 const auth = useAuth()
+
+const navItems = computed(() => {
+  const items: { to: string, label: string }[] = []
+  if (auth.hasPermission('users.manage')) items.push({ to: '/admin/users', label: 'Users' })
+  if (auth.hasPermission('departments.manage', 'users.manage')) items.push({ to: '/admin/departments', label: 'Departments' })
+  return items
+})
 
 async function handleLogout() {
   await auth.logout()

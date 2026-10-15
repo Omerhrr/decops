@@ -25,7 +25,11 @@ class AppError(Exception):
     code: str = "bad_request"
     message: str = "Invalid request."
 
-    def __init__(self, message: str | None = None, *, details: Any = None) -> None:
+    def __init__(
+        self, message: str | None = None, *, details: Any = None, code: str | None = None
+    ) -> None:
+        if code is not None:
+            self.code = code
         self.message = message or self.message
         self.details = details
         super().__init__(self.message)
@@ -39,6 +43,14 @@ class AuthenticationError(AppError):
 
 class PermissionDeniedError(AppError):
     """Returned as 404 to avoid confirming the existence of restricted resources."""
+
+    status_code = status.HTTP_404_NOT_FOUND
+    code = "not_found"
+    message = "Resource not found."
+
+
+class NotFoundError(AppError):
+    """The resource genuinely does not exist (distinct from permission denial)."""
 
     status_code = status.HTTP_404_NOT_FOUND
     code = "not_found"
