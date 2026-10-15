@@ -293,7 +293,6 @@
       </div>
     </div>
 
-    <!-- Assign modal -->
     <div v-if="assignModal" class="modal-backdrop" @click.self="assignModal = null">
       <div class="modal-card max-w-md">
         <h2 class="text-lg font-semibold text-slate-900">Assign “{{ assignModal.item.title }}”</h2>
@@ -365,7 +364,6 @@ const displayPercent = computed(() =>
     : props.task.percent_complete,
 )
 
-// ---------------- loading ----------------
 async function load() {
   try {
     workflow.value = await api.get<Workflow>(`/api/v1/tasks/${props.task.id}/workflow`)
@@ -399,7 +397,6 @@ function refreshAll() {
   return load()
 }
 
-// ---------------- derived helpers ----------------
 function itemsOf(stageId: string): WorkItem[] {
   return (workflow.value?.items ?? []).filter(i => i.stage_id === stageId)
 }
@@ -423,7 +420,6 @@ function milestoneOptions(stageId: string, excludeId?: string): WorkItem[] {
   )
 }
 
-// ---------------- progress mode ----------------
 async function toggleProgressMode() {
   if (!workflow.value) return
   const next = workflow.value.task_progress_mode === 'calculated' ? 'manual' : 'calculated'
@@ -435,7 +431,6 @@ async function toggleProgressMode() {
   }
 }
 
-// ---------------- stage mutations ----------------
 const stageModal = ref<{ existing: WorkflowStage | null } | null>(null)
 const stageForm = reactive({
   name: '',
@@ -537,7 +532,6 @@ async function deleteStage(stage: WorkflowStage) {
   }
 }
 
-// ---------------- item mutations ----------------
 const itemModal = ref<{ stage: WorkflowStage, existing: WorkItem | null } | null>(null)
 const itemForm = reactive({
   item_type: 'subtask' as WorkItemType,
@@ -626,7 +620,6 @@ async function submitAssign() {
   }
 }
 
-// ---------------- dependencies ----------------
 const depForm = reactive({ predecessor_id: '', successor_id: '' })
 
 async function addDependency() {
@@ -656,7 +649,6 @@ async function removeDependency(dep: WorkflowDependency) {
   }
 }
 
-// ---------------- labels ----------------
 function stageStatusLabel(s: string): string {
   return s.replaceAll('_', ' ')
 }

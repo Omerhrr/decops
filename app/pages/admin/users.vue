@@ -1,6 +1,5 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <!-- Header -->
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
@@ -16,14 +15,13 @@
       <button
         v-if="canManage"
         type="button"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+        class="btn-primary"
         @click="showCreate = true"
       >
         + Create employee
       </button>
     </section>
 
-    <!-- Filters -->
     <section class="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center">
       <input
         v-model="query"
@@ -110,7 +108,6 @@
       </table>
     </section>
 
-    <!-- Pagination -->
     <div v-if="totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
       <button
         type="button"
@@ -131,32 +128,31 @@
       </button>
     </div>
 
-    <!-- Create modal -->
     <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 class="text-base font-semibold text-slate-900">Create employee</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createUser">
           <div>
             <label class="text-xs font-medium text-slate-600" for="new-name">Full name</label>
-            <input id="new-name" v-model="form.full_name" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+            <input id="new-name" v-model="form.full_name" required class="input-field mt-1" />
           </div>
           <div>
             <label class="text-xs font-medium text-slate-600" for="new-email">Email</label>
-            <input id="new-email" v-model="form.email" type="email" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+            <input id="new-email" v-model="form.email" type="email" required class="input-field mt-1" />
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-xs font-medium text-slate-600" for="new-code">Employee code</label>
-              <input id="new-code" v-model="form.employee_code" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" placeholder="INT-0000" />
+              <input id="new-code" v-model="form.employee_code" required class="input-field mt-1" placeholder="INT-0000" />
             </div>
             <div>
               <label class="text-xs font-medium text-slate-600" for="new-password">Temp password</label>
-              <input id="new-password" v-model="form.password" type="password" required minlength="10" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+              <input id="new-password" v-model="form.password" type="password" required minlength="10" class="input-field mt-1" />
             </div>
           </div>
           <div>
             <label class="text-xs font-medium text-slate-600" for="new-role">Initial role</label>
-            <select id="new-role" v-model="form.roleId" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+            <select id="new-role" v-model="form.roleId" class="input-field mt-1">
               <option value="">No role yet</option>
               <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
             </select>
@@ -164,7 +160,7 @@
           <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
-            <button type="submit" :disabled="busy" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
+            <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create employee' }}
             </button>
           </div>
@@ -198,7 +194,7 @@
           <button
             type="button"
             :disabled="!roleToAdd || busy"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+            class="btn-primary"
             @click="assignRole"
           >
             Assign

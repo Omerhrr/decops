@@ -35,7 +35,9 @@
             <h2 class="text-base font-semibold text-slate-900 group-hover:text-brand-700">{{ row.department_name }}</h2>
             <p class="mt-0.5 text-xs text-slate-400">Lead: {{ row.lead ?? '-' }} · {{ row.member_count }} member(s)</p>
           </div>
-          <span class="text-slate-300 transition-colors group-hover:text-brand-500">→</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5 text-slate-300 transition-colors group-hover:text-brand-500" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
         </div>
         <div class="mt-4 grid grid-cols-4 gap-2 text-center">
           <div class="rounded-lg bg-slate-50 py-2">

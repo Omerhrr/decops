@@ -125,8 +125,11 @@
               {{ workload?.scope === 'all' ? 'All departments (management scope).' : 'Departments you lead or belong to.' }}
             </p>
           </div>
-          <NuxtLink to="/departments" class="text-sm font-medium text-brand-700 hover:underline">
-            Open workspaces →
+          <NuxtLink to="/departments" class="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline">
+            Open workspaces
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
           </NuxtLink>
         </div>
 
@@ -192,7 +195,7 @@ const { data: workload } = await useFetch<DepartmentWorkloadReport>('/api/v1/rep
   server: false,
 })
 
-// ---- CSV exports (exports.approved; audited server-side) ----
+// CSV exports (exports.approved; audited server-side)
 const exportOptions = [
   { type: 'task_register', label: '⬇ Task register CSV' },
   { type: 'department_workload', label: '⬇ Department workload CSV' },
@@ -221,7 +224,6 @@ async function runExport(type: string) {
   }
 }
 
-// ---- Chart geometry ----
 const chartWidth = 720
 const chartHeight = 220
 const chartPad = 16

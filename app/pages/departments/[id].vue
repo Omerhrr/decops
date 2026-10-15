@@ -9,11 +9,15 @@
     </div>
 
     <template v-else-if="workspace">
-      <!-- Header -->
-      <section class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+      <section class="card p-5 sm:p-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <NuxtLink to="/departments" class="text-xs font-medium text-brand-700 hover:underline">← All departments</NuxtLink>
+            <NuxtLink to="/departments" class="inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+              </svg>
+              All departments
+            </NuxtLink>
             <h1 class="mt-1 text-xl font-semibold text-slate-900">{{ workspace.department.name }}</h1>
             <p class="mt-1 text-sm text-slate-500">
               Lead: {{ workspace.department.lead ?? '-' }} · {{ workspace.department.member_count }} member(s)
@@ -24,7 +28,6 @@
       </section>
 
       <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <!-- Department tasks -->
         <section class="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2" aria-label="Department tasks">
           <h2 class="text-base font-semibold text-slate-900">Departmental tasks</h2>
           <p class="mt-1 text-sm text-slate-500">Authorized tasks associated with this department.</p>
@@ -48,7 +51,6 @@
         </section>
 
         <div class="space-y-6">
-          <!-- Upcoming deadlines -->
           <section class="rounded-2xl border border-slate-200 bg-white p-6" aria-label="Upcoming deadlines">
             <h2 class="text-base font-semibold text-slate-900">Upcoming deadlines</h2>
             <ul class="mt-3 space-y-2">
@@ -62,7 +64,6 @@
             </ul>
           </section>
 
-          <!-- Blocked + overdue -->
           <section class="rounded-2xl border border-slate-200 bg-white p-6" aria-label="Blocked and overdue">
             <h2 class="text-base font-semibold text-slate-900">Needs attention</h2>
             <h3 class="mt-3 text-xs font-semibold uppercase tracking-wide text-rose-500">Blocked ({{ workspace.blocked.length }})</h3>
@@ -88,7 +89,6 @@
         </div>
       </div>
 
-      <!-- Team assignments -->
       <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6" aria-label="Team assignments">
         <h2 class="text-base font-semibold text-slate-900">Team assignments</h2>
         <p class="mt-1 text-sm text-slate-500">

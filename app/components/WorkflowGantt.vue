@@ -139,7 +139,6 @@ function stageProgressPercent(stageId: string): number {
   return props.workflow.progress.stages.find(s => s.stage_id === stageId)?.percent ?? 0
 }
 
-// ---- time scale -----------------------------------------------------------
 const domain = computed<[number, number] | null>(() => {
   // Reads stageRows (raw dates) - never `rows`, which itself derives from
   // the domain via xOf (a cycle would throw "rows.value is not iterable").

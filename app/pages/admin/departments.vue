@@ -1,6 +1,5 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <!-- Header -->
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
@@ -16,14 +15,13 @@
       <button
         v-if="canManage"
         type="button"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+        class="btn-primary"
         @click="showCreate = true"
       >
         + Create department
       </button>
     </section>
 
-    <!-- Grid of departments -->
     <section class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div v-if="loading" class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-400 lg:col-span-2">
         Loading…
@@ -101,22 +99,21 @@
       </article>
     </section>
 
-    <!-- Create modal -->
     <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 class="text-base font-semibold text-slate-900">Create department</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createDepartment">
           <div>
             <label class="text-xs font-medium text-slate-600" for="dep-name">Name</label>
-            <input id="dep-name" v-model="depForm.name" required class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+            <input id="dep-name" v-model="depForm.name" required class="input-field mt-1" />
           </div>
           <div>
             <label class="text-xs font-medium text-slate-600" for="dep-desc">Description</label>
-            <textarea id="dep-desc" v-model="depForm.description" rows="2" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"></textarea>
+            <textarea id="dep-desc" v-model="depForm.description" rows="2" class="input-field mt-1"></textarea>
           </div>
           <div>
             <label class="text-xs font-medium text-slate-600" for="dep-lead">Department lead</label>
-            <select id="dep-lead" v-model="depForm.lead_user_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+            <select id="dep-lead" v-model="depForm.lead_user_id" class="input-field mt-1">
               <option value="">No lead yet</option>
               <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
             </select>
@@ -124,7 +121,7 @@
           <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
             <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
-            <button type="submit" :disabled="busy" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50">
+            <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create department' }}
             </button>
           </div>

@@ -1,6 +1,5 @@
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-    <!-- Header -->
     <section class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <nav class="text-xs text-slate-400" aria-label="Breadcrumb">
@@ -36,9 +35,7 @@
     <p v-if="loadError" class="mt-6 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ loadError }}</p>
 
     <div v-if="task" class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <!-- Left column: summary + activity -->
       <div class="space-y-6 lg:col-span-2">
-        <!-- Summary -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900">Summary</h2>
@@ -93,44 +90,43 @@
             <div class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label class="sm:col-span-2 block">
                 <span class="text-xs font-medium text-slate-600">Title</span>
-                <input v-model="editForm.title" type="text" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <input v-model="editForm.title" type="text" class="input-field mt-1" />
               </label>
               <label class="sm:col-span-2 block">
                 <span class="text-xs font-medium text-slate-600">Description</span>
-                <textarea v-model="editForm.description" rows="4" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <textarea v-model="editForm.description" rows="4" class="input-field mt-1" />
               </label>
               <label class="block">
                 <span class="text-xs font-medium text-slate-600">Priority</span>
-                <select v-model="editForm.priority" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+                <select v-model="editForm.priority" class="input-field mt-1">
                   <option v-for="p in PRIORITIES" :key="p" :value="p">{{ p }}</option>
                 </select>
               </label>
               <label class="block">
                 <span class="text-xs font-medium text-slate-600">Percent complete</span>
-                <input v-model.number="editForm.percent_complete" type="number" min="0" max="100" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <input v-model.number="editForm.percent_complete" type="number" min="0" max="100" class="input-field mt-1" />
               </label>
               <label class="block">
                 <span class="text-xs font-medium text-slate-600">Due date</span>
-                <input v-model="editForm.due_date" type="date" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <input v-model="editForm.due_date" type="date" class="input-field mt-1" />
               </label>
               <label class="block">
                 <span class="text-xs font-medium text-slate-600">Next follow-up</span>
-                <input v-model="editForm.next_follow_up_date" type="date" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <input v-model="editForm.next_follow_up_date" type="date" class="input-field mt-1" />
               </label>
               <label class="sm:col-span-2 block">
                 <span class="text-xs font-medium text-slate-600">Dependencies / blockers note</span>
-                <textarea v-model="editForm.dependency_summary" rows="2" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500" />
+                <textarea v-model="editForm.dependency_summary" rows="2" class="input-field mt-1" />
               </label>
             </div>
             <p v-if="editError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ editError }}</p>
             <div class="mt-4 flex justify-end gap-2">
-              <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100" @click="editing = false">Cancel</button>
-              <button type="button" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700" @click="saveEdit">Save changes</button>
+              <button type="button" class="btn-secondary" @click="editing = false">Cancel</button>
+              <button type="button" class="btn-primary" @click="saveEdit">Save changes</button>
             </div>
           </template>
         </section>
 
-        <!-- Workflow engine (Phase 5): progress, stages, items, dependencies -->
         <WorkflowPanel :task="task" @changed="reloadLight" />
         <WorkflowGantt
           v-if="workflow"
@@ -139,11 +135,9 @@
           :task-due="task.due_date"
         />
 
-        <!-- Collaboration (Phase 6): comments + private attachments -->
         <TaskComments :task-id="task.id" />
         <TaskAttachments :task-id="task.id" />
 
-        <!-- Activity timeline -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 class="text-sm font-semibold text-slate-900">Activity history</h2>
           <p class="mt-1 text-xs text-slate-400">Every creation, transition, assignment, and access change on this task (AC-12).</p>
@@ -160,9 +154,7 @@
         </section>
       </div>
 
-      <!-- Right column: assignments, departments, access -->
       <div class="space-y-6">
-        <!-- Assignments -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900">Assignments</h2>
@@ -197,7 +189,6 @@
           </p>
         </section>
 
-        <!-- Departments -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900">Departments</h2>
@@ -211,7 +202,6 @@
           <p v-if="!task.task_departments.length" class="mt-2 text-sm text-slate-400">No departments linked.</p>
         </section>
 
-        <!-- Access control -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-900">Access grants</h2>
@@ -253,7 +243,6 @@
       </div>
     </div>
 
-    <!-- Transition reason modal -->
     <div v-if="pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="pendingTransition = null">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-slate-900">{{ transitionLabel(pendingTransition) }}</h2>
@@ -263,32 +252,31 @@
         <textarea
           v-model="transitionReason"
           rows="3"
-          class="mt-4 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
+          class="input-field mt-4"
           placeholder="Recorded on the task history…"
         />
         <p v-if="transitionError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ transitionError }}</p>
         <div class="mt-5 flex justify-end gap-3">
-          <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" @click="pendingTransition = null">Cancel</button>
-          <button type="button" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700" @click="confirmTransition">Confirm</button>
+          <button type="button" class="btn-secondary" @click="pendingTransition = null">Cancel</button>
+          <button type="button" class="btn-primary" @click="confirmTransition">Confirm</button>
         </div>
       </div>
     </div>
 
-    <!-- Assign modal -->
     <div v-if="showAssign" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="showAssign = false">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-slate-900">Assign a person</h2>
         <p v-if="assignError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ assignError }}</p>
         <label class="mt-4 block">
           <span class="text-xs font-medium text-slate-600">Person</span>
-          <select v-model="assignForm.user_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="assignForm.user_id" class="input-field mt-1">
             <option value="">Select…</option>
             <option v-for="u in directoryUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
           </select>
         </label>
         <label class="mt-4 block">
           <span class="text-xs font-medium text-slate-600">Role</span>
-          <select v-model="assignForm.role" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="assignForm.role" class="input-field mt-1">
             <option value="supporting_pm">Supporting PM</option>
             <option value="accountable_pm">Accountable PM (replaces current)</option>
             <option value="work_item_assignee">Work item assignee</option>
@@ -298,27 +286,26 @@
           DEC-02: the previous accountable PM's assignment is revoked and recorded on the history.
         </p>
         <div class="mt-5 flex justify-end gap-3">
-          <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" @click="showAssign = false">Cancel</button>
-          <button type="button" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700" @click="submitAssignment">Assign</button>
+          <button type="button" class="btn-secondary" @click="showAssign = false">Cancel</button>
+          <button type="button" class="btn-primary" @click="submitAssignment">Assign</button>
         </div>
       </div>
     </div>
 
-    <!-- Grant modal -->
     <div v-if="showGrant" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" @click.self="showGrant = false">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-slate-900">Grant task access</h2>
         <p v-if="grantError" class="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ grantError }}</p>
         <label class="mt-4 block">
           <span class="text-xs font-medium text-slate-600">Person</span>
-          <select v-model="grantForm.user_id" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="grantForm.user_id" class="input-field mt-1">
             <option value="">Select…</option>
             <option v-for="u in directoryUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
           </select>
         </label>
         <label class="mt-4 block">
           <span class="text-xs font-medium text-slate-600">Access level</span>
-          <select v-model="grantForm.level" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="grantForm.level" class="input-field mt-1">
             <option value="view">View - see and comment</option>
             <option value="operate">Operate - update and coordinate</option>
             <option value="manage">Manage - administer the task</option>
@@ -326,8 +313,8 @@
           </select>
         </label>
         <div class="mt-5 flex justify-end gap-3">
-          <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" @click="showGrant = false">Cancel</button>
-          <button type="button" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700" @click="submitGrant">Grant</button>
+          <button type="button" class="btn-secondary" @click="showGrant = false">Cancel</button>
+          <button type="button" class="btn-primary" @click="submitGrant">Grant</button>
         </div>
       </div>
     </div>
