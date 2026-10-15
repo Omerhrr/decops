@@ -1,0 +1,6 @@
+Task ID,Date Created,Task Title,Task Description,Priority,Accountable PM,Supporting PM(s),Assigned By,Start Date,Due Date,Status,% Complete,Last Updated,Next Follow-up Date,Dependency / Blocker,Attachment / Folder Link,Completion Date
+LEG-501,15/01/2025,Relay panel inspection,Quarterly inspection of relay panels,P1,admin@interdec.com,,,01/02/2025,01/03/2025,In Progress,45,20/02/2025,25/02/2025,Waiting on relay part,https://legacy.interdec.com/f/relay,
+LEG-502,20/01/2025,Track sensor calibration,Calibrate track sensors after storm damage,Medium,ops.lead@interdec.com,manager@interdec.com,admin@interdec.com,05/02/2025,15/03/2025,Completed,100,01/03/2025,,Completed on site,https://legacy.interdec.com/f/sensor,10/03/2025
+LEG-503,01/02/2025,Weird state row,This row has an unmapped status,High,admin@interdec.com,,,10/02/2025,10/04/2025,Garbage Status,10,,
+LEG-504,,Missing title row,This row has no title,Low,admin@interdec.com,,,01/03/2025,01/04/2025,Open,0,,,
+LEG-505,05/02/2025,Relay panel inspection,Potential duplicate of LEG-501,P1,admin@interdec.com,,,10/02/2025,01/03/2025,In Progress,45,20/02/2025,,Waiting on relay part,,

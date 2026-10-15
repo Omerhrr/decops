@@ -1,12 +1,12 @@
 """Reporting & export endpoints (MOD-007, Phase 7; spec api "Dashboards and
 Reports" + MOD-005 "Restricted exports").
 
-- GET /reports/task-completion      -> reports.view (Management)
-- GET /reports/department-workload  -> reports.view (all departments) OR
+- GET /reports/task-completion -> reports.view (Management)
+- GET /reports/department-workload -> reports.view (all departments) OR
                                        reports.department.view (own departments)
-- POST /reports/exports             -> exports.approved; CSV download, audited.
+- POST /reports/exports -> exports.approved; CSV download, audited.
 
-Permission failures raise PermissionDeniedError (404, non-enumeration —
+Permission failures raise PermissionDeniedError (404, non-enumeration -
 consistent with the rest of the API). Every exported row passes the same
 access engine as the on-screen register, so exports cannot leak restricted
 tasks (exit criterion: "Restricted information does not leak through

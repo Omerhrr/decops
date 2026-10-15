@@ -1,14 +1,14 @@
-# DecOps Restore Test Report — Phase 9
+# DecOps Restore Test Report - Phase 9
 
 **Date**: 2026-10-15. **Objective** (spec Phase 9): "Test backup restoration."
 
 ## 1. Procedure
 
 Script: `scripts/restore_test_phase9.py` (committed). Steps executed against the
-live development database (`backend/decops.db`, SQLite — the sandbox stand-in
+live development database (`backend/decops.db`, SQLite - the sandbox stand-in
 for the production PostgreSQL instance):
 
-1. **Online backup** taken with `sqlite3.Connection.backup()` — a consistent,
+1. **Online backup** taken with `sqlite3.Connection.backup()` - a consistent,
    page-level copy that is safe while the API is running (equivalent to
    `pg_dump` for the production engine).
 2. **Pre-incident state recorded**: tasks=17, users=5, audit_events=145,
@@ -42,10 +42,10 @@ for the production PostgreSQL instance):
   schema is at the expected migration head, and no referential-integrity
   violations exist after restore.
 - Because audit trails are ordinary (append-only) tables inside the database,
-  restoring a backup also restores the audit history up to the backup point —
+  restoring a backup also restores the audit history up to the backup point -
   consistent with the audit design (no external state to lose).
 - Application-level state outside the database is limited to two directories
-  (`backend/var/attachments`, `backend/var/imports`) — the runbook requires
+  (`backend/var/attachments`, `backend/var/imports`) - the runbook requires
   backing these up alongside the database so restored task references remain
   downloadable.
 

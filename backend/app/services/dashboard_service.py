@@ -1,7 +1,7 @@
 """Dashboard service (MOD-007, Phase 7).
 
 Single source of truth for dashboard aggregates: every number on every
-dashboard is computed from `visible_tasks()` — the identical access-engine
+dashboard is computed from `visible_tasks()` - the identical access-engine
 evaluation (fresh ActorContext + per-task AccessPolicy, Operation.VIEW) that
 gates the task register. This makes "dashboard totals reconcile with
 authorized task records" true by construction, and restricted tasks cannot

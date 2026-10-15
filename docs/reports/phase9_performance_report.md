@@ -1,4 +1,4 @@
-# DecOps Performance Test Report — Phase 9
+# DecOps Performance Test Report - Phase 9
 
 **Date**: 2026-10-15. **Environment**: sandbox (SQLite, in-process TestClient),
 isolated dataset: 24 users, 4 departments, 300 tasks with mixed visibility
@@ -24,7 +24,7 @@ modes, 5 import jobs.
 | My tasks (`/dashboard/my-tasks`) | 54.9 | 126.8 | 67.2 | 35 |
 | Completion report (`/reports/task-completion`) | 58.1 | 133.8 | 76.7 | 35 |
 | Workload report (`/reports/department-workload`) | 60.3 | 132.2 | 72.4 | 37 |
-| CSV import validation (1000 rows) | 87.9 | — | — | 27 |
+| CSV import validation (1000 rows) | 87.9 | - | - | 27 |
 
 ## 3. Authorization-loop query analysis (N+1 check)
 
@@ -37,7 +37,7 @@ grants). This is the only place a per-row query amplification could occur:
   assignments/grants in a fixed pair of extra statements regardless of row
   count.
 - **Empirical A/B**: `GET /tasks` issued **34 SQL statements both before and
-  after** adding explicit `selectinload` options to the loop queries — flat
+  after** adding explicit `selectinload` options to the loop queries - flat
   query count with 300 candidates (would be ~634 statements if two lazy loads
   ran per candidate).
 - **Action taken**: the explicit eager-loading was kept as defense-in-depth
@@ -47,7 +47,7 @@ grants). This is the only place a per-row query amplification could occur:
 ## 4. Observed profile
 
 - Latency is dominated by Python-side authorization evaluation, not SQL:
-  statement counts stay flat (34–37) as candidate volume grows, and p95 stays
+  statement counts stay flat (34 - 37) as candidate volume grows, and p95 stays
   under ~135 ms across all measured endpoints.
 - The heaviest single operation measured is a worst-case 1000-row CSV import
   validation where every row duplicates an already-imported legacy identifier

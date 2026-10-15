@@ -1,4 +1,4 @@
-"""Phase 7 — Reporting & export tests (MOD-007 + MOD-005 "Restricted exports").
+"""Phase 7 - Reporting & export tests (MOD-007 + MOD-005 "Restricted exports").
 
 Under test:
 - reports.view gates task-completion (Management).
@@ -71,7 +71,7 @@ class TestTaskCompletionReport:
 
     def test_completion_counts_only_visible_tasks(self, client, test_db):
         # Admin creates/operates; a Management viewer (reports.view) gets an
-        # explicit view grant — reports aggregate exactly the authorized set.
+        # explicit view grant - reports aggregate exactly the authorized set.
         manager = make_user(test_db, email="completiomgr@interdec.com", role_names=["Management"])
         pm = make_user(test_db, email="completiopm@interdec.com", role_names=["Accountable PM"])
         login(client, "admin@interdec.com", "DecOps!2026")
@@ -180,7 +180,7 @@ class TestDepartmentWorkload:
         assert [d["department_name"] for d in body["departments"]] == ["Ops Alpha"]
         assert body["departments"][0]["active_tasks"] == 1
 
-        # Lead B sees their (empty) department only — no Alpha row at all.
+        # Lead B sees their (empty) department only - no Alpha row at all.
         login(client, "wkleadb@interdec.com", "Secret!1234")
         body = client.get("/api/v1/reports/department-workload").json()
         assert [d["department_name"] for d in body["departments"]] == ["Ops Beta"]

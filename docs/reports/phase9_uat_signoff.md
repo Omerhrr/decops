@@ -1,4 +1,4 @@
-# DecOps UAT Sign-off — Phase 9
+# DecOps UAT Sign-off - Phase 9
 
 **Date**: 2026-10-15. **Build**: `2b5c2b0` (Phase 8) + Phase 9 hardening.
 **Participants**: sandbox personas standing in for the Interdec role matrix

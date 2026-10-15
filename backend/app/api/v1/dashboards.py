@@ -1,6 +1,6 @@
 """Dashboard endpoints (MOD-007, Phase 7; spec api "Dashboards and Reports").
 
-Personal dashboards are available to every authenticated user — they only
+Personal dashboards are available to every authenticated user - they only
 ever surface that user's own engine-authorized data. The management overview
 block inside /dashboard/summary requires the `dashboards.view` permission
 (spec RBAC matrix: Management) and still only aggregates authorized records.

@@ -5,7 +5,7 @@
         <div>
           <h1 class="text-xl font-semibold text-slate-900">My Tasks</h1>
           <p class="mt-1 text-sm text-slate-500">
-            Quick access to the work assigned to you — the same engine-authorized set as the register.
+            Quick access to the work assigned to you - the same engine-authorized set as the register.
           </p>
         </div>
         <!-- Scope switch -->
@@ -166,5 +166,5 @@ function formatDate(value: string): string {
   return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-useHead({ title: 'My Tasks — DecOps' })
+useHead({ title: 'My Tasks - DecOps' })
 </script>

@@ -83,7 +83,7 @@ def can_assign(
     if target_role is AssignmentRole.ACCOUNTABLE_PM:
         # DEC-02: one accountable PM. Already holding accountability is a no-op
         # (allowed, idempotent); someone else holding it is a replacement and
-        # is allowed — the caller records the change — but must be deliberate.
+        # is allowed - the caller records the change - but must be deliberate.
         pass
     return True, ""
 

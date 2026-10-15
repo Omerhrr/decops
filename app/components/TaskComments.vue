@@ -54,7 +54,7 @@
         </div>
       </li>
     </ul>
-    <p v-else class="mt-5 text-sm text-slate-400">No comments yet — start the discussion.</p>
+    <p v-else class="mt-5 text-sm text-slate-400">No comments yet - start the discussion.</p>
   </section>
 </template>
 

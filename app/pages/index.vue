@@ -34,7 +34,7 @@
         <StatCard label="Accountable for" :value="summary.me.accountable_active" icon="🎯"
                   note="Tasks where you are the accountable PM" />
         <StatCard label="Overdue" :value="summary.me.overdue" icon="⏰"
-                  :note="summary.me.overdue ? 'Action needed — past due date' : 'Nothing past due'" />
+                  :note="summary.me.overdue ? 'Action needed - past due date' : 'Nothing past due'" />
         <StatCard label="Blocked" :value="summary.me.blocked" icon="⛔"
                   :note="`${summary.me.due_soon} due within 7 days`" />
       </section>
@@ -134,7 +134,7 @@
       <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-6" aria-label="Recent activity">
         <h2 class="text-base font-semibold text-slate-900">Recent authorized activity</h2>
         <p class="mt-1 text-sm text-slate-500">
-          Latest events across tasks you can view — restricted tasks never appear here.
+          Latest events across tasks you can view - restricted tasks never appear here.
         </p>
         <ul class="mt-4 space-y-3">
           <li v-if="!summary.recent_activity.length" class="py-4 text-sm text-slate-400">
@@ -144,7 +144,7 @@
             <div class="min-w-0 flex-1">
               <p class="text-sm text-slate-700">
                 <span class="font-medium">{{ event.actor?.full_name ?? 'System' }}</span>
-                — {{ event.summary }}
+ - {{ event.summary }}
               </p>
               <p class="mt-0.5 text-xs text-slate-400">
                 <NuxtLink :to="`/tasks/${event.task_id}`" class="hover:text-brand-700">
@@ -167,7 +167,7 @@
     >
       <h2 class="text-base font-semibold text-slate-900">Administration</h2>
       <p class="mt-1 text-sm text-slate-500">
-        Identity administration is permission-gated — these areas are audited.
+        Identity administration is permission-gated - these areas are audited.
       </p>
       <div class="mt-4 flex flex-wrap gap-3">
         <NuxtLink
@@ -267,5 +267,5 @@ const roadmap = [
   { phase: 8, name: 'CSV Migration', detail: 'Import center: mapping, preview, validation, reconciliation', done: false },
 ]
 
-useHead({ title: 'Dashboard — DecOps' })
+useHead({ title: 'Dashboard - DecOps' })
 </script>

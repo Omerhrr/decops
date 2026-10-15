@@ -1,4 +1,4 @@
-"""Phase 6 — Notifications & transactional outbox tests (spec exit criteria:
+"""Phase 6 - Notifications & transactional outbox tests (spec exit criteria:
 "Notification processing is retry-safe"; mandatory scenario: "A background
 notification job does not disclose information after access revocation")."""
 
@@ -174,7 +174,7 @@ class TestRevocationSafety:
     def test_background_job_does_not_disclose_after_revocation(self, client, test_db):
         """Mandatory scenario. Events are enqueued while the users still have
         access; one participant's access is revoked before the worker ever
-        runs — the job must not disclose anything to them."""
+        runs - the job must not disclose anything to them."""
         admin = test_db.query(User).filter_by(email="admin@interdec.com").first()
         pm = make_user(test_db, email="rspm@interdec.com", role_names=["Accountable PM"])
         revoked_user = make_user(test_db, email="revoked1@interdec.com", role_names=["Supporting PM"])

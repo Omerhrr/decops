@@ -7,7 +7,7 @@ persists the row reports this module produces.
 Spec rules implemented here:
 - approved mapping tables for legacy statuses and priorities; unmapped values
   are REPORTED, never invented or silently defaulted into wrong data;
-- ambiguous employee names are flagged for manual resolution — a mapping is
+- ambiguous employee names are flagged for manual resolution - a mapping is
   never invented;
 - required fields and date relationships are validated per row;
 - whitespace is normalized everywhere; dates accept a configurable day-first
@@ -526,7 +526,7 @@ def validate_row(
     """Validate and normalize one spreadsheet row (never raises).
 
     Warnings are committable notices; errors make the row non-committable.
-    Every problem is recorded — no row is ever silently discarded (spec).
+    Every problem is recorded - no row is ever silently discarded (spec).
     """
     report = RowReport(row_number=row_number, source_task_id=None, title="", status=ROW_OK)
 

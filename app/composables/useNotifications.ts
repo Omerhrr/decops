@@ -1,6 +1,6 @@
 // In-app notification state (Phase 6): unread badge + notification center.
 // Polls the API on an interval while the user is authenticated; processing is
-// server-side (transactional outbox worker) — the client only reads results.
+// server-side (transactional outbox worker) - the client only reads results.
 
 import type { NotificationItem } from '~/types/api'
 

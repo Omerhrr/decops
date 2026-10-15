@@ -33,7 +33,7 @@
         <div class="flex items-start justify-between">
           <div>
             <h2 class="text-base font-semibold text-slate-900 group-hover:text-brand-700">{{ row.department_name }}</h2>
-            <p class="mt-0.5 text-xs text-slate-400">Lead: {{ row.lead ?? '—' }} · {{ row.member_count }} member(s)</p>
+            <p class="mt-0.5 text-xs text-slate-400">Lead: {{ row.lead ?? '-' }} · {{ row.member_count }} member(s)</p>
           </div>
           <span class="text-slate-300 transition-colors group-hover:text-brand-500">→</span>
         </div>
@@ -73,5 +73,5 @@ const { data: workload, pending, error } = await useFetch<DepartmentWorkloadRepo
   server: false,
 })
 
-useHead({ title: 'Departments — DecOps' })
+useHead({ title: 'Departments - DecOps' })
 </script>

@@ -1,4 +1,4 @@
-"""Phase 5 — Workflow Engine API tests (MOD-004).
+"""Phase 5 - Workflow Engine API tests (MOD-004).
 
 Covers: stage/item CRUD + transitions, sequential gating through the API,
 dependency cycle rejection, blockers, milestone auto-completion cascade,

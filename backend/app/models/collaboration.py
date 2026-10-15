@@ -2,7 +2,7 @@
 
 comments / attachments are nested task resources: they inherit the task's
 access policy through the access engine (Operation.COMMENT / Operation.ATTACH)
-— cross-task isolation is structural because every row carries its task_id and
+ - cross-task isolation is structural because every row carries its task_id and
 services always load through the owning task.
 
 notifications is the in-app channel state. outbox_events is the transactional
@@ -62,7 +62,7 @@ class Notification(UUIDPrimaryKeyMixin, Base):
 
     __tablename__ = "notifications"
     __table_args__ = (
-        # Idempotency: one delivery per (outbox event, recipient) — replaying a
+        # Idempotency: one delivery per (outbox event, recipient) - replaying a
         # claimed event must never duplicate notifications (retry-safe).
         UniqueConstraint("outbox_event_id", "recipient_id", name="uq_notification_delivery"),
         Index("ix_notifications_recipient_created", "recipient_id", "created_at"),
@@ -127,7 +127,7 @@ class Comment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 class Attachment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     """Private task attachment. Bytes live under the configured storage dir,
-    referenced only by `storage_key` — the key is never exposed through the
+    referenced only by `storage_key` - the key is never exposed through the
     API; downloads stream through an authorization-checked endpoint."""
 
     __tablename__ = "attachments"

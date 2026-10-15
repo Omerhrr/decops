@@ -59,7 +59,7 @@ def test_generated_passwords_meet_policy():
 
 
 def test_smoke_matrix_covers_every_system_role(test_db):
-    """Every role the RBAC seed knows must have a smoke path set — a new role
+    """Every role the RBAC seed knows must have a smoke path set - a new role
     without launch smoke coverage is a launch-process defect."""
     from app.seeds.rbac_matrix import ROLE_MATRIX
 

@@ -80,7 +80,7 @@ def _error_body(code: str, message: str, details: Any = None) -> dict[str, Any]:
 
 def _clean_validation_errors(errors: list) -> list:
     """Pydantic 2.14+ embeds raw exception objects in `ctx.error`, which are
-    not JSON serializable — stringify them and encode the rest safely."""
+    not JSON serializable - stringify them and encode the rest safely."""
     from fastapi.encoders import jsonable_encoder
 
     clean: list = []
@@ -93,7 +93,7 @@ def _clean_validation_errors(errors: list) -> list:
             }
         try:
             clean.append(jsonable_encoder(item))
-        except Exception:  # noqa: BLE001 - never fail the error path itself
+        except Exception: # noqa: BLE001 - never fail the error path itself
             clean.append({"type": item.get("type"), "loc": item.get("loc"),
                           "msg": item.get("msg")})
     return clean

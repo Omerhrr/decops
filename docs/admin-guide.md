@@ -9,7 +9,7 @@ procedures live in `docs/runbook.md`; end-user features in
 ## 1. Roles in DecOps
 
 DecOps ships nine system roles (fixed permission sets from the approved RBAC
-matrix — see `backend/app/seeds/rbac_matrix.py`):
+matrix - see `backend/app/seeds/rbac_matrix.py`):
 
 | Role | Typical grant | Notes |
 |---|---|---|
@@ -21,11 +21,11 @@ matrix — see `backend/app/seeds/rbac_matrix.py`):
 | Department Lead | Department workspace + lead duties | Needs a department membership |
 | Department Member | Works in their department | |
 | Approver | Reviews & approves | |
-| Read-Only Auditor | `tasks.view_authorized`, `audit.read`, `exports.approved` | Deliberately **no** `reports.view` — auditors export data, they do not browse reports |
+| Read-Only Auditor | `tasks.view_authorized`, `audit.read`, `exports.approved` | Deliberately **no** `reports.view` - auditors export data, they do not browse reports |
 
 Roles are **global** (company scope) and combine freely; a person can be both
 Accountable PM and Department Lead. Permissions are checked on every API call;
-the UI only hides what the role already forbids — the API is the gate.
+the UI only hides what the role already forbids - the API is the gate.
 
 ## 2. Account administration (Users)
 
@@ -57,33 +57,33 @@ department workspace. Department membership changes are audited
   tasks through allowed transitions (reasons where required).
 - **Visibility modes** on a task: `private`, `participants`,
   `department_scoped`, `custom`. Private tasks are invisible to everyone
-  without a grant — including in reports and exports (404, not 403, so IDs do
+  without a grant - including in reports and exports (404, not 403, so IDs do
   not leak).
 - Assignments grants (`task.access_granted` audit action) are the mechanism to
   give a private task to a collaborator.
 
 ## 5. Imports center (CSV migration)
 
-*Imports* (Company Administrator only — System Administration is excluded
+*Imports* (Company Administrator only - System Administration is excluded
 from business content by spec):
 
 1. **Upload** the CSV (UTF-8, ≤ 10 MB). File-level problems (wrong type,
    encoding, binary content) are rejected up front with a clear reason.
-2. **Review the mapping** — headers auto-map to DecOps fields (the 17 legacy
+2. **Review the mapping** - headers auto-map to DecOps fields (the 17 legacy
    columns of the Interdec spreadsheet map by name). Adjust anything wrong;
    revalidation is instant.
-3. **Review the row report** — per-row status:
-   - *ok* — clean row;
-   - *warning* — imported with a reconciliations flag (e.g. percent "0.35"
+3. **Review the row report** - per-row status:
+   - *ok* - clean row;
+   - *warning* - imported with a reconciliations flag (e.g. percent "0.35"
      read as 35 %, date format assumptions);
-   - *failed* — not imported; the reason is stated (unmapped status value,
+   - *failed* - not imported; the reason is stated (unmapped status value,
      bad dates, missing required field);
-   - *duplicate* — flagged for review (exact matches on legacy Task ID block
+   - *duplicate* - flagged for review (exact matches on legacy Task ID block
      import; same-title matches are marked likely/possible).
-4. **Commit** — only ok/warning rows without duplicate flags commit, in
+4. **Commit** - only ok/warning rows without duplicate flags commit, in
    batches, with per-row outcomes written back into the report. Committed
    tasks keep their historical dates and show provenance (`task.imported`).
-5. **Retries are safe** — re-uploading the same file never duplicates tasks:
+5. **Retries are safe** - re-uploading the same file never duplicates tasks:
    rows whose legacy Task ID already exists are reported, not re-imported.
 6. **After commit**: download the summary CSV from the job's report for the
    migration record; `import.committed` is in the audit trail with task IDs.
@@ -115,7 +115,7 @@ logs (see `docs/support-procedures.md`).
   deployments enable it on exactly one worker
   (`DECOPS_OUTBOX_WORKER_ENABLED=false` elsewhere).
 - Production requires PostgreSQL; SQLite exists for the sandbox only.
-- Attachments and import artifacts live on local disk under `backend/var/` —
+- Attachments and import artifacts live on local disk under `backend/var/` -
   include them in backups or downloads break after a restore.
 - OpenAPI docs are disabled in production by hardening; use the repository
   schemas/tests as the API reference.

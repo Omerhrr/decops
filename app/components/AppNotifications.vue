@@ -46,7 +46,7 @@
         </div>
 
         <p v-if="loaded && items.length === 0" class="px-4 py-8 text-center text-sm text-slate-400">
-          You're all caught up — no notifications yet.
+          You're all caught up - no notifications yet.
         </p>
 
         <ul v-else class="max-h-96 divide-y divide-slate-100 overflow-y-auto">

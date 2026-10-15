@@ -1,10 +1,10 @@
 """Workflow models (spec data_model: task_stages, work_items,
-workflow_dependencies; Phase 5 — Workflow Engine).
+workflow_dependencies; Phase 5 - Workflow Engine).
 
 Structure (spec workflow_engine.structure): Task → Stage → Milestone/Subtask.
 - Stages order work into phases; each stage declares an execution_mode
   (sequential stages gate on predecessor completion, parallel stages may run
-  simultaneously — mixed workflows are simply a combination).
+  simultaneously - mixed workflows are simply a combination).
 - Work items (milestones and subtasks) are the assignable units; subtasks may
   nest under milestones. Dependencies connect work items within a task
   (within or across stages); cycles are rejected at the domain layer.

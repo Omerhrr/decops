@@ -237,5 +237,5 @@ onMounted(async () => {
   await Promise.all([loadDepartments(), loadUsers()])
 })
 
-useHead({ title: 'Departments — DecOps' })
+useHead({ title: 'Departments - DecOps' })
 </script>

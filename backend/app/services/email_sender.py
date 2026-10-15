@@ -1,6 +1,6 @@
 """Email delivery for notifications (Phase 6, optional channel).
 
-Disabled by default ("Email, if approved" — spec notifications.channels).
+Disabled by default ("Email, if approved" - spec notifications.channels).
 When enabled, sends via SMTP; failures raise EmailError so the outbox worker
 can classify and retry them. The sandbox/dev default logs the message instead
 of sending, so nothing leaves the machine unconfigured.

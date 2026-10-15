@@ -536,7 +536,7 @@ export interface DepartmentWorkspace {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 8 — CSV Migration (imports)
+// Phase 8 - CSV Migration (imports)
 // ---------------------------------------------------------------------------
 
 export type ImportJobStatus = 'draft' | 'validated' | 'committed' | 'failed'

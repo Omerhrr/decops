@@ -1,7 +1,7 @@
 """Dashboard & report schemas (MOD-007, Phase 7; spec api.endpoint_groups
 "Dashboards and Reports").
 
-Every aggregate in this module is computed over the *authorized* task set —
+Every aggregate in this module is computed over the *authorized* task set -
 the same access-engine decisions that gate the task register (exit criteria:
 "Dashboard totals reconcile with authorized task records", "Restricted
 information does not leak through reports"). Rows embedded in dashboard
@@ -38,7 +38,7 @@ class StatusBreakdown(BaseModel):
 
 
 class ManagementOverview(BaseModel):
-    """Company-wide aggregates — only populated for dashboards.view holders.
+    """Company-wide aggregates - only populated for dashboards.view holders.
 
     Totals cover every task the requesting administrator is authorized to
     view (tasks.manage_all => the whole register; others => their subset).

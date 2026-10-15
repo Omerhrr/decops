@@ -5,7 +5,7 @@
         <div>
           <h1 class="text-xl font-semibold text-slate-900">Reports</h1>
           <p class="mt-1 text-sm text-slate-500">
-            Authorized reporting only — every figure is computed from the tasks your access
+            Authorized reporting only - every figure is computed from the tasks your access
             policy allows, and exports are audited.
           </p>
         </div>
@@ -46,7 +46,7 @@
           <div v-if="completion" class="flex flex-wrap gap-4 text-xs text-slate-500">
             <span><span class="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-brand-500" /> Completed</span>
             <span><span class="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-slate-300" /> Created</span>
-            <span>Avg cycle: <strong>{{ completion.avg_days_to_complete ?? '—' }}d</strong></span>
+            <span>Avg cycle: <strong>{{ completion.avg_days_to_complete ?? '-' }}d</strong></span>
           </div>
         </div>
 
@@ -154,7 +154,7 @@
                     {{ row.department_name }}
                   </NuxtLink>
                 </td>
-                <td class="px-4 py-3 text-slate-600">{{ row.lead ?? '—' }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ row.lead ?? '-' }}</td>
                 <td class="px-4 py-3 text-slate-600">{{ row.member_count }}</td>
                 <td class="px-4 py-3 text-slate-900">{{ row.active_tasks }}</td>
                 <td class="px-4 py-3">
@@ -185,7 +185,7 @@ const canSeeWorkload = computed(() => auth.hasPermission('reports.view', 'report
 
 const { data: completion } = await useFetch<TaskCompletionReport>('/api/v1/reports/task-completion', {
   query: { weeks: 12 },
-  // 404 for users without reports.view — swallow into null instead of surfacing an error.
+  // 404 for users without reports.view - swallow into null instead of surfacing an error.
   server: false,
 })
 const { data: workload } = await useFetch<DepartmentWorkloadReport>('/api/v1/reports/department-workload', {
@@ -254,5 +254,5 @@ function shortWeek(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })
 }
 
-useHead({ title: 'Reports — DecOps' })
+useHead({ title: 'Reports - DecOps' })
 </script>

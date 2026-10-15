@@ -81,7 +81,7 @@
                   :key="r.id"
                   tone="gray"
                 >{{ r.name }}</AppBadge>
-                <span v-if="!detailRoles(u.id).length" class="text-xs text-slate-400">—</span>
+                <span v-if="!detailRoles(u.id).length" class="text-xs text-slate-400"> - </span>
               </div>
             </td>
             <td class="px-4 py-3 text-xs text-slate-500">{{ formatDate(u.last_login_at) }}</td>
@@ -175,7 +175,7 @@
     <!-- Roles modal -->
     <div v-if="rolesTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true">
       <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <h2 class="text-base font-semibold text-slate-900">Global roles — {{ rolesTarget.full_name }}</h2>
+        <h2 class="text-base font-semibold text-slate-900">Global roles - {{ rolesTarget.full_name }}</h2>
         <p class="mt-1 text-xs text-slate-500">Permission changes are audited and take effect on the next request.</p>
 
         <div class="mt-4 flex flex-wrap gap-2">
@@ -400,5 +400,5 @@ onMounted(async () => {
   if (canManage.value) await loadRoles()
 })
 
-useHead({ title: 'Users — DecOps' })
+useHead({ title: 'Users - DecOps' })
 </script>

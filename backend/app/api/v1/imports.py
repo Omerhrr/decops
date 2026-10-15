@@ -1,7 +1,7 @@
 """Import center endpoints (Phase 8 CSV Migration, spec api group "Imports").
 
 Permission model: Company Administrator holds imports.manage + imports.view.
-System Administration deliberately does NOT hold imports.view — import
+System Administration deliberately does NOT hold imports.view - import
 reports carry business content (titles, people) and the spec restricts
 technical administration from automatic access to confidential content.
 Permission failures surface as 404-consistent errors per API conventions.
@@ -124,7 +124,7 @@ def update_import_config(
     """Apply a revised column mapping and/or options, then re-validate
     (spec pipeline: "Allow authorized users to map source columns").
 
-    Body: {"mapping": {header: target|null, ...}, "options": {...}} —
+    Body: {"mapping": {header: target|null, ...}, "options": {...}} -
     both keys optional; any provided key triggers re-validation."""
     actor = _auth(request, user)
     job = import_service.get_job(db, job_id)

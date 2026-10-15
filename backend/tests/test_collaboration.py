@@ -1,4 +1,4 @@
-"""Phase 6 — Collaboration tests (spec MOD-005/MOD-006, Phase 6 exit criteria
+"""Phase 6 - Collaboration tests (spec MOD-005/MOD-006, Phase 6 exit criteria
 "Restricted content remains protected across collaboration features").
 
 Mandatory security scenarios covered (spec security.mandatory_test_scenarios):

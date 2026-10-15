@@ -151,7 +151,7 @@
         </li>
       </ol>
       <p v-else class="mt-4 rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">
-        No stages yet — build the workflow to track stages, milestones and progress.
+        No stages yet - build the workflow to track stages, milestones and progress.
       </p>
     </section>
 
@@ -208,8 +208,8 @@
           <label class="block">
             <span class="field-label">Execution mode</span>
             <select v-model="stageForm.execution_mode" class="field">
-              <option value="sequential">Sequential — waits for earlier stages</option>
-              <option value="parallel">Parallel — may run simultaneously</option>
+              <option value="sequential">Sequential - waits for earlier stages</option>
+              <option value="parallel">Parallel - may run simultaneously</option>
             </select>
           </label>
           <label class="block">
@@ -678,11 +678,11 @@ function basisLabel(b: string): string {
   return b
 }
 function formatDate(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 function formatDateTime(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   })

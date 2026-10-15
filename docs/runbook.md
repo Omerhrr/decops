@@ -18,7 +18,7 @@ deployment). Companion documents: `docs/reports/phase9_*` (test reports),
 1. **Provision PostgreSQL**: create database `decops` and a dedicated role;
    network-isolate it (private subnet / VPC security group); enable TLS.
 2. **Configure the backend** via environment variables (12-factor, `DECOPS_`
-   prefix) — never commit secrets:
+   prefix) - never commit secrets:
    ```bash
    DECOPS_DATABASE_URL=postgresql+psycopg://decops:<password>@<host>:5432/decops
    DECOPS_ENVIRONMENT=production
@@ -39,7 +39,7 @@ deployment). Companion documents: `docs/reports/phase9_*` (test reports),
    uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
    ```
    (systemd unit recommended; the transactional-outbox worker runs inside the
-   app lifespan — exactly ONE worker must own it in multi-worker setups, or
+   app lifespan - exactly ONE worker must own it in multi-worker setups, or
    scale it out per the note in §6.)
 5. **Serve the frontend**: `npm run build && node .output/server/index.mjs`
    with `NUXT_PUBLIC_API_BASE`/proxy target pointing at the API origin.
@@ -58,7 +58,7 @@ cd backend && uv sync && uv run alembic upgrade head   # 1) schema
 node -e "1" && npm run build
 ```
 
-Rollback: redeploy the previous tag; migrations are additive — a rollback
+Rollback: redeploy the previous tag; migrations are additive - a rollback
 never requires downgrading the schema within a release window (verify against
 `alembic history` before destructive changes).
 
@@ -71,7 +71,7 @@ rsync -a backend/var/ /backups/var-$(date +%F)/   # attachments + import artifac
 ```
 Keep 30 daily + 12 monthly backups, encrypted at rest (restic/borg recommended).
 
-**Restore (tested in Phase 9 — `docs/reports/phase9_restore_report.md`):**
+**Restore (tested in Phase 9 - `docs/reports/phase9_restore_report.md`):**
 ```bash
 createdb decops_restored
 pg_restore --clean --if-exists --dbname decops_restored /backups/decops-YYYY-MM-DD.dump

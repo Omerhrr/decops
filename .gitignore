@@ -31,10 +31,11 @@ tool-results/
 upload/
 download/
 
-# Project tooling (sandbox-local)
+# Project tooling
 skills/
-scripts/
 worklog.md
+scripts/*.log
+scripts/phase9_bench.json
 
 # OS / editor
 .DS_Store

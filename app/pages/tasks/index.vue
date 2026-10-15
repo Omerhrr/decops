@@ -81,11 +81,11 @@
               <p class="font-medium text-slate-900">{{ t.title }}</p>
               <p class="text-xs text-slate-400">{{ visibilityLabel(t.visibility_mode) }} visibility</p>
             </td>
-            <td class="px-4 py-3 text-slate-600">{{ t.accountable_pm?.full_name ?? '—' }}</td>
+            <td class="px-4 py-3 text-slate-600">{{ t.accountable_pm?.full_name ?? '-' }}</td>
             <td class="px-4 py-3">
               <div class="flex flex-wrap gap-1">
                 <AppBadge v-for="name in t.department_names" :key="name" tone="gray">{{ name }}</AppBadge>
-                <span v-if="!t.department_names.length" class="text-xs text-slate-400">—</span>
+                <span v-if="!t.department_names.length" class="text-xs text-slate-400"> - </span>
               </div>
             </td>
             <td class="px-4 py-3">
@@ -183,10 +183,10 @@
           <label class="block">
             <span class="text-xs font-medium text-slate-600">Visibility</span>
             <select v-model="form.visibility_mode" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-              <option value="participants">Participants — the project team</option>
-              <option value="private">Private — invited people only</option>
+              <option value="participants">Participants - the project team</option>
+              <option value="private">Private - invited people only</option>
               <option value="department_scoped">Department scoped</option>
-              <option value="custom">Custom — explicit grants only</option>
+              <option value="custom">Custom - explicit grants only</option>
             </select>
           </label>
           <label v-if="form.visibility_mode === 'department_scoped'" class="block">
@@ -280,7 +280,7 @@ function isOverdue(t: Task): boolean {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
@@ -324,10 +324,10 @@ async function loadFormOptions() {
     candidatePMs.value = users.items
       .filter(u => u.account_status === 'active' && u.id !== meId.value)
       .map(u => ({ id: u.id, full_name: u.full_name }))
-  } catch { /* directory needs users.manage — hide the options */ }
+  } catch { /* directory needs users.manage - hide the options */ }
   try {
     departments.value = await api.get<Department[]>('/api/v1/departments')
-  } catch { /* departments need departments.manage — hide the options */ }
+  } catch { /* departments need departments.manage - hide the options */ }
 }
 
 async function createTask() {
@@ -371,5 +371,5 @@ watch(showCreate, (open) => {
 })
 
 onMounted(loadTasks)
-useHead({ title: 'Task register — DecOps' })
+useHead({ title: 'Task register - DecOps' })
 </script>

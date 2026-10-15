@@ -484,7 +484,7 @@ def _next_task_number(db: Session) -> str:
 
 def _legacy_taken(db: Session, legacy_id: str) -> bool:
     """True when a task already exists for this legacy identifier (from this
-    job or any earlier import) — retry safety without duplicates."""
+    job or any earlier import) - retry safety without duplicates."""
     if not legacy_id:
         return False
     stmt = select(Task.id).where(
@@ -563,7 +563,7 @@ def commit_import(
         legacy_id = (normalized.get("legacy_task_id") or "").strip() or None
 
         # Fresh duplicate check at commit time (state may have changed since
-        # validation) — exact identifiers only.
+        # validation) - exact identifiers only.
         if legacy_id and (legacy_id.upper() in run_seen_legacy or _legacy_taken(db, legacy_id)):
             already_committed += 1
             outcome_updates[row["row_number"]] = {
@@ -661,7 +661,7 @@ def _create_task_from_row(
 
     Historical timestamps are preserved when provided and reliable; status
     comes from the approved mapping; the initial visibility policy is the
-    operator-approved import option; the import actor records provenance —
+    operator-approved import option; the import actor records provenance -
     historical audit events are NOT fabricated.
     """
     legacy_id = (normalized.get("legacy_task_id") or "").strip() or None

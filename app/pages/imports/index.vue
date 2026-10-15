@@ -44,7 +44,7 @@
         <h2 class="text-base font-semibold text-slate-900">Import history</h2>
         <p class="mt-1 text-sm text-slate-500">Every upload is recorded with its reconciliation counters.</p>
         <div v-if="!jobs.length" class="mt-4 rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-400">
-          No imports yet — upload a legacy CSV to begin.
+          No imports yet - upload a legacy CSV to begin.
         </div>
         <div v-else class="mt-4 overflow-x-auto">
           <table class="min-w-full text-left text-sm">
@@ -241,8 +241,8 @@
               <tbody>
                 <tr v-for="row in report.rows" :key="row.row_number" class="border-b border-slate-100 align-top">
                   <td class="py-2.5 pr-3 text-slate-400">{{ row.row_number }}</td>
-                  <td class="py-2.5 pr-3 font-mono text-xs text-slate-500">{{ row.source_task_id || '—' }}</td>
-                  <td class="max-w-[16rem] truncate py-2.5 pr-3 text-slate-800" :title="row.title">{{ row.title || '—' }}</td>
+                  <td class="py-2.5 pr-3 font-mono text-xs text-slate-500">{{ row.source_task_id || '-' }}</td>
+                  <td class="max-w-[16rem] truncate py-2.5 pr-3 text-slate-800" :title="row.title">{{ row.title || '-' }}</td>
                   <td class="py-2.5 pr-3">
                     <span :class="rowChip(row.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ row.status }}</span>
                   </td>
@@ -251,7 +251,7 @@
                       {{ row.outcome }}
                       <span v-if="row.committed_task_number" class="font-mono text-brand-600">{{ row.committed_task_number }}</span>
                     </template>
-                    <template v-else>—</template>
+                    <template v-else> - </template>
                   </td>
                   <td class="py-2.5 pr-3 text-xs">
                     <p v-for="error in row.errors" :key="`e${error}`" class="text-rose-600">{{ error }}</p>
@@ -272,7 +272,7 @@
 </template>
 
 <script setup lang="ts">
-// Phase 8 CSV Migration — import center: upload, mapping, validation report,
+// Phase 8 CSV Migration - import center: upload, mapping, validation report,
 // duplicate handling, retry-safe commit, reconciliation summary download.
 
 import type {
@@ -440,7 +440,7 @@ function rowChip(status: string): string {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 </script>

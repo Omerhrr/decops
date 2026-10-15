@@ -68,7 +68,7 @@ def get_user_permission_codes(db: Session, user: User) -> set[str]:
 
 
 def build_actor_context(db: Session, user: User) -> ActorContext:
-    """Fresh actor context per request — revoked access applies immediately."""
+    """Fresh actor context per request - revoked access applies immediately."""
     return ActorContext(
         user_id=user.id,
         permission_codes=frozenset(get_user_permission_codes(db, user)),
@@ -525,7 +525,7 @@ def transition_task(
 
     summary = f"Moved '{task.title}' from {from_status.value} to {target.value}"
     if reason and reason.strip():
-        summary += f" — {reason.strip()[:200]}"
+        summary += f" - {reason.strip()[:200]}"
     record_activity(db, task=task, actor=actor, activity_type="task.status_changed",
                     summary=summary,
                     detail={"from": from_status.value, "to": target.value,
@@ -537,7 +537,7 @@ def transition_task(
         metadata={"from_status": from_status.value, "to_status": target.value},
     )
 
-    # Notification events (Phase 6) — same-transaction outbox rows.
+    # Notification events (Phase 6) - same-transaction outbox rows.
     from app.services import notification_service as _ns
 
     _status_events = {
@@ -626,7 +626,7 @@ def assign_user(
         task.version += 1
         record_activity(
             db, task=task, actor=actor, activity_type="task.accountable_pm_changed",
-            summary=(f"Accountable PM changed from {old_pm.full_name if old_pm else '—'} "
+            summary=(f"Accountable PM changed from {old_pm.full_name if old_pm else '-'} "
                      f"to {assignee.full_name}"),
             detail={"from": str(old_pm.id) if old_pm else None, "to": str(user_id)},
         )

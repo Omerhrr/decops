@@ -1,6 +1,6 @@
 """Task access policy engine (spec task_visibility; Phase 3 deliverable).
 
-Pure domain logic — no database or framework imports — so the rules are unit
+Pure domain logic - no database or framework imports - so the rules are unit
 testable and reusable by any persistence layer (tasks arrive in Phase 4).
 
 Design invariants (spec task_visibility.rules):
@@ -79,7 +79,7 @@ DEPARTMENT_VIEW_PERMISSIONS = frozenset({"tasks.view_department", "tasks.manage_
 class AccessPolicy:
     """The explicit, self-contained access policy of exactly one task.
 
-    Grants/denials are embedded in the policy — they can never leak to other
+    Grants/denials are embedded in the policy - they can never leak to other
     tasks because a policy is only ever constructed for a single task id.
 
     grant_levels maps user_id -> "view" | "operate" | "manage". Grants without
@@ -137,7 +137,7 @@ def _can_view_scope(actor: ActorContext, policy: AccessPolicy) -> bool:
         # department view permission (spec: "subject to explicit restrictions").
         return bool(actor.permission_codes & DEPARTMENT_VIEW_PERMISSIONS)
 
-    # CUSTOM: only explicit grants (checked by the caller) — scope grants nothing.
+    # CUSTOM: only explicit grants (checked by the caller) - scope grants nothing.
     return False
 
 

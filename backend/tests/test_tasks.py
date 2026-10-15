@@ -1,4 +1,4 @@
-"""Phase 4 — Task Management API tests (spec exit criteria: "Users can manage
+"""Phase 4 - Task Management API tests (spec exit criteria: "Users can manage
 authorized tasks. All task mutations enforce authorization and validation.").
 
 Covers: creation (AC-01), DEC-02 accountability, visibility modes through the
@@ -180,7 +180,7 @@ class TestVisibilityAndIsolation:
         login(client, "sup2@interdec.com", "Secret!1234")
         assert client.get(f"/api/v1/tasks/{task['id']}").status_code == 200
 
-        # Creator grants with manage_all? No — use the admin to record a denial.
+        # Creator grants with manage_all? No - use the admin to record a denial.
         login(client, "admin@interdec.com", "DecOps!2026")
         response = client.post(f"/api/v1/tasks/{task['id']}/access-grants",
                                json={"user_id": str(support.id), "access_level": "denied"})

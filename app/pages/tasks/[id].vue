@@ -56,7 +56,7 @@
             <dl class="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
               <div>
                 <dt class="text-xs text-slate-400">Accountable PM</dt>
-                <dd class="mt-0.5 font-medium text-slate-800">{{ task.accountable_pm?.full_name ?? '—' }}</dd>
+                <dd class="mt-0.5 font-medium text-slate-800">{{ task.accountable_pm?.full_name ?? '-' }}</dd>
               </div>
               <div>
                 <dt class="text-xs text-slate-400">Start</dt>
@@ -319,10 +319,10 @@
         <label class="mt-4 block">
           <span class="text-xs font-medium text-slate-600">Access level</span>
           <select v-model="grantForm.level" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500">
-            <option value="view">View — see and comment</option>
-            <option value="operate">Operate — update and coordinate</option>
-            <option value="manage">Manage — administer the task</option>
-            <option value="denied">Denied — explicitly blocked</option>
+            <option value="view">View - see and comment</option>
+            <option value="operate">Operate - update and coordinate</option>
+            <option value="manage">Manage - administer the task</option>
+            <option value="denied">Denied - explicitly blocked</option>
           </select>
         </label>
         <div class="mt-5 flex justify-end gap-3">
@@ -456,19 +456,19 @@ function activityDot(type: string): string {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 function formatDateTime(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(value).toLocaleString(undefined, {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
 function assignerName(userId: string): string {
-  if (userId === task.value?.accountable_pm?.id) return task.value.accountable_pm?.full_name ?? '—'
+  if (userId === task.value?.accountable_pm?.id) return task.value.accountable_pm?.full_name ?? '-'
   const fromAssignments = task.value?.assignments.find(a => a.assigned_by_id === userId)
   if (fromAssignments) return fromAssignments.user.id === userId ? fromAssignments.user.full_name : (fromAssignments.user.full_name)
   const fromGrants = task.value?.access_grants.find(g => g.granted_by_id === userId)
@@ -645,5 +645,5 @@ onMounted(async () => {
   await loadDirectory()
 })
 
-useHead({ title: 'Task detail — DecOps' })
+useHead({ title: 'Task detail - DecOps' })
 </script>

@@ -4,7 +4,7 @@ Covers the spec's spreadsheet_migration pipeline and rules:
 - approved mapping tables (status/priority), normalization, date parsing;
 - user resolution never invents mappings for ambiguous names;
 - duplicate detection via legacy identifiers + configurable rules;
-- row-level validation report — invalid rows are never silently discarded;
+- row-level validation report - invalid rows are never silently discarded;
 - commit creates tasks with preserved historical data, approved visibility,
   and verbatim untrusted references; retry-safe without duplicates;
 - imports cannot grant unauthorized access (no extra grants; restricted
@@ -557,7 +557,7 @@ class TestCommit:
         self, test_db, client, admin, people, isolated_storage,
     ):
         """Imported task must not be visible to users without a legitimate
-        relationship — no access grants are created by the import."""
+        relationship - no access grants are created by the import."""
         make_user(test_db, email="outsider@interdec.com", employee_code="INT-O9",
                   role_names=["Department Member"])
         job, response = self._upload_and_commit(client, [VALID_ROW])

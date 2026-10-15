@@ -1,4 +1,4 @@
-"""Phase 5 — Workflow Engine domain unit tests (pure logic).
+"""Phase 5 - Workflow Engine domain unit tests (pure logic).
 
 Exit criteria coverage: "Invalid transitions and dependency cycles are
 rejected", sequential/parallel/mixed actionability, completion rules and the

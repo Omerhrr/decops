@@ -1,4 +1,4 @@
-# DecOps Security Test Report — Phase 9
+# DecOps Security Test Report - Phase 9
 
 **Scope**: DecOps API (FastAPI backend, `backend/app`) and authentication/authorization
 surfaces. **Date**: 2026-10-15. **Environment**: sandbox development stack
@@ -9,7 +9,7 @@ surfaces. **Date**: 2026-10-15. **Environment**: sandbox development stack
 - Automated hardening suite `backend/tests/test_hardening.py` (17 tests) executed
   against the application factory with an isolated per-test database.
 - Targeted penetration probes (unauthenticated endpoint matrix, IDOR, privilege
-  escalation, mass assignment) executed the same way a black-box pass would —
+  escalation, mass assignment) executed the same way a black-box pass would -
   through the public HTTP surface only.
 - Code review of authentication, session, storage, and export paths
   (`app/services/auth_service.py`, `app/api/v1/auth.py`, `app/services/collaboration_service.py`,
@@ -49,7 +49,7 @@ surfaces. **Date**: 2026-10-15. **Environment**: sandbox development stack
   (`default-src 'none'; frame-ancestors 'none'`), and `Cache-Control: no-store`
   on all API responses; HSTS activates only behind the HTTPS deployment flag.
 - **Explicit eager-loading of `assignments`/`access_grants`** in the register and
-  dashboard authorization loops as defense-in-depth (see performance report —
+  dashboard authorization loops as defense-in-depth (see performance report -
   model-level `lazy="selectin"` already prevented N+1).
 
 ## 4. Known limitations (accepted for sandbox)

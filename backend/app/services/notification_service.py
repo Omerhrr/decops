@@ -3,7 +3,7 @@
 Producer side (runs inside business transactions):
 - record_event() appends an outbox_events row in the SAME database
   transaction as the business change. If the transaction rolls back, the
-  event never existed — "Do not send notifications for transactions that
+  event never existed - "Do not send notifications for transactions that
   ultimately roll back" (spec delivery_requirements).
 
 Consumer side (background worker, own sessions, one commit per event):
@@ -75,7 +75,7 @@ def record_event(
         )
         db.add(event)
         return event
-    except Exception:  # pragma: no cover - defensive: notifications never break business flow
+    except Exception: # pragma: no cover - defensive: notifications never break business flow
         logger.exception("Failed to enqueue notification event %s", event_type)
         return None
 

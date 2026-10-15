@@ -16,7 +16,7 @@
             <NuxtLink to="/departments" class="text-xs font-medium text-brand-700 hover:underline">← All departments</NuxtLink>
             <h1 class="mt-1 text-xl font-semibold text-slate-900">{{ workspace.department.name }}</h1>
             <p class="mt-1 text-sm text-slate-500">
-              Lead: {{ workspace.department.lead ?? '—' }} · {{ workspace.department.member_count }} member(s)
+              Lead: {{ workspace.department.lead ?? '-' }} · {{ workspace.department.member_count }} member(s)
             </p>
           </div>
           <AppBadge tone="gray">{{ workspace.active_total }} active task(s) visible to you</AppBadge>
@@ -151,9 +151,9 @@ function prettyStatus(status: string): string {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '—'
+  if (!value) return '-'
   return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
-useHead({ title: 'Department Workspace — DecOps' })
+useHead({ title: 'Department Workspace - DecOps' })
 </script>

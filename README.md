@@ -1,11 +1,11 @@
-# DecOps — Operations Management System (Interdec)
+# DecOps - Operations Management System (Interdec)
 
 Internal task and workflow management system. This repository currently contains the
 **Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
 **Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, **Phase 6
 (Collaboration & Notifications)**, **Phase 7 (Dashboards & Reporting)**, and
 **Phase 8 (CSV Migration)**, and **Phase 9 (Hardening & UAT)**
-releases from the approved implementation plan —
+releases from the approved implementation plan -
 running frontend + backend, database migrations, secure authentication, RBAC,
 user/department administration, a task access policy engine, full task management
 (register, detail, lifecycle transitions, assignments, access grants, activity
@@ -24,8 +24,8 @@ runbook, and an automated test suite (341 tests).
 
 | Layer     | Technology                                                        |
 |-----------|-------------------------------------------------------------------|
-| Frontend  | Nuxt 4 (Vue 3, TypeScript, Tailwind CSS 4) — port **3000**        |
-| Backend   | FastAPI (Python 3.12, Pydantic v2, SQLAlchemy 2.1) — port **8000**|
+| Frontend | Nuxt 4 (Vue 3, TypeScript, Tailwind CSS 4) - port **3000** |
+| Backend | FastAPI (Python 3.12, Pydantic v2, SQLAlchemy 2.1) - port **8000**|
 | Database  | PostgreSQL (production) / SQLite (local sandbox dev)              |
 | Migrations| Alembic                                                           |
 
@@ -118,62 +118,62 @@ DECOPS_ENVIRONMENT=production
 DECOPS_SESSION_SECRET_KEY=<generated secret>
 ```
 
-## API surface (Phase 2 – Phase 8)
+## API surface (Phase 2 - Phase 8)
 
-- `POST /api/v1/auth/login` — session login (Argon2id, throttling, audited)
-- `POST /api/v1/auth/logout` — session revocation (immediate)
-- `GET  /api/v1/auth/me` — profile, global roles, permission codes
-- `GET  /api/v1/users` — admin-only, paginated directory (filter by q/status)
-- `POST /api/v1/users` — create employee (audited)
-- `GET/PATCH /api/v1/users/{id}` — profile detail / update (audited)
-- `POST /api/v1/users/{id}/status` — activate/deactivate (revokes sessions, audited)
-- `POST /api/v1/users/{id}/roles` — assign global role (`roles.assign`, audited)
-- `DELETE /api/v1/users/{id}/roles/{role_id}` — revoke role (audited)
-- `GET  /api/v1/departments` — list with member counts
-- `POST /api/v1/departments` — create (optional lead → lead membership, audited)
-- `GET/PATCH /api/v1/departments/{id}` — detail incl. memberships / update (audited)
-- `POST /api/v1/departments/{id}/members` — assign employee (audited)
-- `DELETE /api/v1/departments/{id}/members/{user_id}` — remove employee (audited)
-- `GET  /api/v1/roles`, `GET /api/v1/roles/permissions` — RBAC catalogue
-- `GET  /api/v1/tasks` — authorization-filtered register (status/priority/q/department)
-- `POST /api/v1/tasks` — create with valid access policy (tasks.create, audited)
-- `GET  /api/v1/tasks/{id}` — detail (engine VIEW; 404 on denial)
-- `PATCH /api/v1/tasks/{id}` — permitted fields, optimistic concurrency (AC-18)
-- `POST /api/v1/tasks/{id}/transition` — validated lifecycle transitions with
+- `POST /api/v1/auth/login` - session login (Argon2id, throttling, audited)
+- `POST /api/v1/auth/logout` - session revocation (immediate)
+- `GET /api/v1/auth/me` - profile, global roles, permission codes
+- `GET /api/v1/users` - admin-only, paginated directory (filter by q/status)
+- `POST /api/v1/users` - create employee (audited)
+- `GET/PATCH /api/v1/users/{id}` - profile detail / update (audited)
+- `POST /api/v1/users/{id}/status` - activate/deactivate (revokes sessions, audited)
+- `POST /api/v1/users/{id}/roles` - assign global role (`roles.assign`, audited)
+- `DELETE /api/v1/users/{id}/roles/{role_id}` - revoke role (audited)
+- `GET /api/v1/departments` - list with member counts
+- `POST /api/v1/departments` - create (optional lead → lead membership, audited)
+- `GET/PATCH /api/v1/departments/{id}` - detail incl. memberships / update (audited)
+- `POST /api/v1/departments/{id}/members` - assign employee (audited)
+- `DELETE /api/v1/departments/{id}/members/{user_id}` - remove employee (audited)
+- `GET /api/v1/roles`, `GET /api/v1/roles/permissions` - RBAC catalogue
+- `GET /api/v1/tasks` - authorization-filtered register (status/priority/q/department)
+- `POST /api/v1/tasks` - create with valid access policy (tasks.create, audited)
+- `GET /api/v1/tasks/{id}` - detail (engine VIEW; 404 on denial)
+- `PATCH /api/v1/tasks/{id}` - permitted fields, optimistic concurrency (AC-18)
+- `POST /api/v1/tasks/{id}/transition` - validated lifecycle transitions with
   reason/explanation enforcement and per-target operation authorization
-- `GET  /api/v1/tasks/{id}/transition-options` — allowed next statuses for the UI
-- `POST/DELETE /api/v1/tasks/{id}/assignments[/{assignment_id}]` — accountable/supporting
+- `GET /api/v1/tasks/{id}/transition-options` - allowed next statuses for the UI
+- `POST/DELETE /api/v1/tasks/{id}/assignments[/{assignment_id}]` - accountable/supporting
   PM assignment (DEC-02, assigning user recorded, audited)
-- `POST /api/v1/tasks/{id}/departments` — link participating department
-- `POST/DELETE /api/v1/tasks/{id}/access-grants[/{grant_id}]` — view/operate/manage/denied
+- `POST /api/v1/tasks/{id}/departments` - link participating department
+- `POST/DELETE /api/v1/tasks/{id}/access-grants[/{grant_id}]` - view/operate/manage/denied
   grants; immediate revocation; audited (engine CHANGE_VISIBILITY)
-- `GET  /api/v1/tasks/{id}/activity` — task activity timeline (AC-12)
-- `GET  /api/v1/dashboard/summary` — personal stats, upcoming deadlines, blocked
+- `GET /api/v1/tasks/{id}/activity` - task activity timeline (AC-12)
+- `GET /api/v1/dashboard/summary` - personal stats, upcoming deadlines, blocked
   work, recent authorized activity; management overview block for
   `dashboards.view` holders (all aggregates engine-authorized)
-- `GET  /api/v1/dashboard/my-tasks` — assigned/accountable/all scopes, paginated
-- `GET  /api/v1/dashboard/overdue`, `GET /api/v1/dashboard/blocked` — filtered views
-- `GET  /api/v1/reports/task-completion` — weekly created/completed trend, milestone
+- `GET /api/v1/dashboard/my-tasks` - assigned/accountable/all scopes, paginated
+- `GET /api/v1/dashboard/overdue`, `GET /api/v1/dashboard/blocked` - filtered views
+- `GET /api/v1/reports/task-completion` - weekly created/completed trend, milestone
   progress, blocker analysis (`reports.view`)
-- `GET  /api/v1/reports/department-workload` — per-department active/overdue/blocked/
+- `GET /api/v1/reports/department-workload` - per-department active/overdue/blocked/
   completed counts + open assignments (`reports.view` all ·
   `reports.department.view` own departments)
-- `GET  /api/v1/reports/departments/{id}/workspace` — department workspace payload
+- `GET /api/v1/reports/departments/{id}/workspace` - department workspace payload
   (authorized tasks, workload, upcoming, blocked, team assignments)
-- `POST /api/v1/reports/exports` — authorized CSV exports (`exports.approved`):
+- `POST /api/v1/reports/exports` - authorized CSV exports (`exports.approved`):
   task register / department workload / completion trend; rows re-pass the access
   engine, cells are formula-injection sanitized, every export is audited
-- `POST /api/v1/imports/csv` — upload + validate a legacy CSV (`imports.manage`):
+- `POST /api/v1/imports/csv` - upload + validate a legacy CSV (`imports.manage`):
   file type/size/encoding/header checks, auto column mapping, full row validation
-- `GET /api/v1/imports` — import job history with reconciliation counters
+- `GET /api/v1/imports` - import job history with reconciliation counters
   (`imports.view` or `imports.manage`)
-- `GET /api/v1/imports/{id}` — job detail; `GET .../report` — row-level validation
+- `GET /api/v1/imports/{id}` - job detail; `GET .../report` - row-level validation
   report (errors, notices, duplicates, normalized preview)
-- `GET /api/v1/imports/{id}/report/download` — reconciliation summary CSV
-- `PATCH /api/v1/imports/{id}` — operator-approved mapping/options update + revalidate
-- `POST /api/v1/imports/{id}/commit` — batched, retry-safe commit of validated rows
+- `GET /api/v1/imports/{id}/report/download` - reconciliation summary CSV
+- `PATCH /api/v1/imports/{id}` - operator-approved mapping/options update + revalidate
+- `POST /api/v1/imports/{id}/commit` - batched, retry-safe commit of validated rows
   (duplicates/failed rows excluded and reported; `import.committed` audited)
-- `GET  /api/v1/health` — liveness + database check
+- `GET /api/v1/health` - liveness + database check
 - OpenAPI docs at `/api/docs` (non-production)
 
 ## Security controls shipped (spec §security)
@@ -209,11 +209,11 @@ cd backend && uv run pytest   # 341 tests: transitions, auth, authorization, aud
 
 - Every task carries an explicit, self-contained policy (mode + grants + denials)
 - Precedence: explicit denial > permitted admin > explicit grant > creator > scope
-- **Grant levels (Phase 4)**: `view` (read/comment), `operate` (default — update,
+- **Grant levels (Phase 4)**: `view` (read/comment), `operate` (default - update,
   coordinate), `manage` (administer); visibility changes always additionally
   require `tasks.update_assigned`
 - Grants are embedded per policy, so access to one task can never leak to another
-  (proven by `tests/test_isolation.py` and API-level tests — the Phase 3 exit criterion)
+  (proven by `tests/test_isolation.py` and API-level tests - the Phase 3 exit criterion)
 - Revocation is structural: the engine is re-evaluated against fresh actor state on
   every request, so permission/role/membership changes apply immediately
 - `assignment_policy.py` enforces one accountable PM (DEC-02), active-assignee rules,
@@ -249,14 +249,14 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 - **Dependencies**: work items connect within or across stages; self edges,
   duplicates, and **circular dependencies are rejected** (DFS reachability);
   blocked items cannot start until predecessors complete (cancelled
-  predecessors satisfy the edge — an audited scope decision)
+  predecessors satisfy the edge - an audited scope decision)
 - **Completion rules**: a milestone with required subtasks cannot be completed
-  by hand — it auto-completes when the last required subtask completes (and
+  by hand - it auto-completes when the last required subtask completes (and
   reopens if a subtask reopens); a stage can complete only when all required,
   non-cancelled items are done
 - **Progress calculation (AC-06)**: weighted stages × required items; optional
   and cancelled items excluded; subtasks roll up into their milestone (no double
-  counting); manual vs calculated modes are explicit — switching is audited and
+  counting); manual vs calculated modes are explicit - switching is audited and
   manual percent entry is rejected while calculated
 - **History**: completed items keep `completed_at` + activity + audit records;
   every workflow mutation is audited AND shown on the task timeline
@@ -272,13 +272,13 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 - **Comments** (`TaskComments.vue` + `/tasks/{id}/comments`): task-scoped
   threads (optionally bound to a work item), soft delete by the author or
-  task managers, activity entries, and full access-engine enforcement —
+  task managers, activity entries, and full access-engine enforcement -
   a user without VIEW on the task gets the same 404 as everywhere else
 - **Private attachments** (`TaskAttachments.vue` + `/tasks/{id}/attachments`):
   multipart upload to server-side storage (paths never exposed), sha256
   checksum, size/extension restrictions, `scan_status` field for future AV
   integration, authorization-checked download streaming, uploader/manager
-  soft delete — cross-task download is structurally impossible (mandatory
+  soft delete - cross-task download is structurally impossible (mandatory
   security scenario tested)
 - **In-app notification center** (`AppNotifications.vue` + `/notifications`):
   unread badge with 30 s polling, panel with relative timestamps, click-through
@@ -290,7 +290,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   database transaction (a rollback removes the event), a background worker
   delivers with per-event commits, idempotent replay (unique per event +
   recipient), exponential backoff retries for transient failures, and recorded
-  permanent failures — "notification processing is retry-safe" (exit criteria)
+  permanent failures - "notification processing is retry-safe" (exit criteria)
 - **Event coverage**: task assigned, supporting PM added, task blocked, blocker
   resolved, work item completed, milestone completed, task submitted for
   review, review rejected, task completed, task reopened, visibility changed,
@@ -306,7 +306,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 - **Authorization-aware aggregation core**: every dashboard/report/export number
   is computed from one `visible_tasks()` source that re-evaluates the task
-  access engine (fresh actor context + per-task policy) — totals reconcile
+  access engine (fresh actor context + per-task policy) - totals reconcile
   with the authorized register by construction and restricted tasks cannot
   leak through reports (spec exit criteria)
 - **Personal dashboard** (`/`): assigned/accountable/overdue/blocked stat
@@ -320,7 +320,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 - **Department workspace** (`/departments`, `/departments/{id}`): workload
   cards per department, authorized departmental tasks, upcoming deadlines,
   blocked/overdue panels, and team assignments (leads are scoped to their own
-  departments; management sees all — task contents stay engine-filtered)
+  departments; management sees all - task contents stay engine-filtered)
 - **Reports** (`/reports`): 12-week created/completed SVG trend chart, cycle
   time, status breakdown, milestone progress, blocker analysis by priority
   and department, department workload table
@@ -328,7 +328,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   the spec RBAC matrix), register filters supported, Content-Disposition
   download, formula-injection sanitization, `report.exported` audit events
 - **Fixed en route**: `visibility_mode` is now PATCHable through the task API
-  (service gate existed since Phase 6; the request schema never exposed it) —
+  (service gate existed since Phase 6; the request schema never exposed it) -
   guarded by the CHANGE_VISIBILITY engine operation with regression tests
 
 ## CSV migration & import center (Phase 8 deliverables)
@@ -340,7 +340,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   report → batched commit → reconciliation summary download
 - **Approved mapping tables**: legacy statuses ("In Progress", "On Hold",
   "Done", …) and priorities ("P1", "Urgent", …) map onto the DecOps enum;
-  unmapped values FAIL the row and are reported — nothing is invented or
+  unmapped values FAIL the row and are reported - nothing is invented or
   silently defaulted (dates support ISO / day-first / month-first with an
   operator-approved interpretation)
 - **User resolution without guessing**: exact email → exact employee code →
@@ -349,24 +349,24 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   users are rejected as assignees
 - **Duplicate detection**: exact `task_number` / `legacy_external_id`
   identifier matches (commit-blocking), configurable title+due-date ("likely")
-  and title-only ("possible") rules, plus intra-file repeats — duplicates are
+  and title-only ("possible") rules, plus intra-file repeats - duplicates are
   excluded from commit and reported, never re-imported
 - **Legacy data policy honored**: historical `Date Created` timestamps and
   `Completion Date` are preserved, supplied percentages are imported with a
   "reconcile against workflow calculation" flag, dependency descriptions and
   attachment links are stored verbatim as untrusted references (never
   fetched), and a `task.imported` activity records real provenance (import
-  actor, file, row, source ID) — no historical audit events are fabricated
+  actor, file, row, source ID) - no historical audit events are fabricated
 - **Retry-safe commits**: rows commit in controlled batches together with the
   job counters; a mid-run failure keeps committed rows and the job can be
-  re-committed — already-imported legacy identifiers are recognized and
+  re-committed - already-imported legacy identifiers are recognized and
   skipped (`already_committed_rows`), never duplicated; a committed job is
   immutable (409 on PATCH/second commit)
-- **Access preservation**: imports cannot grant unauthorized access — tasks
+- **Access preservation**: imports cannot grant unauthorized access - tasks
   get the operator-approved initial visibility policy, assignments are limited
   to the accountable/supporting PMs from the sheet, no access grants are
   created, and post-commit authorization tests verify outsiders still get 404
-- **Import center UI** (`/imports`, `imports.manage`/`imports.view` gated —
+- **Import center UI** (`/imports`, `imports.manage`/`imports.view` gated -
   deliberately NOT granted to System Administration per the spec restriction
   on technical administration): upload button, job history with counters,
   per-row validation report with error/notice/duplicate chips, mapping +
@@ -395,7 +395,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 ## Production launch (Phase 10 deliverables)
 
 - **Launch orchestrator** (`scripts/launch_phase10.py`): idempotent, audited
-  launch drill — configuration/DB preflight (rejects default secrets, checks
+  launch drill - configuration/DB preflight (rejects default secrets, checks
   migrations + RBAC seed + initial admin), approved-account provisioning from
   `docs/launch/accounts_manifest.csv` (9 staff across all 9 system roles,
   audited `user.created`, credentials file chmod 600 and stable across re-runs),
@@ -404,7 +404,7 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   per-role HTTP smoke matrix (26 probes incl. negative RBAC assertions).
 - **Early-usage monitor** (`scripts/monitor_phase10.py`): health, adoption
   (logins/distinct users), register health, outbox backlog, failed-login
-  burst alerting — JSON snapshots retained under `backend/var/monitoring/`.
+  burst alerting - JSON snapshots retained under `backend/var/monitoring/`.
 - **Production launcher** (`scripts/start_prod.sh`): migrations → seed →
   launch drill → frontend build → API + Nuxt servers with enforced production
   posture (secret/cookie/db env required).
@@ -429,14 +429,14 @@ are shipped. Post-launch evolution is driven by the feedback triage loop
 ## Hardening & UAT (Phase 9 deliverables)
 
 - **Security test report** (`docs/reports/phase9_security_report.md`): 22-point
-  security matrix verified by the new `tests/test_hardening.py` suite —
+  security matrix verified by the new `tests/test_hardening.py` suite -
   security headers, session/cookie hygiene, unauthenticated endpoint matrix,
   IDOR/privilege-escalation probes, mass-assignment robustness, and the audit
   coverage matrix. Security headers middleware (`nosniff`, `DENY`, `no-referrer`,
   restrictive CSP, `no-store`, conditional HSTS) shipped in this phase.
 - **Performance test report** (`docs/reports/phase9_performance_report.md`):
   benchmark harness (`scripts/bench_phase9.py`) measuring p50/p95 latency and
-  exact SQL statement counts at 300 tasks — all endpoints p95 < 140 ms with
+  exact SQL statement counts at 300 tasks - all endpoints p95 < 140 ms with
   flat query counts (no N+1; verified empirically via A/B).
 - **Restore test report** (`docs/reports/phase9_restore_report.md`): online
   backup → simulated data-loss incident → restore → integrity/reconciliation/

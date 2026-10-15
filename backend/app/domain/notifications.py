@@ -1,4 +1,4 @@
-"""Notification domain rules (spec notifications.*, Phase 6) — pure logic.
+"""Notification domain rules (spec notifications.*, Phase 6) - pure logic.
 
 Event catalog, recipient fan-out defaults, email subject redaction, and retry
 backoff live here so they are unit-testable and reusable by the worker.
@@ -6,7 +6,7 @@ backoff live here so they are unit-testable and reusable by the worker.
 Security-critical rules encoded:
 - The acting user never receives their own event (actor exclusion).
 - Email subjects for confidential tasks (private/custom visibility) use the
-  task number only — never the title ("Avoid exposing confidential task
+  task number only - never the title ("Avoid exposing confidential task
   titles in email subjects where policy prohibits it").
 - Transient vs permanent delivery failures get different treatment:
   transient -> exponential backoff retry; permanent -> recorded, no retry.
@@ -62,8 +62,8 @@ def email_subject(*, event_label: str, task_number: str, task_title: str,
                   visibility_mode: str) -> str:
     """Subject line with title redaction for confidential tasks."""
     if is_confidential(visibility_mode):
-        return f"DecOps: {event_label} — task {task_number}"
-    return f"DecOps: {event_label} — {task_title} ({task_number})"
+        return f"DecOps: {event_label} - task {task_number}"
+    return f"DecOps: {event_label} - {task_title} ({task_number})"
 
 
 def default_circle(
@@ -141,7 +141,7 @@ def event_label(event_type: str) -> str:
 
 def summary_for_event(event_type: str, *, task_number: str, task_title: str,
                       actor_name: str | None, item_title: str | None = None) -> str:
-    """Human-readable notification summary (task number always included —
+    """Human-readable notification summary (task number always included -
     titles are fine in-app because the recipient already passed VIEW authz)."""
     who = actor_name or "Someone"
     if event_type == EventType.TASK_ASSIGNED:
