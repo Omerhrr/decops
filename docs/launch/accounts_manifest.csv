@@ -1,0 +1,10 @@
+email,full_name,employee_code,roles,department
+m.chen@interdec.com,Miriam Chen,INT-1001,Management,
+d.okafor@interdec.com,David Okafor,INT-1002,Accountable PM,
+s.alvarez@interdec.com,Sofia Alvarez,INT-1003,Accountable PM,
+j.tanaka@interdec.com,Kenji Tanaka,INT-1004,Supporting PM,
+a.novak@interdec.com,Ana Novak,INT-1005,Department Lead,Operations
+r.haddad@interdec.com,Rania Haddad,INT-1006,Department Member,Operations
+t.mbeki@interdec.com,Thabo Mbeki,INT-1007,Department Member,Operations
+p.lindqvist@interdec.com,Peter Lindqvist,INT-1008,Approver,
+n.adeyemi@interdec.com,Ngozi Adeyemi,INT-1009,Read-Only Auditor,

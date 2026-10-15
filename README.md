@@ -18,7 +18,7 @@ exports, a CSV import center (column mapping, validation, duplicate detection,
 retry-safe commits, reconciliation reports), audit logging, structured error
 handling, security hardening (response headers, hardened session hygiene),
 Phase 9 test reports (security, performance, restore) with a production
-runbook, and an automated test suite (335 tests).
+runbook, and an automated test suite (341 tests).
 
 ## Stack (pinned per spec)
 
@@ -190,7 +190,7 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 335 tests: transitions, auth, authorization, audit,
+cd backend && uv run pytest   # 341 tests: transitions, auth, authorization, audit,
                               #   access policy, assignment policy, cross-task isolation,
                               #   task CRUD/edits/transitions/assignments/grants/activity,
                               #   workflow state machines, dependency cycles, sequential/
@@ -392,10 +392,39 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   settings
 - These remain subject to Interdec sign-off per the spec.
 
+## Production launch (Phase 10 deliverables)
+
+- **Launch orchestrator** (`scripts/launch_phase10.py`): idempotent, audited
+  launch drill — configuration/DB preflight (rejects default secrets, checks
+  migrations + RBAC seed + initial admin), approved-account provisioning from
+  `docs/launch/accounts_manifest.csv` (9 staff across all 9 system roles,
+  audited `user.created`, credentials file chmod 600 and stable across re-runs),
+  validated task-register import through the real Phase 8 pipeline
+  (retry-safe: fully-imported registers are detected and skipped), and a
+  per-role HTTP smoke matrix (26 probes incl. negative RBAC assertions).
+- **Early-usage monitor** (`scripts/monitor_phase10.py`): health, adoption
+  (logins/distinct users), register health, outbox backlog, failed-login
+  burst alerting — JSON snapshots retained under `backend/var/monitoring/`.
+- **Production launcher** (`scripts/start_prod.sh`): migrations → seed →
+  launch drill → frontend build → API + Nuxt servers with enforced production
+  posture (secret/cookie/db env required).
+- **Documentation set**: `docs/user-guide.md` (end users),
+  `docs/admin-guide.md` (administrators), `docs/support-procedures.md`
+  (support tiers, incident playbook, feedback intake & prioritization),
+  `docs/reports/phase10_launch_report.md` (launch drill record + exit
+  criteria assessment), `docs/launch/` (accounts manifest, validated
+  register, feedback log template).
+- **Launch guard tests** (`tests/test_launch.py`): credential-source
+  stability (0600 file), smoke-matrix coverage of every system role,
+  retry-safe register pre-check, launch-asset well-formedness.
+- Interdec's formal rollout acceptance remains the final sign-off item (see
+  the launch report §6).
+
 ## Roadmap
 
-Phase 10 (production launch) follows the approved `implementation_phases`
-in `spec_full.json`.
+All ten phases of the approved `implementation_phases` in `spec_full.json`
+are shipped. Post-launch evolution is driven by the feedback triage loop
+(`docs/support-procedures.md` §4).
 
 ## Hardening & UAT (Phase 9 deliverables)
 
