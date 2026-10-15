@@ -1,2 +1,43 @@
-skills/
+# Node / Nuxt
 node_modules/
+.nuxt/
+.output/
+dist/
+.data/
+.nitro/
+.cache/
+bun.lock
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Python / backend
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.py[cod]
+backend/.pytest_cache/
+backend/.coverage
+backend/decops.db
+backend/*.db
+*.sqlite3
+
+# Logs & temp
+dev.log
+*.log
+tool-results/
+upload/
+download/
+
+# Project tooling (sandbox-local)
+skills/
+scripts/
+worklog.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
