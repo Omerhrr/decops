@@ -16,7 +16,7 @@ import uuid
 from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.domain import access_policy
 from app.domain.access_policy import Operation
@@ -58,6 +58,10 @@ def visible_tasks(db: Session, actor: User) -> list[Task]:
         .options(
             joinedload(Task.accountable_pm),
             joinedload(Task.task_departments).joinedload(TaskDepartment.department),
+            # Phase 9 perf: build_policy needs assignments + grants per task;
+            # eager-load once instead of two lazy queries per candidate.
+            selectinload(Task.assignments),
+            selectinload(Task.access_grants),
         )
         .order_by(Task.created_at.desc())
         .limit(SANDBOX_TASK_CAP)

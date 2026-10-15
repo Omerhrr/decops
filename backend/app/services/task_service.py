@@ -14,7 +14,7 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.errors import ConflictError, NotFoundError, ValidationFailedError
 from app.domain import assignment_policy, access_policy
@@ -203,6 +203,10 @@ def list_tasks_for_actor(
     stmt = select(Task).options(
         joinedload(Task.accountable_pm),
         joinedload(Task.task_departments).joinedload(TaskDepartment.department),
+        # Phase 9 perf: build_policy reads assignments + grants per candidate;
+        # eager-load them once so the authorization loop is O(1) queries.
+        selectinload(Task.assignments),
+        selectinload(Task.access_grants),
     )
     if status:
         try:

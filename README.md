@@ -4,7 +4,8 @@ Internal task and workflow management system. This repository currently contains
 **Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
 **Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, **Phase 6
 (Collaboration & Notifications)**, **Phase 7 (Dashboards & Reporting)**, and
-**Phase 8 (CSV Migration)** releases from the approved implementation plan —
+**Phase 8 (CSV Migration)**, and **Phase 9 (Hardening & UAT)**
+releases from the approved implementation plan —
 running frontend + backend, database migrations, secure authentication, RBAC,
 user/department administration, a task access policy engine, full task management
 (register, detail, lifecycle transitions, assignments, access grants, activity
@@ -15,7 +16,9 @@ delivery, a collapsible sidebar with a mobile drawer layout, personal and
 management dashboards, a department workspace, authorized reporting with CSV
 exports, a CSV import center (column mapping, validation, duplicate detection,
 retry-safe commits, reconciliation reports), audit logging, structured error
-handling, and an automated test suite (318 tests).
+handling, security hardening (response headers, hardened session hygiene),
+Phase 9 test reports (security, performance, restore) with a production
+runbook, and an automated test suite (335 tests).
 
 ## Stack (pinned per spec)
 
@@ -187,7 +190,7 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 318 tests: transitions, auth, authorization, audit,
+cd backend && uv run pytest   # 335 tests: transitions, auth, authorization, audit,
                               #   access policy, assignment policy, cross-task isolation,
                               #   task CRUD/edits/transitions/assignments/grants/activity,
                               #   workflow state machines, dependency cycles, sequential/
@@ -391,5 +394,27 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 ## Roadmap
 
-Phases 9–10 (hardening and launch) follow the approved `implementation_phases`
+Phase 10 (production launch) follows the approved `implementation_phases`
 in `spec_full.json`.
+
+## Hardening & UAT (Phase 9 deliverables)
+
+- **Security test report** (`docs/reports/phase9_security_report.md`): 22-point
+  security matrix verified by the new `tests/test_hardening.py` suite —
+  security headers, session/cookie hygiene, unauthenticated endpoint matrix,
+  IDOR/privilege-escalation probes, mass-assignment robustness, and the audit
+  coverage matrix. Security headers middleware (`nosniff`, `DENY`, `no-referrer`,
+  restrictive CSP, `no-store`, conditional HSTS) shipped in this phase.
+- **Performance test report** (`docs/reports/phase9_performance_report.md`):
+  benchmark harness (`scripts/bench_phase9.py`) measuring p50/p95 latency and
+  exact SQL statement counts at 300 tasks — all endpoints p95 < 140 ms with
+  flat query counts (no N+1; verified empirically via A/B).
+- **Restore test report** (`docs/reports/phase9_restore_report.md`): online
+  backup → simulated data-loss incident → restore → integrity/reconciliation/
+  migration-state checks all pass.
+- **UAT sign-off** (`docs/reports/phase9_uat_signoff.md`): persona journeys
+  (Management, Lead, Auditor, Administrator) executed through the real UI;
+  formal approval recorded as conditional pending Interdec.
+- **Production runbook** (`docs/runbook.md`): first deployment, migrations and
+  seeds, multi-worker notes (outbox worker), reverse proxy/TLS, backup &
+  restore procedures, monitoring, incident response, pre-launch checklist.

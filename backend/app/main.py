@@ -47,6 +47,48 @@ class RequestContextMiddleware:
             request_id_ctx.reset(token)
 
 
+class SecurityHeadersMiddleware:
+    """Phase 9 hardening: baseline response headers on every API response.
+
+    The API serves JSON only (the UI is the Nuxt origin), so a restrictive
+    CSP plus no-sniff/no-frame/referrer defaults cost nothing and blunt
+    content-sniffing, framing, and referrer leakage. Cache-control keeps
+    authenticated task content out of shared caches. HSTS is added only for
+    HTTPS deployments (secure_cookies=True) to avoid breaking plain HTTP
+    sandbox access.
+    """
+
+    HEADERS: list[tuple[str, str]] = [
+        ("X-Content-Type-Options", "nosniff"),
+        ("X-Frame-Options", "DENY"),
+        ("Referrer-Policy", "no-referrer"),
+        ("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'"),
+        ("Cache-Control", "no-store"),
+    ]
+
+    def __init__(self, app, *, hsts_seconds: int = 0) -> None:  # noqa: ANN001
+        self.app = app
+        self.hsts_seconds = hsts_seconds
+
+    async def __call__(self, scope, receive, send) -> None:  # noqa: ANN001
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_headers(message) -> None:  # noqa: ANN001
+            if message["type"] == "http.response.start":
+                headers = message.setdefault("headers", [])
+                existing = {k.lower() for k, _ in headers}
+                for name, value in self.HEADERS:
+                    if name.lower() not in existing:
+                        headers.append((name.encode(), value.encode()))
+                if self.hsts_seconds:
+                    headers.append((b"strict-transport-security", f"max-age={self.hsts_seconds}".encode()))
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
+
+
 def create_app(override_settings: Settings | None = None) -> FastAPI:
     app_settings = override_settings or settings
     setup_logging()
@@ -76,6 +118,12 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
 
     # Request id + structured access log
     app.add_middleware(RequestContextMiddleware)
+
+    # Phase 9 hardening: security headers on every response
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        hsts_seconds=31536000 if app_settings.secure_cookies else 0,
+    )
 
     # CORS fallback for direct API access (the Nuxt server normally proxies /api)
     app.add_middleware(
