@@ -401,6 +401,12 @@ def update_task(
             changes["progress_mode"] = {"from": _enum_value(task.progress_mode), "to": new_mode.value}
             task.progress_mode = new_mode
     if "percent_complete" in fields and fields["percent_complete"] is not None:
+        if _enum_value(task.progress_mode) == "calculated" and "progress_mode" not in fields:
+            raise ConflictError(
+                "Progress is calculated from the workflow; switch the task to "
+                "manual progress mode to edit the percentage.",
+                code="progress_is_calculated",
+            )
         pct = int(fields["percent_complete"])
         if pct != task.percent_complete:
             changes["percent_complete"] = {"from": task.percent_complete, "to": pct}

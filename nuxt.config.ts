@@ -14,6 +14,12 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      // The app is reached through an ephemeral preview/proxy gateway whose
+      // hostname changes per session (ws-*.fcapp.run). Vite blocks unknown
+      // Host headers by default; allow any host in this sandbox dev setup.
+      allowedHosts: true,
+    },
   },
 
   typescript: {

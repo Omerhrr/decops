@@ -1,12 +1,14 @@
 # DecOps — Operations Management System (Interdec)
 
 Internal task and workflow management system. This repository currently contains the
-**Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**, and
-**Phase 4 (Task Management)** releases from the approved implementation plan — running
-frontend + backend, database migrations, secure authentication, RBAC, user/department
-administration, a task access policy engine, full task management (register, detail,
-lifecycle transitions, assignments, access grants, activity history), audit logging,
-structured error handling, and an automated test suite (143 tests).
+**Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
+**Phase 4 (Task Management)**, and **Phase 5 (Workflow Engine)** releases from the
+approved implementation plan — running frontend + backend, database migrations,
+secure authentication, RBAC, user/department administration, a task access policy
+engine, full task management (register, detail, lifecycle transitions, assignments,
+access grants, activity history), the workflow engine (stages, milestones, subtasks,
+dependencies, progress calculation, Gantt timeline, workflow editor), audit logging,
+structured error handling, and an automated test suite (202 tests).
 
 ## Stack (pinned per spec)
 
@@ -137,9 +139,12 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 143 tests: transitions, auth, authorization, audit,
+cd backend && uv run pytest   # 202 tests: transitions, auth, authorization, audit,
                               #   access policy, assignment policy, cross-task isolation,
-                              #   task CRUD/edits/transitions/assignments/grants/activity
+                              #   task CRUD/edits/transitions/assignments/grants/activity,
+                              #   workflow state machines, dependency cycles, sequential/
+                              #   parallel gating, completion rules, progress calculation,
+                              #   workflow API authz + optimistic concurrency
 ```
 
 ## Task access policy engine (Phase 3 + Phase 4 deliverable)
@@ -175,6 +180,39 @@ cd backend && uv run pytest   # 143 tests: transitions, auth, authorization, aud
 - **Audit + activity**: every create/edit/transition/assignment/grant writes both
   an admin audit event and a user-facing task activity entry
 
+## Workflow engine (Phase 5 deliverables)
+
+`backend/app/domain/workflow.py` + `backend/app/domain/progress.py` implement the
+spec's workflow rules as pure, exhaustively unit-tested logic:
+
+- **Structure**: Task → Stage → Milestone/Subtask (subtasks may nest under
+  milestones); stages carry sequence numbers, execution modes, weights, progress
+  basis, and stage-specific deadlines
+- **Execution modes**: sequential stages become actionable only when every
+  earlier stage is completed/cancelled; parallel stages may run simultaneously;
+  mixed workflows combine both (AC-05)
+- **Dependencies**: work items connect within or across stages; self edges,
+  duplicates, and **circular dependencies are rejected** (DFS reachability);
+  blocked items cannot start until predecessors complete (cancelled
+  predecessors satisfy the edge — an audited scope decision)
+- **Completion rules**: a milestone with required subtasks cannot be completed
+  by hand — it auto-completes when the last required subtask completes (and
+  reopens if a subtask reopens); a stage can complete only when all required,
+  non-cancelled items are done
+- **Progress calculation (AC-06)**: weighted stages × required items; optional
+  and cancelled items excluded; subtasks roll up into their milestone (no double
+  counting); manual vs calculated modes are explicit — switching is audited and
+  manual percent entry is rejected while calculated
+- **History**: completed items keep `completed_at` + activity + audit records;
+  every workflow mutation is audited AND shown on the task timeline
+- **Concurrency**: work-item edits carry optimistic version checks (AC-18)
+- **API**: `/tasks/{id}/workflow` (tree + blockers + progress method),
+  stage/item CRUD + transitions + assign, dependencies, progress mode,
+  `/workflow-templates` (admin)
+- **UI**: Workflow editor on the task detail page (stages, items, assignments,
+  dependencies, reason modals for audited transitions) and a **Gantt timeline**
+  with stage bars, milestone diamonds, dependency curves, and a today marker
+
 ## Decisions defaulted (from spec §decisions_to_confirm_with_interdec)
 
 - DEC-02: one accountable PM, multiple supporting PMs (modelled in schema)
@@ -186,6 +224,6 @@ cd backend && uv run pytest   # 143 tests: transitions, auth, authorization, aud
 
 ## Roadmap
 
-Phases 5–10 (workflow engine with stages/milestones, collaboration & notifications,
-dashboards, CSV migration, hardening, launch) follow the approved
-`implementation_phases` in `spec_full.json`.
+Phases 6–10 (collaboration & notifications, dashboards & reporting, CSV
+migration, hardening, launch) follow the approved `implementation_phases`
+in `spec_full.json`.

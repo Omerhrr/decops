@@ -17,6 +17,17 @@ from app.models.task import (
     TaskPriority,
 )
 from app.models.user import AccountStatus, User, UserSession
+from app.models.workflow import (
+    ProgressBasis,
+    StageExecutionMode,
+    StageStatus,
+    TaskStage,
+    WorkItem,
+    WorkItemDependency,
+    WorkItemStatus,
+    WorkItemType,
+    WorkflowTemplate,
+)
 
 __all__ = [
     "AccessLevel",
@@ -29,17 +40,26 @@ __all__ = [
     "MembershipRole",
     "ParticipationType",
     "Permission",
+    "ProgressBasis",
     "ProgressMode",
     "Role",
     "RolePermission",
     "ScopeType",
+    "StageExecutionMode",
+    "StageStatus",
     "Task",
     "TaskAccessGrant",
     "TaskActivity",
     "TaskAssignment",
     "TaskDepartment",
     "TaskPriority",
+    "TaskStage",
     "User",
     "UserRole",
     "UserSession",
+    "WorkItem",
+    "WorkItemDependency",
+    "WorkItemStatus",
+    "WorkItemType",
+    "WorkflowTemplate",
 ]

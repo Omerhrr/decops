@@ -170,6 +170,11 @@ def evaluate_access(actor: ActorContext, policy: AccessPolicy, operation: Operat
             # Read/contribute grant: access must not automatically authorize
             # every operation (spec task_visibility.rules).
             return AccessDecision.ALLOW if operation in GRANT_VIEW_OPERATIONS else AccessDecision.DENY
+        if operation is Operation.MANAGE_WORKFLOW:
+            # Restructuring the workflow (stages, items, dependencies) is a
+            # manage-level power; operate grants execute work on items but
+            # cannot restructure (Phase 5).
+            return AccessDecision.ALLOW if level == "manage" else AccessDecision.DENY
         if operation is Operation.CHANGE_VISIBILITY:
             # Changing visibility requires explicit permission (spec rule).
             return AccessDecision.ALLOW if "tasks.update_assigned" in actor.permission_codes else AccessDecision.DENY

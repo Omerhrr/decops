@@ -226,3 +226,108 @@ export interface TransitionOptions {
   current_status: TaskStatus
   allowed_transitions: TaskStatus[]
 }
+
+// ---------- Phase 5: workflow engine ----------
+
+export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
+export type WorkItemStatus = StageStatus
+export type ExecutionMode = 'sequential' | 'parallel'
+export type WorkItemType = 'milestone' | 'subtask'
+export type ProgressBasis = 'all_items' | 'milestones_only' | 'subtasks_only'
+
+export interface WorkflowStage {
+  id: string
+  task_id: string
+  name: string
+  description: string | null
+  sequence_number: number
+  execution_mode: ExecutionMode
+  status: StageStatus
+  weight: number
+  progress_basis: ProgressBasis
+  start_date: string | null
+  due_date: string | null
+  completed_at: string | null
+}
+
+export interface WorkItem {
+  id: string
+  task_id: string
+  stage_id: string
+  parent_work_item_id: string | null
+  item_type: WorkItemType
+  title: string
+  description: string | null
+  status: WorkItemStatus
+  priority: string | null
+  assigned_user_id: string | null
+  assignee: TaskUserBrief | null
+  sequence_number: number
+  is_required: boolean
+  weight: number
+  start_date: string | null
+  due_date: string | null
+  completed_at: string | null
+  version: number
+}
+
+export interface WorkflowDependency {
+  id: string
+  task_id: string
+  predecessor_id: string
+  successor_id: string
+  note: string | null
+}
+
+export interface StageProgress {
+  stage_id: string
+  stage_name: string
+  status: string
+  weight: number
+  included_item_count: number
+  completed_item_count: number
+  total_weight: number
+  completed_weight: number
+  percent: number
+  excluded: Record<string, number>
+  method: string
+}
+
+export interface WorkflowProgress {
+  task_percent: number
+  counted_item_total: number
+  counted_item_completed: number
+  method: string
+  stages: StageProgress[]
+}
+
+export interface WorkflowBlocker {
+  item_id: string
+  blocked_by: string[]
+}
+
+export interface Workflow {
+  task_id: string
+  task_status: TaskStatus
+  task_progress_mode: 'manual' | 'calculated'
+  task_percent_complete: number
+  calculated_percent: number
+  stages: WorkflowStage[]
+  items: WorkItem[]
+  dependencies: WorkflowDependency[]
+  blockers: WorkflowBlocker[]
+  actionable_stage_ids: string[]
+  progress: WorkflowProgress
+}
+
+export interface WorkflowTemplate {
+  id: string
+  name: string
+  description: string | null
+  definition: { stages: { name: string, execution_mode: string, weight: number, items: { item_type: string, title: string, is_required: boolean, weight: number }[] }[] }
+  version: number
+  is_active: boolean
+  created_by_id: string
+  created_at: string
+  updated_at: string
+}

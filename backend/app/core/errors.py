@@ -15,6 +15,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.domain.workflow import WorkflowTransitionError
+
 logger = logging.getLogger("decops.errors")
 
 
@@ -104,6 +106,16 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=exc.status_code,
             content=_error_body(exc.code, exc.message, exc.details),
         )
+
+    @app.exception_handler(WorkflowTransitionError)
+    async def workflow_rule_handler(_: Request, exc: WorkflowTransitionError) -> JSONResponse:
+        # Invalid transitions, cycles, gates -> 409; missing justification or
+        # unknown status -> 422 (consistent with the task lifecycle mapping).
+        status_code = (
+            422 if exc.code in {"reason_required", "invalid_status", "self_dependency"}
+            else 409
+        )
+        return JSONResponse(status_code=status_code, content=_error_body(exc.code, str(exc)))
 
     @app.exception_handler(RequestValidationError)
     async def validation_error_handler(_: Request, exc: RequestValidationError) -> JSONResponse:

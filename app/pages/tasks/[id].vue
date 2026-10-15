@@ -130,6 +130,15 @@
           </template>
         </section>
 
+        <!-- Workflow engine (Phase 5): progress, stages, items, dependencies -->
+        <WorkflowPanel :task="task" @changed="reloadLight" />
+        <WorkflowGantt
+          v-if="workflow"
+          :workflow="workflow"
+          :task-start="task.start_date"
+          :task-due="task.due_date"
+        />
+
         <!-- Activity timeline -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 class="text-sm font-semibold text-slate-900">Activity history</h2>
@@ -332,6 +341,7 @@ import type {
   TaskPriority,
   TaskStatus,
   TransitionOptions,
+  Workflow,
 } from '~/types/api'
 
 const route = useRoute()
@@ -343,6 +353,7 @@ const PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'critical']
 const task = ref<TaskDetail | null>(null)
 const activity = ref<TaskActivityEntry[]>([])
 const allowedTransitions = ref<TaskStatus[]>([])
+const workflow = ref<Workflow | null>(null)
 const loadError = ref('')
 const editing = ref(false)
 const editError = ref('')
@@ -590,15 +601,25 @@ async function loadActivity() {
   }
 }
 
+async function loadWorkflow() {
+  if (!task.value) return
+  try {
+    workflow.value = await api.get<Workflow>(`/api/v1/tasks/${task.value.id}/workflow`)
+  } catch {
+    workflow.value = null
+  }
+}
+
 async function reload() {
   const t = await api.get<TaskDetail>(`/api/v1/tasks/${String(route.params.id)}`)
   task.value = t
-  await Promise.all([loadActivity(), loadTransitions()])
+  await Promise.all([loadActivity(), loadTransitions(), loadWorkflow()])
 }
 
 async function reloadLight() {
   const t = await api.get<TaskDetail>(`/api/v1/tasks/${String(route.params.id)}`)
   task.value = t
+  await Promise.all([loadActivity(), loadWorkflow()])
 }
 
 async function loadDirectory() {
