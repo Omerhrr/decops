@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import enum
 import uuid
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 
@@ -80,6 +81,9 @@ class AccessPolicy:
 
     Grants/denials are embedded in the policy — they can never leak to other
     tasks because a policy is only ever constructed for a single task id.
+
+    grant_levels maps user_id -> "view" | "operate" | "manage". Grants without
+    a recorded level default to "operate" (Phase 3 binary-grant behaviour).
     """
 
     task_id: uuid.UUID
@@ -92,6 +96,7 @@ class AccessPolicy:
     # custom/any: explicit per-user grants and denials (revocable, audited upstream).
     explicit_grants: frozenset[uuid.UUID] = field(default_factory=frozenset)
     explicit_denials: frozenset[uuid.UUID] = field(default_factory=frozenset)
+    grant_levels: Mapping[uuid.UUID, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not isinstance(self.mode, VisibilityMode):
@@ -106,6 +111,10 @@ class AccessDeniedError(PermissionError):
         self.operation = operation
         self.reason = reason
         super().__init__(f"Access denied for {operation.value} on task {task_id}: {reason}")
+
+
+# Operations a "view"-level grant permits (read/contribute only).
+GRANT_VIEW_OPERATIONS = frozenset({Operation.VIEW, Operation.COMMENT, Operation.ATTACH})
 
 
 def _can_view_scope(actor: ActorContext, policy: AccessPolicy) -> bool:
@@ -156,9 +165,16 @@ def evaluate_access(actor: ActorContext, policy: AccessPolicy, operation: Operat
 
     # 2. Explicit per-user grant (custom mode and exceptions on any mode).
     if actor.user_id in policy.explicit_grants:
+        level = policy.grant_levels.get(actor.user_id, "operate")
+        if level == "view":
+            # Read/contribute grant: access must not automatically authorize
+            # every operation (spec task_visibility.rules).
+            return AccessDecision.ALLOW if operation in GRANT_VIEW_OPERATIONS else AccessDecision.DENY
         if operation is Operation.CHANGE_VISIBILITY:
             # Changing visibility requires explicit permission (spec rule).
             return AccessDecision.ALLOW if "tasks.update_assigned" in actor.permission_codes else AccessDecision.DENY
+        if operation is Operation.ARCHIVE:
+            return AccessDecision.DENY  # archiving is administrative only
         return AccessDecision.ALLOW
 
     # 3. Creator manages their task, within their permission limits.

@@ -18,6 +18,12 @@ ROLE_MATRIX: dict[str, dict] = {
             "roles.assign",
             "workflows.configure",
             "settings.org.manage",
+            "tasks.create",
+            # Permitted administrator for restricted tasks (spec task_visibility
+            # design principles). The engine requires this code to administer
+            # task visibility (grants/denials) even with tasks.manage_all.
+            "tasks.update_assigned",
+            "tasks.manage_all",
         ],
     },
     "Management": {
@@ -27,12 +33,14 @@ ROLE_MATRIX: dict[str, dict] = {
             "reports.view",
             "tasks.view_authorized",
             "tasks.approve",
+            "tasks.create",
         ],
     },
     "Accountable PM": {
         "description": "Owns the outcome of an assigned task.",
         "permissions": [
             "tasks.update_assigned",
+            "tasks.create",
             "milestones.manage",
             "progress.update",
             "blockers.report",

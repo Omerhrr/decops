@@ -121,3 +121,108 @@ export interface Department {
 export interface DepartmentDetail extends Department {
   memberships: DepartmentMembership[]
 }
+
+// ---------- Phase 4: task management ----------
+
+export type TaskStatus =
+  | 'draft'
+  | 'open'
+  | 'in_progress'
+  | 'blocked'
+  | 'under_review'
+  | 'completed'
+  | 'cancelled'
+  | 'archived'
+
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
+export type VisibilityMode = 'private' | 'participants' | 'department_scoped' | 'custom'
+export type AccessLevel = 'view' | 'operate' | 'manage' | 'denied'
+export type AssignmentRole = 'accountable_pm' | 'supporting_pm' | 'work_item_assignee'
+
+export interface TaskUserBrief {
+  id: string
+  full_name: string
+  email: string
+  employee_code: string
+}
+
+export interface TaskAssignment {
+  id: string
+  user_id: string
+  user: TaskUserBrief
+  assignment_role: AssignmentRole
+  assigned_by_id: string
+  assigned_at: string
+  revoked_at: string | null
+}
+
+export interface TaskDepartmentLink {
+  id: string
+  department_id: string
+  department_name: string | null
+  participation_type: 'executing' | 'consulted' | 'informed'
+}
+
+export interface TaskAccessGrant {
+  id: string
+  principal_id: string
+  principal: TaskUserBrief
+  access_level: AccessLevel
+  granted_by_id: string
+  granted_at: string
+  revoked_at: string | null
+  revocation_reason: string | null
+}
+
+export interface Task {
+  id: string
+  task_number: string
+  title: string
+  priority: TaskPriority
+  status: TaskStatus
+  accountable_pm_id: string
+  accountable_pm: TaskUserBrief | null
+  start_date: string | null
+  due_date: string | null
+  next_follow_up_date: string | null
+  percent_complete: number
+  progress_mode: 'manual' | 'calculated'
+  visibility_mode: VisibilityMode
+  created_at: string
+  department_names: string[]
+}
+
+export interface TaskDetail extends Task {
+  description: string | null
+  created_by_id: string
+  dependency_summary: string | null
+  version: number
+  completed_at: string | null
+  cancelled_at: string | null
+  archived_at: string | null
+  updated_at: string
+  assignments: TaskAssignment[]
+  task_departments: TaskDepartmentLink[]
+  access_grants: TaskAccessGrant[]
+}
+
+export interface TaskPage {
+  items: Task[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface TaskActivityEntry {
+  id: string
+  activity_type: string
+  summary: string
+  detail: Record<string, unknown> | null
+  created_at: string
+  actor: TaskUserBrief | null
+}
+
+export interface TransitionOptions {
+  current_status: TaskStatus
+  allowed_transitions: TaskStatus[]
+}

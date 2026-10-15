@@ -76,6 +76,27 @@ def _error_body(code: str, message: str, details: Any = None) -> dict[str, Any]:
     return {"error": err}
 
 
+def _clean_validation_errors(errors: list) -> list:
+    """Pydantic 2.14+ embeds raw exception objects in `ctx.error`, which are
+    not JSON serializable — stringify them and encode the rest safely."""
+    from fastapi.encoders import jsonable_encoder
+
+    clean: list = []
+    for err in errors:
+        item = dict(err)
+        ctx = item.get("ctx")
+        if isinstance(ctx, dict):
+            item["ctx"] = {
+                k: (str(v) if isinstance(v, Exception) else v) for k, v in ctx.items()
+            }
+        try:
+            clean.append(jsonable_encoder(item))
+        except Exception:  # noqa: BLE001 - never fail the error path itself
+            clean.append({"type": item.get("type"), "loc": item.get("loc"),
+                          "msg": item.get("msg")})
+    return clean
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def app_error_handler(_: Request, exc: AppError) -> JSONResponse:
@@ -91,7 +112,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             content=_error_body(
                 "validation_failed",
                 "Request validation failed.",
-                details={"errors": exc.errors()},
+                details={"errors": _clean_validation_errors(exc.errors())},
             ),
         )
 

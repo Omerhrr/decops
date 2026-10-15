@@ -1,10 +1,12 @@
 # DecOps — Operations Management System (Interdec)
 
 Internal task and workflow management system. This repository currently contains the
-**Phase 2 (Application Foundation)** and **Phase 3 (Identity & Authorization)** releases
-from the approved implementation plan — running frontend + backend, database migrations,
-secure authentication, RBAC, user/department administration, a task access policy engine,
-audit logging, structured error handling, and an automated test suite (113 tests).
+**Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**, and
+**Phase 4 (Task Management)** releases from the approved implementation plan — running
+frontend + backend, database migrations, secure authentication, RBAC, user/department
+administration, a task access policy engine, full task management (register, detail,
+lifecycle transitions, assignments, access grants, activity history), audit logging,
+structured error handling, and an automated test suite (143 tests).
 
 ## Stack (pinned per spec)
 
@@ -25,6 +27,9 @@ talks to one origin and session cookies remain first-party HttpOnly.
 ├── app/                    # Nuxt app (pages, components, composables, middleware)
 │   ├── pages/login.vue     # Authentication (MOD-001)
 │   ├── pages/index.vue     # Dashboard shell (MOD-007 placeholder)
+│   ├── pages/tasks/index.vue   # Task register (MOD-003, Phase 4)
+│   ├── pages/tasks/[id].vue    # Task detail: summary, transitions, assignments,
+│   │                           #   departments, access grants, activity timeline
 │   ├── pages/admin/users.vue       # User administration (MOD-002, Phase 3)
 │   ├── pages/admin/departments.vue # Department management (MOD-002, Phase 3)
 │   ├── composables/        # useApi (typed client, SSR cookie forwarding), useAuth
@@ -33,15 +38,19 @@ talks to one origin and session cookies remain first-party HttpOnly.
 │   ├── app/
 │   │   ├── core/           # Settings, security, logging, error envelope
 │   │   ├── db/             # Engine/session, base, portable types (UTCDateTime, JSON)
-│   │   ├── models/         # users, sessions, RBAC, departments, audit_events
-│   │   ├── domain/         # Task lifecycle state machine, access policy engine,
-│   │   │                   #   assignment authorization (pure logic, Phase 3)
-│   │   ├── api/v1/         # /api/v1 routers: auth, users, departments, roles, health
-│   │   ├── services/       # auth, audit, user admin, department services
+│   │   ├── models/         # users, sessions, RBAC, departments, audit_events,
+│   │   │                   #   tasks, task_assignments, task_departments,
+│   │   │                   #   task_access_grants, task_activities (Phase 4)
+│   │   ├── domain/         # Task lifecycle state machine, access policy engine
+│   │   │                   #   (grant levels), assignment authorization (pure logic)
+│   │   ├── api/v1/         # /api/v1 routers: auth, users, departments, roles, tasks,
+│   │   │                   #   health
+│   │   ├── services/       # auth, audit, user admin, department, task services
 │   │   └── seeds/          # Idempotent RBAC matrix + admin seed
-│   ├── alembic/            # Migrations
+│   ├── alembic/            # Migrations (foundation + Phase 4 task tables)
 │   └── tests/              # Pytest: auth, authorization, transitions, audit,
-│   │                       #   cross-task isolation (113 tests)
+│   │                       #   access policy, assignment policy, cross-task isolation,
+│   │                       #   task CRUD/transitions/assignments/grants (143 tests)
 └── spec_full.json          # Full approved requirements document
 ```
 
@@ -98,6 +107,19 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 - `POST /api/v1/departments/{id}/members` — assign employee (audited)
 - `DELETE /api/v1/departments/{id}/members/{user_id}` — remove employee (audited)
 - `GET  /api/v1/roles`, `GET /api/v1/roles/permissions` — RBAC catalogue
+- `GET  /api/v1/tasks` — authorization-filtered register (status/priority/q/department)
+- `POST /api/v1/tasks` — create with valid access policy (tasks.create, audited)
+- `GET  /api/v1/tasks/{id}` — detail (engine VIEW; 404 on denial)
+- `PATCH /api/v1/tasks/{id}` — permitted fields, optimistic concurrency (AC-18)
+- `POST /api/v1/tasks/{id}/transition` — validated lifecycle transitions with
+  reason/explanation enforcement and per-target operation authorization
+- `GET  /api/v1/tasks/{id}/transition-options` — allowed next statuses for the UI
+- `POST/DELETE /api/v1/tasks/{id}/assignments[/{assignment_id}]` — accountable/supporting
+  PM assignment (DEC-02, assigning user recorded, audited)
+- `POST /api/v1/tasks/{id}/departments` — link participating department
+- `POST/DELETE /api/v1/tasks/{id}/access-grants[/{grant_id}]` — view/operate/manage/denied
+  grants; immediate revocation; audited (engine CHANGE_VISIBILITY)
+- `GET  /api/v1/tasks/{id}/activity` — task activity timeline (AC-12)
 - `GET  /api/v1/health` — liveness + database check
 - OpenAPI docs at `/api/docs` (non-production)
 
@@ -115,23 +137,43 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 113 tests: transitions, auth, authorization, audit,
-                              #   access policy, assignment policy, cross-task isolation
+cd backend && uv run pytest   # 143 tests: transitions, auth, authorization, audit,
+                              #   access policy, assignment policy, cross-task isolation,
+                              #   task CRUD/edits/transitions/assignments/grants/activity
 ```
 
-## Task access policy engine (Phase 3 deliverable)
+## Task access policy engine (Phase 3 + Phase 4 deliverable)
 
 `backend/app/domain/access_policy.py` implements the spec's four visibility modes
 (`private`, `participants`, `department_scoped`, `custom`) as pure, stateless logic:
 
 - Every task carries an explicit, self-contained policy (mode + grants + denials)
 - Precedence: explicit denial > permitted admin > explicit grant > creator > scope
+- **Grant levels (Phase 4)**: `view` (read/comment), `operate` (default — update,
+  coordinate), `manage` (administer); visibility changes always additionally
+  require `tasks.update_assigned`
 - Grants are embedded per policy, so access to one task can never leak to another
-  (proven by `tests/test_isolation.py` — the Phase 3 exit criterion)
+  (proven by `tests/test_isolation.py` and API-level tests — the Phase 3 exit criterion)
 - Revocation is structural: the engine is re-evaluated against fresh actor state on
   every request, so permission/role/membership changes apply immediately
 - `assignment_policy.py` enforces one accountable PM (DEC-02), active-assignee rules,
   and department-scoped assignment authorization; the assigning user is recorded
+- `task_lifecycle.py` + `task_service.transition_task` enforce the spec transition
+  matrix: backend-validated transitions, reason-required cancellations/reopenings,
+  blocker explanations, terminal timestamps, and per-target operation authorization
+
+## Task management (Phase 4 deliverables)
+
+- **Task register** (`/tasks`): all engine-authorized tasks with number, title,
+  accountable PM, departments, priority, status, progress, due date; filters and
+  pagination; overdue highlighting
+- **Task detail** (`/tasks/{id}`): summary + inline editing (AC-18 optimistic
+  concurrency), transition actions with reason capture, assignments (DEC-02
+  replacement), participating departments, access grants with levels, and the
+  full activity timeline
+- **Task numbers**: `TSK-YYYY-NNNN`, unique and sequential
+- **Audit + activity**: every create/edit/transition/assignment/grant writes both
+  an admin audit event and a user-facing task activity entry
 
 ## Decisions defaulted (from spec §decisions_to_confirm_with_interdec)
 
@@ -144,6 +186,6 @@ cd backend && uv run pytest   # 113 tests: transitions, auth, authorization, aud
 
 ## Roadmap
 
-Phases 3–10 (identity & authorization deepening, task management, workflow engine,
-collaboration, dashboards, CSV migration, hardening, launch) follow the approved
+Phases 5–10 (workflow engine with stages/milestones, collaboration & notifications,
+dashboards, CSV migration, hardening, launch) follow the approved
 `implementation_phases` in `spec_full.json`.

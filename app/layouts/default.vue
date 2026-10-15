@@ -43,8 +43,8 @@
 
     <footer class="border-t border-slate-200 bg-white">
       <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p>DecOps v1.1.0 — Internal Operations Management System</p>
-        <p>Interdec · Phase 3 release (Identity &amp; Authorization)</p>
+        <p>DecOps v1.2.0 — Internal Operations Management System</p>
+        <p>Interdec · Phase 4 release (Task Management)</p>
       </div>
     </footer>
   </div>
@@ -55,6 +55,8 @@ const auth = useAuth()
 
 const navItems = computed(() => {
   const items: { to: string, label: string }[] = []
+  // Task register shows only engine-authorized tasks, so it is safe for everyone.
+  items.push({ to: '/tasks', label: 'Tasks' })
   if (auth.hasPermission('users.manage')) items.push({ to: '/admin/users', label: 'Users' })
   if (auth.hasPermission('departments.manage', 'users.manage')) items.push({ to: '/admin/departments', label: 'Departments' })
   return items
