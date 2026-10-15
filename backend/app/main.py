@@ -4,8 +4,10 @@ Modular monolith (spec backend_architecture): route handlers stay thin,
 business logic lives in services/domain, authorization is centralized.
 """
 
+import asyncio
 import logging
 import uuid
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +17,7 @@ from app.core.config import Settings, settings
 from app.core.context import request_id_ctx
 from app.core.errors import register_exception_handlers
 from app.core.logging import log_event, setup_logging
+from app.services import outbox_worker
 
 logger = logging.getLogger("decops.app")
 
@@ -48,6 +51,15 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
     app_settings = override_settings or settings
     setup_logging()
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Background transactional-outbox worker (Phase 6). Disabled in tests.
+        worker_task = outbox_worker.start_worker()
+        try:
+            yield
+        finally:
+            await outbox_worker.stop_worker(worker_task)
+
     app = FastAPI(
         title=app_settings.app_name,
         version="1.0.0",
@@ -58,6 +70,7 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
         ),
         docs_url="/api/docs" if not app_settings.is_production else None,
         openapi_url="/api/openapi.json" if not app_settings.is_production else None,
+        lifespan=lifespan,
     )
     app.state.settings = app_settings
 

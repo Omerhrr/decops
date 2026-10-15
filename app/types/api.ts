@@ -331,3 +331,51 @@ export interface WorkflowTemplate {
   created_at: string
   updated_at: string
 }
+
+// ---------- Phase 6: collaboration & notifications ----------
+
+export interface Comment {
+  id: string
+  task_id: string
+  work_item_id: string | null
+  body: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+  author: TaskUserBrief
+}
+
+export interface Attachment {
+  id: string
+  task_id: string
+  work_item_id: string | null
+  original_filename: string
+  content_type: string
+  size_bytes: number
+  checksum: string
+  scan_status: string
+  created_at: string
+  deleted_at: string | null
+  uploaded_by: TaskUserBrief
+}
+
+export interface NotificationItem {
+  id: string
+  event_type: string
+  resource_type: string
+  resource_id: string | null
+  payload: { title?: string, summary?: string, task_number?: string } | null
+  read_at: string | null
+  created_at: string
+}
+
+export interface NotificationList {
+  items: NotificationItem[]
+  unread: number
+}
+
+export interface NotificationPreference {
+  event_type: string
+  in_app_enabled: boolean
+  email_enabled: boolean
+}

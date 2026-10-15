@@ -68,8 +68,11 @@ def make_user(
     role_names: list[str] | None = None,
     status: str = "active",
 ):
+    # Derive a unique code from the full local part (5-char prefixes collided
+    # for emails like email1@ / emails1@).
+    resolved_code = employee_code or f"INT-{email.split('@')[0].upper()[:26]}"
     user = User(
-        employee_code=employee_code or f"INT-{email[:5].upper()}",
+        employee_code=resolved_code,
         full_name=email.split("@")[0].title(),
         email=email,
         authentication_reference=hash_password(password),

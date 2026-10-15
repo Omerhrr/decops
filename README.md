@@ -2,13 +2,16 @@
 
 Internal task and workflow management system. This repository currently contains the
 **Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
-**Phase 4 (Task Management)**, and **Phase 5 (Workflow Engine)** releases from the
-approved implementation plan — running frontend + backend, database migrations,
-secure authentication, RBAC, user/department administration, a task access policy
-engine, full task management (register, detail, lifecycle transitions, assignments,
-access grants, activity history), the workflow engine (stages, milestones, subtasks,
-dependencies, progress calculation, Gantt timeline, workflow editor), audit logging,
-structured error handling, and an automated test suite (202 tests).
+**Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, and **Phase 6
+(Collaboration & Notifications)** releases from the approved implementation plan —
+running frontend + backend, database migrations, secure authentication, RBAC,
+user/department administration, a task access policy engine, full task management
+(register, detail, lifecycle transitions, assignments, access grants, activity
+history), the workflow engine (stages, milestones, subtasks, dependencies, progress
+calculation, Gantt timeline, workflow editor), task comments and private attachments,
+an in-app notification center backed by a transactional outbox with retry-safe
+delivery, a collapsible sidebar with a mobile drawer layout, audit logging,
+structured error handling, and an automated test suite (242 tests).
 
 ## Stack (pinned per spec)
 
@@ -34,25 +37,37 @@ talks to one origin and session cookies remain first-party HttpOnly.
 │   │                           #   departments, access grants, activity timeline
 │   ├── pages/admin/users.vue       # User administration (MOD-002, Phase 3)
 │   ├── pages/admin/departments.vue # Department management (MOD-002, Phase 3)
-│   ├── composables/        # useApi (typed client, SSR cookie forwarding), useAuth
+│   ├── components/     # AppSidebarNav (collapsible rail), AppNotifications
+│   │                   #   (bell + notification center), TaskComments,
+│   │                   #   TaskAttachments, WorkflowPanel, WorkflowGantt
+│   ├── composables/    # useApi (typed client, SSR cookie forwarding), useAuth,
+│   │                   #   useNotifications (badge polling, read state)
 │   └── middleware/         # Global auth guard
 ├── backend/
 │   ├── app/
 │   │   ├── core/           # Settings, security, logging, error envelope
 │   │   ├── db/             # Engine/session, base, portable types (UTCDateTime, JSON)
 │   │   ├── models/         # users, sessions, RBAC, departments, audit_events,
-│   │   │                   #   tasks, task_assignments, task_departments,
-│   │   │                   #   task_access_grants, task_activities (Phase 4)
+│   │   │                   #   tasks + assignments/grants/activities (Phase 4),
+│   │   │                   #   comments, attachments, notifications,
+│   │   │                   #   notification_preferences, outbox_events (Phase 6)
 │   │   ├── domain/         # Task lifecycle state machine, access policy engine
-│   │   │                   #   (grant levels), assignment authorization (pure logic)
+│   │   │                   #   (grant levels), assignment authorization,
+│   │   │                   #   workflow/progress rules, notification rules
+│   │   │                   #   (event catalog, subject redaction, backoff)
 │   │   ├── api/v1/         # /api/v1 routers: auth, users, departments, roles, tasks,
-│   │   │                   #   health
-│   │   ├── services/       # auth, audit, user admin, department, task services
+│   │   │                   #   workflow, collaboration (comments/attachments),
+│   │   │                   #   notifications, health
+│   │   ├── services/       # auth, audit, user admin, department, task, workflow,
+│   │   │                   #   collaboration, notification (outbox producer +
+│   │   │                   #   delivery), email_sender, outbox_worker
 │   │   └── seeds/          # Idempotent RBAC matrix + admin seed
-│   ├── alembic/            # Migrations (foundation + Phase 4 task tables)
+│   ├── alembic/            # Migrations (foundation, Phase 4, Phase 5, Phase 6)
 │   └── tests/              # Pytest: auth, authorization, transitions, audit,
 │   │                       #   access policy, assignment policy, cross-task isolation,
-│   │                       #   task CRUD/transitions/assignments/grants (143 tests)
+│   │                       #   task CRUD/transitions/assignments/grants, workflow
+│   │                       #   domain/API, comments/attachments privacy,
+│   │                       #   notifications/outbox/retry/sweep/email (242 tests)
 └── spec_full.json          # Full approved requirements document
 ```
 
@@ -213,17 +228,60 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   dependencies, reason modals for audited transitions) and a **Gantt timeline**
   with stage bars, milestone diamonds, dependency curves, and a today marker
 
+## Collaboration & notifications (Phase 6 deliverables)
+
+- **Comments** (`TaskComments.vue` + `/tasks/{id}/comments`): task-scoped
+  threads (optionally bound to a work item), soft delete by the author or
+  task managers, activity entries, and full access-engine enforcement —
+  a user without VIEW on the task gets the same 404 as everywhere else
+- **Private attachments** (`TaskAttachments.vue` + `/tasks/{id}/attachments`):
+  multipart upload to server-side storage (paths never exposed), sha256
+  checksum, size/extension restrictions, `scan_status` field for future AV
+  integration, authorization-checked download streaming, uploader/manager
+  soft delete — cross-task download is structurally impossible (mandatory
+  security scenario tested)
+- **In-app notification center** (`AppNotifications.vue` + `/notifications`):
+  unread badge with 30 s polling, panel with relative timestamps, click-through
+  to the resource, mark-read / mark-all-read; recipients always re-resolved and
+  authorization **re-checked at delivery time**, so revoked access never
+  receives disclosure (spec mandatory test scenario)
+- **Transactional outbox** (`outbox_events` + `notification_service` +
+  `outbox_worker.py`): business mutations enqueue delivery events in the SAME
+  database transaction (a rollback removes the event), a background worker
+  delivers with per-event commits, idempotent replay (unique per event +
+  recipient), exponential backoff retries for transient failures, and recorded
+  permanent failures — "notification processing is retry-safe" (exit criteria)
+- **Event coverage**: task assigned, supporting PM added, task blocked, blocker
+  resolved, work item completed, milestone completed, task submitted for
+  review, review rejected, task completed, task reopened, visibility changed,
+  access granted/revoked, deadline approaching / overdue (worker sweep with a
+  per-window dedup)
+- **Optional email channel** (`email_sender.py`, disabled by default): SMTP
+  delivery respecting per-user preferences; subjects for confidential tasks
+  (private/custom visibility) use the task **number only**, never the title
+- **Per-user preferences** (`/notifications/preferences`): in-app and email
+  switches per event type, honored by the delivery pipeline
+
+## Application shell (collapsible sidebar + mobile)
+
+- **Desktop**: fixed collapsible sidebar (full ↔ icon rail) with active-route
+  indicator, persisted per browser via `localStorage`
+- **Mobile**: off-canvas drawer behind a hamburger button with backdrop,
+  auto-close on navigation, and a responsive single-column content layout
+- Header hosts the notification bell (unread badge), user identity, and sign out
+
 ## Decisions defaulted (from spec §decisions_to_confirm_with_interdec)
 
 - DEC-02: one accountable PM, multiple supporting PMs (modelled in schema)
 - DEC-11: timestamps stored in UTC (`UTCDateTime`), rendered client-side
 - DEC-12: local credential management for now; `authentication_reference`
   column is SSO-ready
-- DEC-13: in-app foundation only; notification tables arrive in Phase 6
+- DEC-13: in-app notifications delivered; the email channel ships disabled
+  ("Email, if approved" per spec) and is configurable via `DECOPS_EMAIL_*`
+  settings
 - These remain subject to Interdec sign-off per the spec.
 
 ## Roadmap
 
-Phases 6–10 (collaboration & notifications, dashboards & reporting, CSV
-migration, hardening, launch) follow the approved `implementation_phases`
-in `spec_full.json`.
+Phases 7–10 (dashboards & reporting, CSV migration, hardening, launch) follow
+the approved `implementation_phases` in `spec_full.json`.

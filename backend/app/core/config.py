@@ -47,6 +47,30 @@ class Settings(BaseSettings):
     seed_admin_name: str = "Interdec Administrator"
     seed_admin_employee_code: str = "INT-0001"
 
+    # --- Attachments (Phase 6: private, task-scoped document storage) ---
+    attachment_storage_dir: Path = BACKEND_DIR / "var" / "attachments"
+    attachment_max_bytes: int = 25 * 1024 * 1024  # 25 MB (spec: file size restrictions)
+    attachment_allowed_extensions: list[str] = [
+        ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+        ".txt", ".csv", ".md", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".zip",
+    ]
+
+    # --- Notifications & transactional outbox (Phase 6) ---
+    outbox_worker_enabled: bool = True
+    outbox_worker_interval_seconds: float = 15.0
+    outbox_max_attempts: int = 8
+    outbox_base_backoff_seconds: float = 30.0
+    deadline_reminder_days: int = 3
+    deadline_dedup_hours: int = 20
+
+    # --- Optional email delivery (spec: "Email, if approved") ---
+    email_notifications_enabled: bool = False
+    smtp_host: str = "localhost"
+    smtp_port: int = 25
+    smtp_username: str = ""
+    smtp_password: str = ""
+    email_from: str = "decops@interdec.com"
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"

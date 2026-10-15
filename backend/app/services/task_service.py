@@ -379,6 +379,14 @@ def update_task(
             "This task was modified by someone else. Reload and reapply your changes.",
             code="version_conflict",
         )
+    # Widening/narrowing visibility is a dedicated engine operation: check it
+    # BEFORE any mutation (a plain updater gets the same 404 as everyone else).
+    if "visibility_mode" in fields and fields["visibility_mode"] is not None:
+        try:
+            access_policy.require_access(
+                build_actor_context(db, actor), build_policy(db, task), Operation.CHANGE_VISIBILITY)
+        except access_policy.AccessDeniedError:
+            raise NotFoundError("Task not found.") from None
     changes: dict[str, dict] = {}
 
     def _changed(name: str, old, new) -> bool:
@@ -411,6 +419,15 @@ def update_task(
         if pct != task.percent_complete:
             changes["percent_complete"] = {"from": task.percent_complete, "to": pct}
             task.percent_complete = pct
+    if "visibility_mode" in fields and fields["visibility_mode"] is not None:
+        new_visibility = str(fields["visibility_mode"])
+        try:
+            VisibilityMode(new_visibility)
+        except ValueError as exc:
+            raise ValidationFailedError(f"Unknown visibility mode '{new_visibility}'.") from exc
+        if new_visibility != _enum_value(task.visibility_mode):
+            changes["visibility_mode"] = {"from": _enum_value(task.visibility_mode), "to": new_visibility}
+            task.visibility_mode = new_visibility
 
     # Nullable fields: explicit None clears the value.
     for name in ("description", "dependency_summary"):
@@ -438,6 +455,16 @@ def update_task(
         actor=actor, request_id=request_id, change_summary=summary,
         metadata={"changes": changes, "version": task.version},
     )
+    if "visibility_mode" in changes:
+        # Spec notifications.events: visibility changes notify the circle.
+        from app.services import notification_service as _ns
+
+        _ns.record_event(
+            db, event_type=_ns.ntf.EventType.VISIBILITY_CHANGED, task_id=task.id,
+            actor=actor,
+            extra={"summary": f"Visibility of {task.task_number} changed from "
+                              f"{changes['visibility_mode']['from']} to {changes['visibility_mode']['to']}"},
+        )
     return task
 
 
@@ -505,6 +532,23 @@ def transition_task(
         change_summary=summary,
         metadata={"from_status": from_status.value, "to_status": target.value},
     )
+
+    # Notification events (Phase 6) — same-transaction outbox rows.
+    from app.services import notification_service as _ns
+
+    _status_events = {
+        TaskStatus.completed: _ns.ntf.EventType.TASK_COMPLETED,
+        TaskStatus.blocked: _ns.ntf.EventType.TASK_BLOCKED,
+        TaskStatus.under_review: _ns.ntf.EventType.TASK_SUBMITTED_FOR_REVIEW,
+    }
+    if target in _status_events:
+        _ns.record_event(db, event_type=_status_events[target], task_id=task.id, actor=actor)
+    elif target in (TaskStatus.open, TaskStatus.in_progress) and from_status is TaskStatus.completed:
+        _ns.record_event(db, event_type=_ns.ntf.EventType.TASK_REOPENED, task_id=task.id, actor=actor)
+    elif target in (TaskStatus.open, TaskStatus.in_progress) and from_status is TaskStatus.blocked:
+        _ns.record_event(db, event_type=_ns.ntf.EventType.BLOCKER_RESOLVED, task_id=task.id, actor=actor)
+    elif target is TaskStatus.in_progress and from_status is TaskStatus.under_review:
+        _ns.record_event(db, event_type=_ns.ntf.EventType.REVIEW_REJECTED, task_id=task.id, actor=actor)
     return task
 
 
@@ -604,6 +648,15 @@ def assign_user(
         db, action="task.assigned", resource_type="task", resource_id=task.id,
         actor=actor, request_id=request_id, change_summary=summary,
         metadata={"assignee": str(user_id), "role": role.value},
+    )
+
+    from app.services import notification_service as _ns
+
+    event_type = (_ns.ntf.EventType.TASK_ASSIGNED
+                  if role == AssignmentRoleType.accountable_pm
+                  else _ns.ntf.EventType.SUPPORTING_PM_ADDED)
+    _ns.record_event(
+        db, event_type=event_type, task_id=task.id, actor=actor, target_user_id=user_id,
     )
     return assignment
 
@@ -729,6 +782,16 @@ def add_access_grant(
         actor=actor, request_id=request_id, change_summary=summary,
         metadata={"user_id": str(user_id), "access_level": access_level.value},
     )
+
+    from app.services import notification_service as _ns
+
+    # A recorded denial revokes what the user may have had: the affected user
+    # is told their access changed (targeted event, never broadcast).
+    grant_event = (_ns.ntf.EventType.ACCESS_REVOKED if access_level == AccessLevel.denied
+                   else _ns.ntf.EventType.ACCESS_GRANTED)
+    _ns.record_event(
+        db, event_type=grant_event, task_id=task.id, actor=actor, target_user_id=user_id,
+    )
     return grant
 
 
@@ -760,6 +823,13 @@ def revoke_access_grant(
         db, action="task.access_revoked", resource_type="task", resource_id=task.id,
         actor=actor, request_id=request_id, reason=grant.revocation_reason,
         change_summary=summary, metadata={"user_id": str(grant.principal_id)},
+    )
+
+    from app.services import notification_service as _ns
+
+    _ns.record_event(
+        db, event_type=_ns.ntf.EventType.ACCESS_REVOKED, task_id=task.id,
+        actor=actor, target_user_id=grant.principal_id,
     )
 
 

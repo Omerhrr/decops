@@ -2,6 +2,14 @@
 create_all see the complete metadata."""
 
 from app.models.audit import AuditEvent
+from app.models.collaboration import (
+    Attachment,
+    Comment,
+    Notification,
+    NotificationPreference,
+    OutboxEvent,
+    OutboxStatus,
+)
 from app.models.department import Department, DepartmentMembership, DepartmentStatus, MembershipRole
 from app.models.rbac import Permission, Role, RolePermission, ScopeType, UserRole
 from app.models.task import (
@@ -33,11 +41,17 @@ __all__ = [
     "AccessLevel",
     "AccountStatus",
     "AssignmentRoleType",
+    "Attachment",
     "AuditEvent",
+    "Comment",
     "Department",
     "DepartmentMembership",
     "DepartmentStatus",
     "MembershipRole",
+    "Notification",
+    "NotificationPreference",
+    "OutboxEvent",
+    "OutboxStatus",
     "ParticipationType",
     "Permission",
     "ProgressBasis",

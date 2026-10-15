@@ -742,6 +742,37 @@ def transition_item(db: Session, actor: User, task_id: uuid.UUID,
                               "auto": True},
                 )
 
+    # ------------------------------------------------------------------
+    # Phase 6: notification events (same-transaction outbox rows)
+    # ------------------------------------------------------------------
+    from app.services import notification_service as _ns
+
+    if target == "completed":
+        is_milestone = _enum_value(item.item_type) == WorkItemType.milestone.value
+        event_type = (_ns.ntf.EventType.MILESTONE_COMPLETED if is_milestone
+                      else _ns.ntf.EventType.WORK_ITEM_COMPLETED)
+        _ns.record_event(
+            db, event_type=event_type, task_id=task.id, actor=actor, work_item_id=item.id,
+        )
+        # A completed predecessor may have unblocked pending successors:
+        # "Blocker resolved" notifications go to each newly unblocked assignee.
+        edges = load_edges(db, task.id)
+        item_statuses = {i.id: _enum_value(i.status) for i in _task_items(db, task)}
+        for edge in edges:
+            if edge.predecessor_id != item.id:
+                continue
+            successor = db.get(WorkItem, edge.successor_id)
+            if successor is None or item_statuses.get(successor.id) != "pending":
+                continue
+            if wf.unmet_predecessors(edges, item_statuses, successor.id):
+                continue
+            if successor.assigned_user_id and successor.assigned_user_id != actor.id:
+                _ns.record_event(
+                    db, event_type=_ns.ntf.EventType.BLOCKER_RESOLVED, task_id=task.id,
+                    actor=actor, work_item_id=successor.id,
+                    target_user_id=successor.assigned_user_id,
+                )
+
     sync_task_percent(db, task)
     return item
 

@@ -41,3 +41,6 @@ worklog.md
 Thumbs.db
 .idea/
 .vscode/
+
+# Runtime attachment storage (Phase 6)
+backend/var/

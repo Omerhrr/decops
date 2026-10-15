@@ -139,6 +139,10 @@
           :task-due="task.due_date"
         />
 
+        <!-- Collaboration (Phase 6): comments + private attachments -->
+        <TaskComments :task-id="task.id" />
+        <TaskAttachments :task-id="task.id" />
+
         <!-- Activity timeline -->
         <section class="rounded-2xl border border-slate-200 bg-white p-5">
           <h2 class="text-sm font-semibold text-slate-900">Activity history</h2>
