@@ -379,3 +379,158 @@ export interface NotificationPreference {
   in_app_enabled: boolean
   email_enabled: boolean
 }
+
+// ---------- Phase 7: dashboards & reporting ----------
+
+export interface PersonalSummary {
+  assigned_active: number
+  accountable_active: number
+  overdue: number
+  blocked: number
+  due_soon: number
+}
+
+export interface StatusBreakdown {
+  draft: number
+  open: number
+  in_progress: number
+  blocked: number
+  under_review: number
+  completed: number
+  cancelled: number
+  archived: number
+}
+
+export interface ManagementOverview {
+  total_visible: number
+  active: number
+  overdue: number
+  blocked: number
+  completion_rate: number
+  completed_this_week: number
+  by_status: StatusBreakdown
+}
+
+export interface DeadlineRow {
+  task_id: string
+  task_number: string
+  title: string
+  due_date: string
+  days_left: number
+  status: TaskStatus
+  priority: TaskPriority
+  accountable_pm: TaskUserBrief | null
+}
+
+export interface ActivityRow {
+  task_id: string
+  task_number: string
+  task_title: string
+  activity_type: string
+  summary: string
+  actor: TaskUserBrief | null
+  created_at: string
+}
+
+export interface DashboardSummary {
+  me: PersonalSummary
+  visible_totals: StatusBreakdown
+  visible_total: number
+  overdue_total: number
+  blocked_total: number
+  upcoming_deadlines: DeadlineRow[]
+  blocked_tasks: DeadlineRow[]
+  recent_activity: ActivityRow[]
+  management_overview: ManagementOverview | null
+}
+
+export interface MyTaskPage {
+  items: Task[]
+  total: number
+  page: number
+  page_size: number
+  scope: 'assigned' | 'accountable' | 'all'
+}
+
+export interface CompletionWeekPoint {
+  week_start: string
+  completed: number
+  created: number
+}
+
+export interface MilestoneProgress {
+  total: number
+  completed: number
+  in_progress: number
+  pending: number
+  cancelled: number
+}
+
+export interface BlockerAnalysis {
+  blocked_total: number
+  by_priority: Record<string, number>
+  by_department: Record<string, number>
+  overdue_blocked: number
+}
+
+export interface TaskCompletionReport {
+  weeks: number
+  series: CompletionWeekPoint[]
+  totals: Record<string, number>
+  avg_days_to_complete: number | null
+  by_status: Record<string, number>
+  milestone_progress: MilestoneProgress
+  blocker_analysis: BlockerAnalysis
+}
+
+export interface DepartmentWorkloadRow {
+  department_id: string
+  department_name: string
+  lead: string | null
+  member_count: number
+  active_tasks: number
+  overdue_tasks: number
+  blocked_tasks: number
+  completed_tasks: number
+  open_assignments: number
+}
+
+export interface DepartmentWorkloadReport {
+  departments: DepartmentWorkloadRow[]
+  scope: 'all' | 'my_departments'
+}
+
+export interface WorkspaceTask {
+  id: string
+  task_number: string
+  title: string
+  status: TaskStatus
+  priority: TaskPriority
+  due_date: string | null
+  percent_complete: number
+  accountable_pm: string | null
+}
+
+export interface WorkspaceRow {
+  id: string
+  task_number: string
+  title: string
+  due_date: string | null
+  accountable_pm: string | null
+}
+
+export interface DepartmentWorkspace {
+  department: {
+    id: string
+    name: string
+    description: string | null
+    lead: string | null
+    member_count: number
+  }
+  tasks: WorkspaceTask[]
+  active_total: number
+  blocked: WorkspaceRow[]
+  upcoming: WorkspaceRow[]
+  overdue: WorkspaceRow[]
+  team: { user: TaskUserBrief, membership_role: string, open_assignments: number }[]
+}

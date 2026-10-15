@@ -266,6 +266,34 @@ class TestTaskEditing:
         assert data["description"] == task["description"]  # untouched
         assert data["percent_complete"] == task["percent_complete"]
 
+    def test_visibility_mode_patchable_behind_change_visibility_gate(self, client, test_db):
+        admin = test_db.query(User).filter_by(email="admin@interdec.com").first()
+        pm = make_user(test_db, email="vispatch@interdec.com", role_names=["Accountable PM"])
+        login(client, "admin@interdec.com", "DecOps!2026")
+        task = _create_task(client, pm_id=str(pm.id), visibility_mode="participants")
+
+        # Admin (tasks.update_assigned => CHANGE_VISIBILITY) widens visibility.
+        data = client.patch(f"/api/v1/tasks/{task['id']}", json={
+            "version": task["version"], "visibility_mode": "department_scoped",
+        }).json()
+        assert data["visibility_mode"] == "department_scoped"
+
+        # Invalid mode rejected.
+        response = client.patch(f"/api/v1/tasks/{task['id']}", json={
+            "version": data["version"], "visibility_mode": "public",
+        })
+        assert response.status_code == 422
+
+        # A participant WITHOUT tasks.update_assigned cannot change visibility.
+        viewer = make_user(test_db, email="visviewer@interdec.com", role_names=["Department Member"])
+        client.post(f"/api/v1/tasks/{task['id']}/access-grants",
+                    json={"user_id": str(viewer.id), "access_level": "view"})
+        login(client, "visviewer@interdec.com", "Secret!1234")
+        response = client.patch(f"/api/v1/tasks/{task['id']}", json={
+            "version": data["version"], "visibility_mode": "private",
+        })
+        assert response.status_code == 404  # same 404 as every other forbidden op
+
 
 # ---------------------------------------------------------------------------
 # Lifecycle transitions

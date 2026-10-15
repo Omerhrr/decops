@@ -50,7 +50,17 @@ class TaskUpdateRequest(BaseModel):
     percent_complete: int | None = Field(default=None, ge=0, le=100)
     progress_mode: ProgressModeEnum | None = None
     dependency_summary: str | None = Field(default=None, max_length=5000)
+    # Widening/narrowing visibility is gated by CHANGE_VISIBILITY in the
+    # service layer (a plain updater gets the same 404 as everyone else).
+    visibility_mode: str | None = None
     version: int = Field(ge=1)
+
+    @field_validator("visibility_mode")
+    @classmethod
+    def _check_visibility(cls, v: str | None) -> str | None:
+        if v is not None and v not in VISIBILITY_MODES:
+            raise ValueError(f"visibility_mode must be one of {', '.join(VISIBILITY_MODES)}")
+        return v
 
 
 class TaskTransitionRequest(BaseModel):

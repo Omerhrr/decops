@@ -51,5 +51,26 @@ export function useApi() {
     post: <T>(path: string, body?: unknown) => request<T>(path, { method: 'POST', body }),
     patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
     delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+    // Binary download (CSV exports): returns the blob plus a filename parsed
+    // from Content-Disposition so the caller can trigger a client-side save.
+    download: async (path: string, body?: unknown): Promise<{ blob: Blob, filename: string }> => {
+      const response = await $fetch.raw(path, {
+        method: 'POST',
+        body,
+        credentials: 'include',
+        ignoreResponseError: true,
+      })
+      if (response.status >= 400) {
+        const errBody = (response._data ?? {}) as ApiErrorBody
+        throw new ApiError(response.status, errBody.error ?? {
+          code: 'unknown_error',
+          message: 'Unexpected response from the server.',
+        })
+      }
+      const blob = new Blob([response._data as BlobPart], { type: 'text/csv;charset=utf-8' })
+      const disposition = (response.headers.get('content-disposition') ?? '')
+      const match = /filename="?([^";]+)"?/.exec(disposition)
+      return { blob, filename: match?.[1] ?? 'decops_export.csv' }
+    },
   }
 }

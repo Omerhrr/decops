@@ -2,16 +2,19 @@
 
 Internal task and workflow management system. This repository currently contains the
 **Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
-**Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, and **Phase 6
-(Collaboration & Notifications)** releases from the approved implementation plan —
+**Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, **Phase 6
+(Collaboration & Notifications)**, and **Phase 7 (Dashboards & Reporting)**
+releases from the approved implementation plan —
 running frontend + backend, database migrations, secure authentication, RBAC,
 user/department administration, a task access policy engine, full task management
 (register, detail, lifecycle transitions, assignments, access grants, activity
 history), the workflow engine (stages, milestones, subtasks, dependencies, progress
 calculation, Gantt timeline, workflow editor), task comments and private attachments,
 an in-app notification center backed by a transactional outbox with retry-safe
-delivery, a collapsible sidebar with a mobile drawer layout, audit logging,
-structured error handling, and an automated test suite (242 tests).
+delivery, a collapsible sidebar with a mobile drawer layout, personal and
+management dashboards, a department workspace, authorized reporting with CSV
+exports, audit logging, structured error handling, and an automated test suite
+(262 tests).
 
 ## Stack (pinned per spec)
 
@@ -107,7 +110,7 @@ DECOPS_ENVIRONMENT=production
 DECOPS_SESSION_SECRET_KEY=<generated secret>
 ```
 
-## API surface (Phase 2 + Phase 3)
+## API surface (Phase 2 – Phase 7)
 
 - `POST /api/v1/auth/login` — session login (Argon2id, throttling, audited)
 - `POST /api/v1/auth/logout` — session revocation (immediate)
@@ -137,6 +140,21 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 - `POST/DELETE /api/v1/tasks/{id}/access-grants[/{grant_id}]` — view/operate/manage/denied
   grants; immediate revocation; audited (engine CHANGE_VISIBILITY)
 - `GET  /api/v1/tasks/{id}/activity` — task activity timeline (AC-12)
+- `GET  /api/v1/dashboard/summary` — personal stats, upcoming deadlines, blocked
+  work, recent authorized activity; management overview block for
+  `dashboards.view` holders (all aggregates engine-authorized)
+- `GET  /api/v1/dashboard/my-tasks` — assigned/accountable/all scopes, paginated
+- `GET  /api/v1/dashboard/overdue`, `GET /api/v1/dashboard/blocked` — filtered views
+- `GET  /api/v1/reports/task-completion` — weekly created/completed trend, milestone
+  progress, blocker analysis (`reports.view`)
+- `GET  /api/v1/reports/department-workload` — per-department active/overdue/blocked/
+  completed counts + open assignments (`reports.view` all ·
+  `reports.department.view` own departments)
+- `GET  /api/v1/reports/departments/{id}/workspace` — department workspace payload
+  (authorized tasks, workload, upcoming, blocked, team assignments)
+- `POST /api/v1/reports/exports` — authorized CSV exports (`exports.approved`):
+  task register / department workload / completion trend; rows re-pass the access
+  engine, cells are formula-injection sanitized, every export is audited
 - `GET  /api/v1/health` — liveness + database check
 - OpenAPI docs at `/api/docs` (non-production)
 
@@ -154,12 +172,14 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 202 tests: transitions, auth, authorization, audit,
+cd backend && uv run pytest   # 262 tests: transitions, auth, authorization, audit,
                               #   access policy, assignment policy, cross-task isolation,
                               #   task CRUD/edits/transitions/assignments/grants/activity,
                               #   workflow state machines, dependency cycles, sequential/
                               #   parallel gating, completion rules, progress calculation,
-                              #   workflow API authz + optimistic concurrency
+                              #   workflow API authz + optimistic concurrency,
+                              #   dashboards/reports reconciliation + leak prevention,
+                              #   authorized CSV exports (filters, sanitization, audit)
 ```
 
 ## Task access policy engine (Phase 3 + Phase 4 deliverable)
@@ -262,6 +282,35 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 - **Per-user preferences** (`/notifications/preferences`): in-app and email
   switches per event type, honored by the delivery pipeline
 
+## Dashboards & reporting (Phase 7 deliverables)
+
+- **Authorization-aware aggregation core**: every dashboard/report/export number
+  is computed from one `visible_tasks()` source that re-evaluates the task
+  access engine (fresh actor context + per-task policy) — totals reconcile
+  with the authorized register by construction and restricted tasks cannot
+  leak through reports (spec exit criteria)
+- **Personal dashboard** (`/`): assigned/accountable/overdue/blocked stat
+  cards, due-soon indicator, upcoming deadlines (30-day window), blocked
+  work, and recent authorized activity across visible tasks
+- **Management overview**: `dashboards.view`-gated block with visible totals,
+  active/overdue/blocked, completion rate, and weekly completions
+- **My Tasks** (`/my-tasks`): assigned / accountable / all scope tabs,
+  priority + status badges, progress bars, due dates with overdue flags,
+  pagination
+- **Department workspace** (`/departments`, `/departments/{id}`): workload
+  cards per department, authorized departmental tasks, upcoming deadlines,
+  blocked/overdue panels, and team assignments (leads are scoped to their own
+  departments; management sees all — task contents stay engine-filtered)
+- **Reports** (`/reports`): 12-week created/completed SVG trend chart, cycle
+  time, status breakdown, milestone progress, blocker analysis by priority
+  and department, department workload table
+- **Authorized CSV exports**: `exports.approved`-gated (Read-Only Auditor per
+  the spec RBAC matrix), register filters supported, Content-Disposition
+  download, formula-injection sanitization, `report.exported` audit events
+- **Fixed en route**: `visibility_mode` is now PATCHable through the task API
+  (service gate existed since Phase 6; the request schema never exposed it) —
+  guarded by the CHANGE_VISIBILITY engine operation with regression tests
+
 ## Application shell (collapsible sidebar + mobile)
 
 - **Desktop**: fixed collapsible sidebar (full ↔ icon rail) with active-route
@@ -283,5 +332,5 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 ## Roadmap
 
-Phases 7–10 (dashboards & reporting, CSV migration, hardening, launch) follow
-the approved `implementation_phases` in `spec_full.json`.
+Phases 8–10 (CSV migration, hardening, launch) follow the approved
+`implementation_phases` in `spec_full.json`.
