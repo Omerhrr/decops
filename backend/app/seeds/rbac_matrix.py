@@ -24,6 +24,11 @@ ROLE_MATRIX: dict[str, dict] = {
             # task visibility (grants/denials) even with tasks.manage_all.
             "tasks.update_assigned",
             "tasks.manage_all",
+            # Phase 8 CSV migration: the import center stages historical data
+            # (business content) and commits new tasks. Company Administration
+            # owns org-wide approved operational settings per spec role matrix.
+            "imports.manage",
+            "imports.view",
         ],
     },
     "Management": {

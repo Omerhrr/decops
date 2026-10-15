@@ -68,6 +68,8 @@ def _detail_out(task) -> dict:
         description=task.description,
         created_by_id=task.created_by_id,
         dependency_summary=task.dependency_summary,
+        legacy_external_id=task.legacy_external_id,
+        attachment_folder_reference=task.attachment_folder_reference,
         version=task.version,
         completed_at=task.completed_at,
         cancelled_at=task.cancelled_at,

@@ -55,6 +55,11 @@ class Settings(BaseSettings):
         ".txt", ".csv", ".md", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".zip",
     ]
 
+    # --- CSV migration (Phase 8: import center) ---
+    import_storage_dir: Path = BACKEND_DIR / "var" / "imports"
+    import_max_bytes: int = 10 * 1024 * 1024  # 10 MB per uploaded CSV
+    import_batch_size: int = 100
+
     # --- Notifications & transactional outbox (Phase 6) ---
     outbox_worker_enabled: bool = True
     outbox_worker_interval_seconds: float = 15.0

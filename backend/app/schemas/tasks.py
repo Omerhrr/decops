@@ -168,6 +168,9 @@ class TaskDetailOut(TaskOut):
     description: str | None = None
     created_by_id: uuid.UUID
     dependency_summary: str | None = None
+    # Phase 8 CSV migration provenance (untrusted legacy reference + source ID)
+    legacy_external_id: str | None = None
+    attachment_folder_reference: str | None = None
     version: int
     completed_at: datetime | None = None
     cancelled_at: datetime | None = None

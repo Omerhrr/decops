@@ -72,5 +72,25 @@ export function useApi() {
       const match = /filename="?([^";]+)"?/.exec(disposition)
       return { blob, filename: match?.[1] ?? 'decops_export.csv' }
     },
+    // GET variant for server-generated downloads (import reconciliation
+    // summaries) that need no request body.
+    downloadGet: async (path: string): Promise<{ blob: Blob, filename: string }> => {
+      const response = await $fetch.raw(path, {
+        method: 'GET',
+        credentials: 'include',
+        ignoreResponseError: true,
+      })
+      if (response.status >= 400) {
+        const errBody = (response._data ?? {}) as ApiErrorBody
+        throw new ApiError(response.status, errBody.error ?? {
+          code: 'unknown_error',
+          message: 'Unexpected response from the server.',
+        })
+      }
+      const blob = new Blob([response._data as BlobPart], { type: 'text/csv;charset=utf-8' })
+      const disposition = (response.headers.get('content-disposition') ?? '')
+      const match = /filename="?([^";]+)"?/.exec(disposition)
+      return { blob, filename: match?.[1] ?? 'decops_download.csv' }
+    },
   }
 }

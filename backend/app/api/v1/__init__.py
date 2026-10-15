@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.api.v1 import auth, collaboration, dashboards, departments, health, notifications, rbac, reports, tasks, users, workflow
+from app.api.v1 import auth, collaboration, dashboards, departments, health, imports, notifications, rbac, reports, tasks, users, workflow
 
 api_router = APIRouter()
 api_router.include_router(health.router)
@@ -17,3 +17,4 @@ api_router.include_router(collaboration.router)
 api_router.include_router(notifications.router)
 api_router.include_router(dashboards.router)
 api_router.include_router(reports.router)
+api_router.include_router(imports.router)

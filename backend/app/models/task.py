@@ -64,6 +64,12 @@ class Task(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     dependency_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     attachment_folder_reference: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
+    # Phase 8 CSV migration: source identifier preserved for traceability and
+    # retry-safe imports ("Task ID" -> task_number when reusable, else stored
+    # here). Indexed; uniqueness is enforced by the import service, which must
+    # recognise already-committed legacy rows instead of duplicating them.
+    legacy_external_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+
     # Explicit, self-contained access policy (spec task_visibility.rules)
     visibility_mode: Mapped[str] = mapped_column(String(30), nullable=False)
 

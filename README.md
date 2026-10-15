@@ -3,8 +3,8 @@
 Internal task and workflow management system. This repository currently contains the
 **Phase 2 (Application Foundation)**, **Phase 3 (Identity & Authorization)**,
 **Phase 4 (Task Management)**, **Phase 5 (Workflow Engine)**, **Phase 6
-(Collaboration & Notifications)**, and **Phase 7 (Dashboards & Reporting)**
-releases from the approved implementation plan —
+(Collaboration & Notifications)**, **Phase 7 (Dashboards & Reporting)**, and
+**Phase 8 (CSV Migration)** releases from the approved implementation plan —
 running frontend + backend, database migrations, secure authentication, RBAC,
 user/department administration, a task access policy engine, full task management
 (register, detail, lifecycle transitions, assignments, access grants, activity
@@ -13,8 +13,9 @@ calculation, Gantt timeline, workflow editor), task comments and private attachm
 an in-app notification center backed by a transactional outbox with retry-safe
 delivery, a collapsible sidebar with a mobile drawer layout, personal and
 management dashboards, a department workspace, authorized reporting with CSV
-exports, audit logging, structured error handling, and an automated test suite
-(262 tests).
+exports, a CSV import center (column mapping, validation, duplicate detection,
+retry-safe commits, reconciliation reports), audit logging, structured error
+handling, and an automated test suite (318 tests).
 
 ## Stack (pinned per spec)
 
@@ -40,12 +41,11 @@ talks to one origin and session cookies remain first-party HttpOnly.
 │   │                           #   departments, access grants, activity timeline
 │   ├── pages/admin/users.vue       # User administration (MOD-002, Phase 3)
 │   ├── pages/admin/departments.vue # Department management (MOD-002, Phase 3)
+│   ├── pages/imports/index.vue # CSV import center (Phase 8): upload, mapping,
+│   │                           #   validation report, commit, reconciliation download
 │   ├── components/     # AppSidebarNav (collapsible rail), AppNotifications
 │   │                   #   (bell + notification center), TaskComments,
 │   │                   #   TaskAttachments, WorkflowPanel, WorkflowGantt
-│   ├── composables/    # useApi (typed client, SSR cookie forwarding), useAuth,
-│   │                   #   useNotifications (badge polling, read state)
-│   └── middleware/         # Global auth guard
 ├── backend/
 │   ├── app/
 │   │   ├── core/           # Settings, security, logging, error envelope
@@ -57,20 +57,25 @@ talks to one origin and session cookies remain first-party HttpOnly.
 │   │   ├── domain/         # Task lifecycle state machine, access policy engine
 │   │   │                   #   (grant levels), assignment authorization,
 │   │   │                   #   workflow/progress rules, notification rules
-│   │   │                   #   (event catalog, subject redaction, backoff)
+│   │   │                   #   (event catalog, subject redaction, backoff),
+│   │   │                   #   csv_import rules (mapping tables, user resolution,
+│   │   │                   #   duplicate detection, row validation)
 │   │   ├── api/v1/         # /api/v1 routers: auth, users, departments, roles, tasks,
 │   │   │                   #   workflow, collaboration (comments/attachments),
-│   │   │                   #   notifications, health
+│   │   │                   #   notifications, dashboards, reports, imports, health
 │   │   ├── services/       # auth, audit, user admin, department, task, workflow,
 │   │   │                   #   collaboration, notification (outbox producer +
-│   │   │                   #   delivery), email_sender, outbox_worker
+│   │   │                   #   delivery), email_sender, outbox_worker,
+│   │   │                   #   import (staged pipeline: validate → report →
+│   │   │                   #   batched retry-safe commit)
 │   │   └── seeds/          # Idempotent RBAC matrix + admin seed
-│   ├── alembic/            # Migrations (foundation, Phase 4, Phase 5, Phase 6)
+│   ├── alembic/            # Migrations (foundation, Phase 4, Phase 5, Phase 6, Phase 8)
 │   └── tests/              # Pytest: auth, authorization, transitions, audit,
 │   │                       #   access policy, assignment policy, cross-task isolation,
 │   │                       #   task CRUD/transitions/assignments/grants, workflow
 │   │                       #   domain/API, comments/attachments privacy,
-│   │                       #   notifications/outbox/retry/sweep/email (242 tests)
+│   │                       #   notifications/outbox/retry/sweep/email,
+│   │                       #   CSV import pipeline + import center API (318 tests)
 └── spec_full.json          # Full approved requirements document
 ```
 
@@ -110,7 +115,7 @@ DECOPS_ENVIRONMENT=production
 DECOPS_SESSION_SECRET_KEY=<generated secret>
 ```
 
-## API surface (Phase 2 – Phase 7)
+## API surface (Phase 2 – Phase 8)
 
 - `POST /api/v1/auth/login` — session login (Argon2id, throttling, audited)
 - `POST /api/v1/auth/logout` — session revocation (immediate)
@@ -155,6 +160,16 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 - `POST /api/v1/reports/exports` — authorized CSV exports (`exports.approved`):
   task register / department workload / completion trend; rows re-pass the access
   engine, cells are formula-injection sanitized, every export is audited
+- `POST /api/v1/imports/csv` — upload + validate a legacy CSV (`imports.manage`):
+  file type/size/encoding/header checks, auto column mapping, full row validation
+- `GET /api/v1/imports` — import job history with reconciliation counters
+  (`imports.view` or `imports.manage`)
+- `GET /api/v1/imports/{id}` — job detail; `GET .../report` — row-level validation
+  report (errors, notices, duplicates, normalized preview)
+- `GET /api/v1/imports/{id}/report/download` — reconciliation summary CSV
+- `PATCH /api/v1/imports/{id}` — operator-approved mapping/options update + revalidate
+- `POST /api/v1/imports/{id}/commit` — batched, retry-safe commit of validated rows
+  (duplicates/failed rows excluded and reported; `import.committed` audited)
 - `GET  /api/v1/health` — liveness + database check
 - OpenAPI docs at `/api/docs` (non-production)
 
@@ -172,14 +187,16 @@ DECOPS_SESSION_SECRET_KEY=<generated secret>
 ## Test suite
 
 ```bash
-cd backend && uv run pytest   # 262 tests: transitions, auth, authorization, audit,
+cd backend && uv run pytest   # 318 tests: transitions, auth, authorization, audit,
                               #   access policy, assignment policy, cross-task isolation,
                               #   task CRUD/edits/transitions/assignments/grants/activity,
                               #   workflow state machines, dependency cycles, sequential/
                               #   parallel gating, completion rules, progress calculation,
                               #   workflow API authz + optimistic concurrency,
                               #   dashboards/reports reconciliation + leak prevention,
-                              #   authorized CSV exports (filters, sanitization, audit)
+                              #   authorized CSV exports (filters, sanitization, audit),
+                              #   CSV migration (mapping tables, user resolution, duplicates,
+                              #   row validation, retry-safe commit, access preservation)
 ```
 
 ## Task access policy engine (Phase 3 + Phase 4 deliverable)
@@ -311,6 +328,48 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
   (service gate existed since Phase 6; the request schema never exposed it) —
   guarded by the CHANGE_VISIBILITY engine operation with regression tests
 
+## CSV migration & import center (Phase 8 deliverables)
+
+- **Staged pipeline** (spec `spreadsheet_migration.import_pipeline`): upload →
+  validate (file type / size / encoding / header structure) → auto column
+  mapping with operator overrides → preview of normalized rows → resolve
+  people against the directory → duplicate detection → row-level validation
+  report → batched commit → reconciliation summary download
+- **Approved mapping tables**: legacy statuses ("In Progress", "On Hold",
+  "Done", …) and priorities ("P1", "Urgent", …) map onto the DecOps enum;
+  unmapped values FAIL the row and are reported — nothing is invented or
+  silently defaulted (dates support ISO / day-first / month-first with an
+  operator-approved interpretation)
+- **User resolution without guessing**: exact email → exact employee code →
+  unique full-name match; ambiguous names match multiple users and FAIL the
+  row for manual resolution (spec: never invent a user mapping); inactive
+  users are rejected as assignees
+- **Duplicate detection**: exact `task_number` / `legacy_external_id`
+  identifier matches (commit-blocking), configurable title+due-date ("likely")
+  and title-only ("possible") rules, plus intra-file repeats — duplicates are
+  excluded from commit and reported, never re-imported
+- **Legacy data policy honored**: historical `Date Created` timestamps and
+  `Completion Date` are preserved, supplied percentages are imported with a
+  "reconcile against workflow calculation" flag, dependency descriptions and
+  attachment links are stored verbatim as untrusted references (never
+  fetched), and a `task.imported` activity records real provenance (import
+  actor, file, row, source ID) — no historical audit events are fabricated
+- **Retry-safe commits**: rows commit in controlled batches together with the
+  job counters; a mid-run failure keeps committed rows and the job can be
+  re-committed — already-imported legacy identifiers are recognized and
+  skipped (`already_committed_rows`), never duplicated; a committed job is
+  immutable (409 on PATCH/second commit)
+- **Access preservation**: imports cannot grant unauthorized access — tasks
+  get the operator-approved initial visibility policy, assignments are limited
+  to the accountable/supporting PMs from the sheet, no access grants are
+  created, and post-commit authorization tests verify outsiders still get 404
+- **Import center UI** (`/imports`, `imports.manage`/`imports.view` gated —
+  deliberately NOT granted to System Administration per the spec restriction
+  on technical administration): upload button, job history with counters,
+  per-row validation report with error/notice/duplicate chips, mapping +
+  options editor with revalidation, commit with confirmation, and
+  `summary.csv` reconciliation download
+
 ## Application shell (collapsible sidebar + mobile)
 
 - **Desktop**: fixed collapsible sidebar (full ↔ icon rail) with active-route
@@ -332,5 +391,5 @@ spec's workflow rules as pure, exhaustively unit-tested logic:
 
 ## Roadmap
 
-Phases 8–10 (CSV migration, hardening, launch) follow the approved
-`implementation_phases` in `spec_full.json`.
+Phases 9–10 (hardening and launch) follow the approved `implementation_phases`
+in `spec_full.json`.

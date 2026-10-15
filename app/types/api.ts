@@ -534,3 +534,83 @@ export interface DepartmentWorkspace {
   overdue: WorkspaceRow[]
   team: { user: TaskUserBrief, membership_role: string, open_assignments: number }[]
 }
+
+// ---------------------------------------------------------------------------
+// Phase 8 — CSV Migration (imports)
+// ---------------------------------------------------------------------------
+
+export type ImportJobStatus = 'draft' | 'validated' | 'committed' | 'failed'
+
+export interface ImportJobSummary {
+  id: string
+  filename: string
+  status: ImportJobStatus
+  total_rows: number
+  successful_rows: number
+  warning_rows: number
+  failed_rows: number
+  duplicate_rows: number
+  already_committed_rows: number
+  committed_rows: number
+  created_at: string
+  completed_at: string | null
+  uploaded_by_email: string | null
+  file_level_errors: string | null
+}
+
+export interface ImportNormalizedRow {
+  legacy_task_id?: string | null
+  title: string
+  priority?: string
+  status?: string
+  percent_complete?: number
+  percent_requires_reconciliation?: boolean
+  accountable_pm_display?: string
+  supporting_pm_display?: string[]
+  due_date?: string | null
+  start_date?: string | null
+  duplicate_review?: boolean
+  [key: string]: unknown
+}
+
+export interface ImportRowReport {
+  row_number: number
+  source_task_id: string | null
+  title: string
+  status: 'ok' | 'warning' | 'failed'
+  errors: string[]
+  notices: string[]
+  duplicates: { kind: string, task_number: string, title: string, reason: string }[]
+  normalized: ImportNormalizedRow | null
+  outcome: string | null
+  committed_task_number: string | null
+  committed_task_id: string | null
+}
+
+export interface ImportReport {
+  job_id: string
+  filename: string
+  headers: string[]
+  mapping: Record<string, string | null>
+  unmapped_headers: string[]
+  file_level_errors: string[]
+  counts: Record<string, number>
+  generated_at: string
+  rows: ImportRowReport[]
+  commit?: {
+    committed_by: string
+    committed_at: string
+    committed_rows: number
+    already_committed_rows: number
+    task_ids: string[]
+    errors: string[]
+  }
+}
+
+export interface ImportOptions {
+  visibility_mode: string
+  day_first: boolean
+  match_title_due: boolean
+  match_title_only: boolean
+  reuse_task_number: boolean
+}

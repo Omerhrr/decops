@@ -11,6 +11,7 @@ from app.models.collaboration import (
     OutboxStatus,
 )
 from app.models.department import Department, DepartmentMembership, DepartmentStatus, MembershipRole
+from app.models.import_job import ImportJob, ImportJobStatus
 from app.models.rbac import Permission, Role, RolePermission, ScopeType, UserRole
 from app.models.task import (
     AccessLevel,
@@ -47,6 +48,8 @@ __all__ = [
     "Department",
     "DepartmentMembership",
     "DepartmentStatus",
+    "ImportJob",
+    "ImportJobStatus",
     "MembershipRole",
     "Notification",
     "NotificationPreference",
