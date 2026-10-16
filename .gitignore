@@ -46,3 +46,6 @@ Thumbs.db
 
 # Runtime attachment storage
 backend/var/
+
+# Local build tooling for the user guide deliverable
+scripts/ug_build/
