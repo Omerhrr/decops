@@ -39,7 +39,7 @@
         <button
           v-if="auth.user.value && attachment.uploaded_by?.id === auth.user.value.id"
           type="button"
-          class="shrink-0 rounded-lg border border-transparent px-2 py-1.5 text-xs text-faint transition-colors hover:text-rose-600 dark:text-rose-400"
+          class="shrink-0 rounded-lg border border-transparent px-2 py-1.5 text-xs text-faint transition-colors hover:text-rose-600 dark:hover:text-rose-400"
           :data-test="`attachment-delete-${attachment.id}`"
           @click="remove(attachment)"
         >

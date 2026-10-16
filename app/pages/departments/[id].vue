@@ -43,8 +43,8 @@
                 </p>
               </div>
               <div class="flex shrink-0 items-center gap-2">
-                <AppBadge :tone="statusTone(task.status)">{{ prettyStatus(task.status) }}</AppBadge>
-                <AppBadge :tone="priorityTone(task.priority)">{{ task.priority }}</AppBadge>
+                <AppBadge :tone="statusTone(task.status)">{{ statusLabel(task.status) }}</AppBadge>
+                <AppBadge :tone="priorityTone(task.priority)">{{ capitalize(task.priority) }}</AppBadge>
               </div>
             </li>
           </ul>
@@ -131,29 +131,6 @@ const route = useRoute()
 const { data: workspace, pending, error } = await useFetch<DepartmentWorkspace>(
   () => `/api/v1/reports/departments/${route.params.id}/workspace`,
 )
-
-function statusTone(status: string): 'green' | 'amber' | 'gray' | 'rose' {
-  if (status === 'completed') return 'green'
-  if (status === 'blocked') return 'rose'
-  if (status === 'in_progress' || status === 'under_review') return 'amber'
-  return 'gray'
-}
-
-function priorityTone(priority: string): 'green' | 'amber' | 'gray' | 'rose' {
-  if (priority === 'critical') return 'rose'
-  if (priority === 'high') return 'amber'
-  if (priority === 'low') return 'gray'
-  return 'green'
-}
-
-function prettyStatus(status: string): string {
-  return status.replace(/_/g, ' ')
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return '-'
-  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
 
 useHead({ title: 'Department Workspace - DecOps' })
 </script>

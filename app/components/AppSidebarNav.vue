@@ -17,7 +17,7 @@
           :class="[
             collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5',
             isActive(item)
-              ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 dark:bg-brand-500/10 dark:text-brand-300'
+              ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300'
               : 'text-body hover:bg-hover hover:text-ink',
           ]"
           :aria-current="isActive(item) ? 'page' : undefined"
@@ -88,7 +88,7 @@ const sections = computed<NavSection[]>(() => {
   // Department workspaces and reports re-use the reporting permission matrix:
   // leads see their departments, management sees everything they may view.
   if (auth.hasPermission('reports.view', 'reports.department.view', 'workload.view')) {
-    insights.push({ to: '/departments', label: 'Departments', icon: 'departments' })
+    insights.push({ to: '/departments', label: 'Department workspaces', icon: 'departments' })
   }
   if (auth.hasPermission('reports.view', 'reports.department.view', 'exports.approved')) {
     insights.push({ to: '/reports', label: 'Reports', icon: 'reports' })
@@ -98,7 +98,7 @@ const sections = computed<NavSection[]>(() => {
     administration.push({ to: '/admin/users', label: 'Users', icon: 'users' })
   }
   if (auth.hasPermission('departments.manage', 'users.manage')) {
-    administration.push({ to: '/admin/departments', label: 'Departments Admin', icon: 'departments' })
+    administration.push({ to: '/admin/departments', label: 'Departments', icon: 'departments' })
   }
   // Import center: Company Administration only (spec restriction).
   if (auth.hasPermission('imports.manage', 'imports.view')) {

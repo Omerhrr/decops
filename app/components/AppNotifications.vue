@@ -54,7 +54,7 @@
             <button
               type="button"
               class="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-hover"
-              :class="{ ' dark:bg-brand-500/5': !item.read_at }"
+              :class="{ 'bg-brand-50/70 dark:bg-brand-500/5': !item.read_at }"
               @click="onItemClick(item)"
             >
               <span

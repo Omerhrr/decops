@@ -61,6 +61,7 @@
       role="dialog"
       aria-modal="true"
       aria-label="Role editor"
+      v-dialog="{ close: closeEditor }"
       @click.self="closeEditor"
     >
       <div class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl">

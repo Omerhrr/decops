@@ -53,7 +53,7 @@
         <StatCard label="Overdue" :value="summary.me.overdue" :tone="summary.me.overdue ? 'danger' : 'neutral'"
                   :note="summary.me.overdue ? 'Action needed: past due date' : 'Nothing past due'" />
         <StatCard label="Blocked" :value="summary.me.blocked" :tone="summary.me.blocked ? 'warning' : 'neutral'"
-                  :note="`${summary.me.due_soon} due within 7 days`" />
+                  :note="summary.me.blocked ? 'Waiting on a blocker right now' : 'Nothing is blocked'" />
       </section>
 
       <section class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3" aria-label="Visual analytics">
@@ -100,7 +100,7 @@
               Aggregated over the {{ summary.visible_total }} task(s) you are authorized to view.
             </p>
           </div>
-          <NuxtLink to="/reports" class="text-sm font-medium text-brand-700 dark:text-brand-300 hover:underline dark:text-brand-400">
+          <NuxtLink to="/reports" class="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400">
             Open reports
           </NuxtLink>
         </div>
@@ -120,7 +120,10 @@
             <h2 class="text-base font-semibold text-ink">Upcoming deadlines</h2>
             <AppBadge tone="gray">{{ summary.upcoming_deadlines.length }} scheduled</AppBadge>
           </div>
-          <p class="page-subtitle">Active work due in the next 30 days, soonest first.</p>
+          <p class="page-subtitle">
+            Active work due in the next 30 days, soonest first.
+            <template v-if="summary.me.due_soon">{{ summary.me.due_soon }} due within 7 days.</template>
+          </p>
           <ul class="mt-4 divide-y divide-line">
             <li v-if="!summary.upcoming_deadlines.length" class="empty-state">
               <svg class="mx-auto h-8 w-8 text-faint" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -132,7 +135,7 @@
                 class="flex items-center justify-between gap-4 py-3">
               <div class="min-w-0">
                 <NuxtLink :to="`/tasks/${row.task_id}`"
-                          class="truncate text-sm font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300 dark:hover:text-brand-400">
+                          class="truncate text-sm font-medium text-ink hover:text-brand-700 dark:hover:text-brand-400">
                   {{ row.title }}
                 </NuxtLink>
                 <p class="mt-0.5 text-xs text-muted">
@@ -158,9 +161,9 @@
               <p class="mt-2">Nothing blocked right now.</p>
             </li>
             <li v-for="row in summary.blocked_tasks" :key="row.task_id"
-                class="rounded-xl border border-rose-100 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/10 p-3 dark:border-rose-900/60 dark:bg-rose-950/20">
+                class="rounded-xl border border-rose-100 bg-rose-50 p-3 dark:border-rose-900/60 dark:bg-rose-950/20">
               <NuxtLink :to="`/tasks/${row.task_id}`"
-                        class="text-sm font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300 dark:hover:text-brand-400">
+                        class="text-sm font-medium text-ink hover:text-brand-700 dark:hover:text-brand-400">
                 {{ row.title }}
               </NuxtLink>
               <p class="mt-0.5 text-xs text-muted">{{ row.task_number }}</p>
@@ -187,10 +190,10 @@
                 {{ event.summary }}
               </p>
               <p class="mt-0.5 text-xs text-muted">
-                <NuxtLink :to="`/tasks/${event.task_id}`" class="hover:text-brand-700 dark:hover:text-brand-300 dark:hover:text-brand-400">
+                <NuxtLink :to="`/tasks/${event.task_id}`" class="hover:text-brand-700 dark:hover:text-brand-400">
                   {{ event.task_number }} · {{ event.task_title }}
                 </NuxtLink>
-                · {{ formatRelative(event.created_at) }}
+                · {{ relativeTime(event.created_at) }}
               </p>
             </div>
             <AppBadge tone="gray">{{ activityLabel(event.activity_type) }}</AppBadge>
@@ -210,9 +213,9 @@
         <NuxtLink
           v-if="auth.hasPermission('users.manage')"
           to="/admin/users"
-          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 hover: dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
+          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
         >
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 dark:hover:bg-brand-500/15 group-hover:text-brand-700 dark:hover:text-brand-300 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 group-hover:text-brand-700 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
             </svg>
@@ -225,9 +228,9 @@
         <NuxtLink
           v-if="auth.hasPermission('departments.manage', 'users.manage')"
           to="/admin/departments"
-          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 hover: dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
+          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
         >
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 dark:hover:bg-brand-500/15 group-hover:text-brand-700 dark:hover:text-brand-300 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 group-hover:text-brand-700 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
             </svg>
@@ -239,9 +242,9 @@
         </NuxtLink>
         <NuxtLink
           to="/settings"
-          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 hover: dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
+          class="group flex items-center gap-4 rounded-xl border border-line p-4 transition-colors hover:border-brand-300 dark:hover:border-brand-500/40 dark:hover:bg-brand-500/5"
         >
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 dark:hover:bg-brand-500/15 group-hover:text-brand-700 dark:hover:text-brand-300 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition-colors group-hover:bg-brand-100 group-hover:text-brand-700 dark:group-hover:bg-brand-500/10 dark:group-hover:text-brand-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" class="h-5 w-5" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -298,18 +301,6 @@ function formatDate(value: string): string {
   return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
     month: 'short', day: 'numeric', year: 'numeric',
   })
-}
-
-function formatRelative(value: string): string {
-  const seconds = Math.floor((Date.now() - new Date(value).getTime()) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return new Date(value).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 const ACTIVITY_LABELS: Record<string, string> = {

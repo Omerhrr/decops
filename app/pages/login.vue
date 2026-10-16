@@ -4,7 +4,7 @@
       <div class="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-600/40 blur-3xl" aria-hidden="true" />
       <div class="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-brand-500/20 blur-3xl" aria-hidden="true" />
       <NuxtLink to="/" class="relative flex items-center gap-3">
-        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-lg font-bold">D</span>
+        <BrandLogo mark-only :size="40" />
         <span class="flex flex-col leading-tight">
           <span class="text-base font-semibold">DecOps</span>
           <span class="text-xs text-brand-200">Interdec Operations</span>
@@ -46,7 +46,7 @@
         <ThemeToggle />
       </div>
       <div class="mb-8 lg:hidden">
-        <span class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-xl font-bold text-white">D</span>
+        <BrandLogo mark-only :size="44" />
       </div>
       <h1 class="text-2xl font-semibold tracking-tight text-ink">Sign in to DecOps</h1>
       <p class="mt-2 text-sm text-muted">Use your Interdec work account.</p>

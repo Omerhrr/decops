@@ -11,7 +11,7 @@
         v-model="draft"
         rows="3"
         placeholder="Write a comment…"
-        class="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500"
+        class="input-field"
         :disabled="submitting"
         data-test="comment-input"
       />
@@ -20,7 +20,7 @@
         <span v-else />
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="btn-primary !px-4 text-xs"
           :disabled="submitting || !draft.trim()"
           data-test="comment-submit"
         >
@@ -42,7 +42,7 @@
               <button
                 v-if="auth.user.value && comment.author.id === auth.user.value.id"
                 type="button"
-                class="text-[11px] text-faint hover:text-rose-600 dark:text-rose-400"
+                class="text-[11px] text-faint transition-colors hover:text-rose-600 dark:hover:text-rose-400"
                 :data-test="`comment-delete-${comment.id}`"
                 @click="remove(comment)"
               >

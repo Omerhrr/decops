@@ -183,6 +183,12 @@ body {
   @apply px-4 py-3 align-middle;
 }
 
+/* Inline error alert used by forms and destructive actions */
+@utility alert-error {
+  @apply rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700
+    dark:border-rose-900/50 dark:bg-rose-500/10 dark:text-rose-300;
+}
+
 /* Friendly empty states inside cards and tables */
 @utility empty-state {
   @apply flex flex-col items-center justify-center px-6 py-10 text-center text-sm text-muted;

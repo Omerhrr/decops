@@ -108,6 +108,7 @@
       role="dialog"
       aria-modal="true"
       aria-label="Create user"
+      v-dialog="{ close: () => creating = false }"
       @click.self="creating = false"
     >
       <div class="w-full max-w-md overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl">
@@ -173,6 +174,7 @@
       role="dialog"
       aria-modal="true"
       aria-label="Assign roles"
+      v-dialog="{ close: () => rolesTarget = null }"
       @click.self="rolesTarget = null"
     >
       <div class="w-full max-w-md overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl">
@@ -207,6 +209,7 @@
 import type { Role, UserDetail, UserOut } from '~/types/api'
 
 const api = useApi()
+const { confirm } = useConfirm()
 const users = ref<UserOut[]>([])
 const detailRoles = ref<Record<string, string[]>>({})
 const assignableRoles = ref<Role[]>([])
@@ -322,6 +325,15 @@ async function toggleRole(user: UserOut, roleId: string, granted: boolean): Prom
 }
 
 async function setStatus(user: UserOut, status: 'active' | 'deactivated'): Promise<void> {
+  if (status === 'deactivated') {
+    const ok = await confirm({
+      title: 'Revoke login',
+      message: `Revoke login for ${user.full_name}? Their sessions end immediately and they cannot sign in until access is granted again.`,
+      confirmLabel: 'Revoke login',
+      tone: 'danger',
+    })
+    if (!ok) return
+  }
   loadError.value = ''
   try {
     await api.post(`/api/v1/users/${user.id}/status`, {

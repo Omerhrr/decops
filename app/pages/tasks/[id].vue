@@ -99,7 +99,7 @@
               <label class="block">
                 <span class="text-xs font-medium text-body">Priority</span>
                 <select v-model="editForm.priority" class="input-field mt-1">
-                  <option v-for="p in PRIORITIES" :key="p" :value="p">{{ p }}</option>
+                  <option v-for="p in PRIORITIES" :key="p" :value="p">{{ capitalize(p) }}</option>
                 </select>
               </label>
               <label class="block">
@@ -143,7 +143,7 @@
           <p class="mt-1 text-xs text-faint">Every creation, transition, assignment, and access change on this task (AC-12).</p>
           <ol v-if="activity.length" class="mt-4 space-y-4">
             <li v-for="a in activity" :key="a.id" class="relative border-l-2 border-line pl-4">
-              <span class="absolute -left-[7px] top-1 h-3 w-3 rounded-full border-2 border-white" :class="activityDot(a.activity_type)" />
+              <span class="absolute -left-[7px] top-1 h-3 w-3 rounded-full border-2 border-surface" :class="activityDot(a.activity_type)" />
               <p class="text-sm text-body">{{ a.summary }}</p>
               <p class="mt-0.5 text-xs text-faint">
                 {{ a.actor?.full_name ?? 'System' }} · {{ formatDateTime(a.created_at) }}
@@ -243,7 +243,7 @@
       </div>
     </div>
 
-    <div v-if="pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="pendingTransition = null">
+    <div v-if="pendingTransition" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Task transition" v-dialog="{ close: () => pendingTransition = null }" @click.self="pendingTransition = null">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-ink">{{ transitionLabel(pendingTransition) }}</h2>
         <p class="mt-1 text-sm text-muted">
@@ -263,7 +263,7 @@
       </div>
     </div>
 
-    <div v-if="showAssign" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showAssign = false">
+    <div v-if="showAssign" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Assign a person" v-dialog="{ close: () => showAssign = false }" @click.self="showAssign = false">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-ink">Assign a person</h2>
         <p v-if="assignError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ assignError }}</p>
@@ -292,7 +292,7 @@
       </div>
     </div>
 
-    <div v-if="showGrant" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showGrant = false">
+    <div v-if="showGrant" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Grant task access" v-dialog="{ close: () => showGrant = false }" @click.self="showGrant = false">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-ink">Grant task access</h2>
         <p v-if="grantError" class="mt-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">{{ grantError }}</p>
@@ -334,6 +334,12 @@ import type {
   TransitionOptions,
   Workflow,
 } from '~/types/api'
+import {
+  capitalize,
+  formatDate as formatDateValue,
+  formatDateTime as formatDateTimeValue,
+  isOverdue as isOverdueFor,
+} from '~/utils/display'
 
 const route = useRoute()
 const api = useApi()
@@ -373,11 +379,7 @@ const grantForm = reactive<{ user_id: string, level: AccessLevel }>({ user_id: '
 
 const activeAssignments = computed(() => (task.value?.assignments ?? []).filter(a => !a.revoked_at))
 const activeGrants = computed(() => (task.value?.access_grants ?? []).filter(g => !g.revoked_at))
-const isOverdue = computed(() => {
-  const t = task.value
-  if (!t?.due_date || ['completed', 'cancelled', 'archived'].includes(t.status)) return false
-  return new Date(t.due_date).getTime() < Date.now()
-})
+const isOverdue = computed(() => isOverdueFor(task.value?.due_date, task.value?.status ?? ''))
 
 // Permissions: manage = engine UPDATE (holds tasks.update_assigned or created it);
 // visibility changes additionally require the dedicated permission per the engine.
@@ -397,19 +399,6 @@ const roleLabel = (r: AssignmentRole) => ({
   supporting_pm: 'Supporting PM',
   work_item_assignee: 'Work item assignee',
 }[r])
-const priorityTone = (p: string) =>
-  p === 'critical' ? 'rose' : p === 'high' ? 'amber' : p === 'medium' ? 'gray' : 'green'
-
-function statusTone(s: string): 'green' | 'amber' | 'gray' | 'rose' {
-  switch (s) {
-    case 'completed': return 'green'
-    case 'open':
-    case 'in_progress': return 'amber'
-    case 'blocked':
-    case 'cancelled': return 'rose'
-    default: return 'gray'
-  }
-}
 
 function transitionLabel(s: TaskStatus): string {
   const map: Partial<Record<TaskStatus, string>> = {
@@ -421,10 +410,10 @@ function transitionLabel(s: TaskStatus): string {
 }
 
 function transitionClass(s: TaskStatus): string {
-  if (s === 'cancelled') return 'border-red-200 text-red-600 hover:bg-red-50'
+  if (s === 'cancelled') return 'border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-400 dark:hover:bg-rose-500/10'
   if (s === 'completed') return 'border-brand-200 bg-brand-600 text-white hover:bg-brand-700'
   if (s === 'archived') return 'border-line text-body hover:bg-hover'
-  return 'border-brand-200 text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-500/10'
+  return 'border-brand-200 text-brand-700 hover:bg-brand-50 dark:border-brand-500/40 dark:text-brand-300 dark:hover:bg-brand-500/10'
 }
 
 function reasonHint(s: TaskStatus): string {
@@ -443,23 +432,19 @@ function activityDot(type: string): string {
 }
 
 function formatDate(value: string | null): string {
-  if (!value) return '-'
-  return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  return formatDateValue(value)
 }
 
 function formatDateTime(value: string | null): string {
-  if (!value) return '-'
-  return new Date(value).toLocaleString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+  return formatDateTimeValue(value)
 }
 
 function assignerName(userId: string): string {
   if (userId === task.value?.accountable_pm?.id) return task.value.accountable_pm?.full_name ?? '-'
   const fromAssignments = task.value?.assignments.find(a => a.assigned_by_id === userId)
-  if (fromAssignments) return fromAssignments.user.id === userId ? fromAssignments.user.full_name : (fromAssignments.user.full_name)
+  if (fromAssignments) return fromAssignments.user.full_name
   const fromGrants = task.value?.access_grants.find(g => g.granted_by_id === userId)
-  if (fromGrants) return fromGrants.principal.id === userId ? fromGrants.principal.full_name : fromGrants.principal.full_name
+  if (fromGrants) return fromGrants.principal.full_name
   if (userId === auth.user.value?.id) return auth.displayName.value
   return 'a colleague'
 }

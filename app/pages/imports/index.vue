@@ -61,7 +61,6 @@
               <tr
                 v-for="job in jobs" :key="job.id"
                 class="cursor-pointer border-b border-line hover:bg-hover"
-                :class="{ '': selectedId === job.id }"
                 @click="selectJob(job.id)"
               >
                 <td class="py-3 pr-4 font-medium text-ink">
@@ -71,7 +70,7 @@
                 <td class="py-3 pr-4"><span :class="statusChip(job.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ job.status }}</span></td>
                 <td class="py-3 pr-4 text-body">
                   {{ job.total_rows }} total
-                  <span class="text-emerald-600">{{ job.successful_rows }} ok</span>,
+                  <span class="text-emerald-600 dark:text-emerald-400">{{ job.successful_rows }} ok</span>,
                   <span class="text-amber-600 dark:text-amber-400">{{ job.warning_rows }} warn</span>,
                   <span class="text-rose-600 dark:text-rose-400">{{ job.failed_rows }} failed</span>
                 </td>
@@ -131,7 +130,7 @@
           </div>
           <div class="rounded-xl bg-emerald-50 dark:bg-emerald-500/10 p-3 text-center">
             <p class="text-lg font-semibold text-emerald-700 dark:text-emerald-300">{{ selected.successful_rows }}</p>
-            <p class="text-xs text-emerald-600">ok</p>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400">ok</p>
           </div>
           <div class="rounded-xl bg-amber-50 dark:bg-amber-500/10 p-3 text-center">
             <p class="text-lg font-semibold text-amber-700 dark:text-amber-300">{{ selected.warning_rows }}</p>
@@ -185,7 +184,7 @@
           <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-body">
             <label class="flex items-center gap-2">
               <span>Initial visibility</span>
-              <select v-model="optionsDraft.visibility_mode" class="rounded-md border border-line px-2 py-1">
+              <select v-model="optionsDraft.visibility_mode" class="select-field" aria-label="Initial visibility">
                 <option value="participants">participants</option>
                 <option value="private">private</option>
                 <option value="department_scoped">department_scoped</option>
@@ -193,19 +192,19 @@
               </select>
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="optionsDraft.day_first" type="checkbox" class="h-3.5 w-3.5">
+              <input v-model="optionsDraft.day_first" type="checkbox" class="h-3.5 w-3.5 accent-brand-600">
               Day-first dates (14/03/2025)
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="optionsDraft.match_title_due" type="checkbox" class="h-3.5 w-3.5">
+              <input v-model="optionsDraft.match_title_due" type="checkbox" class="h-3.5 w-3.5 accent-brand-600">
               Duplicate rule: title + due date
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="optionsDraft.match_title_only" type="checkbox" class="h-3.5 w-3.5">
+              <input v-model="optionsDraft.match_title_only" type="checkbox" class="h-3.5 w-3.5 accent-brand-600">
               Duplicate rule: title only
             </label>
             <label class="flex items-center gap-2">
-              <input v-model="optionsDraft.reuse_task_number" type="checkbox" class="h-3.5 w-3.5">
+              <input v-model="optionsDraft.reuse_task_number" type="checkbox" class="h-3.5 w-3.5 accent-brand-600">
               Reuse TSK-pattern Task IDs
             </label>
             <button
@@ -255,7 +254,7 @@
                   <td class="py-2.5 pr-3 text-xs">
                     <p v-for="error in row.errors" :key="`e${error}`" class="text-rose-600 dark:text-rose-400">{{ error }}</p>
                     <p v-for="notice in row.notices" :key="`n${notice}`" class="text-amber-600 dark:text-amber-400">{{ notice }}</p>
-                    <p v-for="dup in row.duplicates" :key="`d${dup.task_number}${dup.kind}`" class="text-violet-600">
+                    <p v-for="dup in row.duplicates" :key="`d${dup.task_number}${dup.kind}`" class="text-violet-600 dark:text-violet-400">
                       duplicate ({{ dup.kind }}) → {{ dup.task_number }}
                     </p>
                     <p v-if="!row.errors.length && !row.notices.length && !row.duplicates.length" class="text-faint">clean</p>
@@ -287,6 +286,7 @@ const TARGET_FIELDS = [
 
 const api = useApi()
 const auth = useAuth()
+const { confirm } = useConfirm()
 const canManage = computed(() => auth.hasPermission('imports.manage'))
 const canView = computed(() => auth.hasPermission('imports.view', 'imports.manage'))
 
@@ -392,9 +392,11 @@ async function applyConfig() {
 
 async function commitSelected() {
   if (!selected.value) return
-  const confirmed = window.confirm(
-    `Commit ${committableCount.value} validated rows into DecOps? Failed rows and duplicates are excluded; this job cannot be committed twice.`,
-  )
+  const confirmed = await confirm({
+    title: 'Commit import',
+    message: `Commit ${committableCount.value} validated rows into DecOps? Failed rows and duplicates are excluded; this job cannot be committed twice.`,
+    confirmLabel: 'Commit rows',
+  })
   if (!confirmed) return
   committing.value = true
   actionError.value = ''

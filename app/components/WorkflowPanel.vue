@@ -28,7 +28,7 @@
         <div class="h-2.5 flex-1 overflow-hidden rounded-full bg-hover">
           <div
             class="h-full rounded-full transition-all"
-            :class="workflow!.task_progress_mode === 'calculated' ? 'bg-brand-500' : 'bg-indigo-400'"
+            :class="workflow!.task_progress_mode === 'calculated' ? 'bg-brand-500' : 'bg-brand-400/70'"
             :style="{ width: `${displayPercent}%` }"
           />
         </div>
@@ -78,7 +78,7 @@
               <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
                 <span class="text-faint">{{ stage.sequence_number }}.</span>
                 {{ stage.name }}
-                <AppBadge :tone="stageStatusTone(stage.status)">{{ stageStatusLabel(stage.status) }}</AppBadge>
+                <AppBadge :tone="statusTone(stage.status)">{{ stageStatusLabel(stage.status) }}</AppBadge>
                 <AppBadge tone="gray">{{ stage.execution_mode }}</AppBadge>
                 <AppBadge v-if="stage.progress_basis !== 'all_items'" tone="amber">{{ basisLabel(stage.progress_basis) }}</AppBadge>
                 <AppBadge v-if="!isActionable(stage) && stage.status === 'pending'" tone="rose">waiting</AppBadge>
@@ -111,7 +111,7 @@
                     <span class="inline-block h-2 w-2 rotate-45 rounded-[1px]"
                           :class="item.item_type === 'milestone' ? 'bg-amber-500' : 'bg-line-strong'" />
                     <span class="font-medium">{{ item.title }}</span>
-                    <AppBadge :tone="itemStatusTone(item.status)">{{ item.status.replaceAll('_', ' ') }}</AppBadge>
+                    <AppBadge :tone="statusTone(item.status)">{{ item.status.replaceAll('_', ' ') }}</AppBadge>
                     <AppBadge v-if="!item.is_required" tone="gray">optional</AppBadge>
                     <AppBadge v-if="isBlocked(item)" tone="rose">blocked by {{ blockedByNames(item) }}</AppBadge>
                   </p>
@@ -197,7 +197,7 @@
     </section>
 
     <!-- Stage modal -->
-    <div v-if="stageModal" class="modal-backdrop" @click.self="stageModal = null">
+    <div v-if="stageModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Stage editor" v-dialog="{ close: () => stageModal = null }" @click.self="stageModal = null">
       <div class="modal-card">
         <h2 class="text-lg font-semibold text-ink">{{ stageModal.existing ? 'Edit stage' : 'Add stage' }}</h2>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -246,7 +246,7 @@
     </div>
 
     <!-- Item modal -->
-    <div v-if="itemModal" class="modal-backdrop" @click.self="itemModal = null">
+    <div v-if="itemModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Work item editor" v-dialog="{ close: () => itemModal = null }" @click.self="itemModal = null">
       <div class="modal-card">
         <h2 class="text-lg font-semibold text-ink">{{ itemModal.existing ? 'Edit work item' : 'Add work item' }}</h2>
         <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -293,7 +293,7 @@
       </div>
     </div>
 
-    <div v-if="assignModal" class="modal-backdrop" @click.self="assignModal = null">
+    <div v-if="assignModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Assign work item" v-dialog="{ close: () => assignModal = null }" @click.self="assignModal = null">
       <div class="modal-card max-w-md">
         <h2 class="text-lg font-semibold text-ink">Assign “{{ assignModal.item.title }}”</h2>
         <label class="mt-4 block">
@@ -312,7 +312,7 @@
     </div>
 
     <!-- Reason modal (stage/item transitions needing justification) -->
-    <div v-if="reasonModal" class="modal-backdrop" @click.self="reasonModal = null">
+    <div v-if="reasonModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Confirm transition" v-dialog="{ close: () => reasonModal = null }" @click.self="reasonModal = null">
       <div class="modal-card max-w-md">
         <h2 class="text-lg font-semibold text-ink">{{ reasonModal.summary }}</h2>
         <p class="mt-1 text-sm text-muted">
@@ -346,6 +346,7 @@ const emit = defineEmits<{ changed: [] }>()
 
 const api = useApi()
 const auth = useAuth()
+const { confirm } = useConfirm()
 
 const workflow = ref<Workflow | null>(null)
 const panelError = ref('')
@@ -482,14 +483,12 @@ async function submitStage() {
 const reasonModal = ref<{ kind: 'stage' | 'item', id: string, to: string, summary: string, needsReason: boolean } | null>(null)
 const reasonForm = reactive({ reason: '' })
 
-const REASON_REQUIRED = new Set(['cancelled', 'pending', 'in_progress_after_completed'])
 function needsReasonFor(current: string, to: string): boolean {
   if (to === 'cancelled') return true
   if (to === 'in_progress' && current === 'completed') return true
   if (to === 'pending' && current === 'cancelled') return true
   return false
 }
-void REASON_REQUIRED
 
 function transitionStage(stage: WorkflowStage, to: string) {
   openReasonModal('stage', stage.id, to, `Stage “${stage.name}” → ${stageStatusLabel(to)}`, needsReasonFor(stage.status, to))
@@ -523,7 +522,13 @@ async function confirmReasonTransition() {
 }
 
 async function deleteStage(stage: WorkflowStage) {
-  if (!confirm(`Delete stage “${stage.name}”? This only works for empty, never-started stages.`)) return
+  const ok = await confirm({
+    title: 'Delete stage',
+    message: `Delete stage “${stage.name}”? This only works for empty, never-started stages.`,
+    confirmLabel: 'Delete stage',
+    tone: 'danger',
+  })
+  if (!ok) return
   try {
     await api.delete(`/api/v1/tasks/${props.task.id}/stages/${stage.id}`)
     await refreshAll()
@@ -588,7 +593,13 @@ async function submitItem() {
 }
 
 async function deleteItem(item: WorkItem) {
-  if (!confirm(`Delete work item “${item.title}”? Only pending/cancelled items without dependencies can be deleted.`)) return
+  const ok = await confirm({
+    title: 'Delete work item',
+    message: `Delete work item “${item.title}”? Only pending/cancelled items without dependencies can be deleted.`,
+    confirmLabel: 'Delete item',
+    tone: 'danger',
+  })
+  if (!ok) return
   try {
     await api.delete(`/api/v1/tasks/${props.task.id}/items/${item.id}`)
     await refreshAll()
@@ -682,19 +693,32 @@ function formatDateTime(value: string | null): string {
 </script>
 
 <style scoped>
+/* All colors come from the theme tokens so this panel follows light/dark and
+   the configured accent color like every other screen. */
 .stage-btn {
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
   padding: 0.25rem 0.6rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--body);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
-.stage-btn:hover { background: #f1f5f9; }
-.stage-btn.brand { border-color: #c7d2fe; color: #4f46e5; }
-.stage-btn.brand:hover { background: #eef2ff; }
+.stage-btn:hover { background: var(--hover); color: var(--ink); }
+.stage-btn.brand { border-color: var(--brand-200); color: var(--brand-700); }
+.stage-btn.brand:hover { background: var(--brand-50); }
+.dark .stage-btn.brand {
+  border-color: color-mix(in srgb, var(--brand-500) 40%, transparent);
+  color: var(--brand-300);
+}
+.dark .stage-btn.brand:hover { background: color-mix(in srgb, var(--brand-500) 10%, transparent); }
 .stage-btn.danger { border-color: #fecdd3; color: #e11d48; }
 .stage-btn.danger:hover { background: #fff1f2; }
+.dark .stage-btn.danger {
+  border-color: rgb(225 29 72 / 0.4);
+  color: #fb7185;
+}
+.dark .stage-btn.danger:hover { background: rgb(225 29 72 / 0.1); }
 
 .modal-backdrop {
   position: fixed;
@@ -703,14 +727,14 @@ function formatDateTime(value: string | null): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.4);
+  background: var(--overlay);
   padding: 1rem;
 }
 .modal-card {
   width: 100%;
   max-width: 40rem;
   border-radius: 1rem;
-  background: #fff;
+  background: var(--surface);
   padding: 1.5rem;
   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
@@ -718,42 +742,34 @@ function formatDateTime(value: string | null): string {
   display: block;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--body);
 }
 .field {
   margin-top: 0.25rem;
   width: 100%;
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line-strong);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--surface);
   outline: none;
 }
-.field:focus { border-color: #6366f1; }
+.field::placeholder { color: var(--faint); }
+.field:focus {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-500) 25%, transparent);
+}
 .dep-select {
   margin-top: 0.25rem;
   border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line-strong);
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
+  color: var(--ink);
+  background: var(--surface);
   outline: none;
   max-width: 16rem;
 }
-.btn-ghost {
-  border-radius: 0.5rem;
-  border: 1px solid #e2e8f0;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  color: #334155;
-}
-.btn-ghost:hover { background: #f1f5f9; }
-.btn-primary {
-  border-radius: 0.5rem;
-  background: #4f46e5;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #fff;
-}
-.btn-primary:hover { background: #4338ca; }
+.dep-select:focus { border-color: var(--brand-500); }
 </style>

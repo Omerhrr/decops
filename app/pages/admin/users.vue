@@ -27,12 +27,14 @@
         v-model="query"
         type="search"
         placeholder="Search by name or email…"
-        class="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500 sm:max-w-sm"
+        class="input-field sm:max-w-sm"
+        aria-label="Search employees"
         @input="debouncedLoad"
       />
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500"
+        class="select-field"
+        aria-label="Filter by status"
         @change="loadUsers"
       >
         <option value="">All statuses</option>
@@ -58,12 +60,16 @@
         </thead>
         <tbody class="divide-y divide-line">
           <tr v-if="loading">
-            <td colspan="6" class="px-4 py-8 text-center text-faint">Loading…</td>
+            <td colspan="6" class="px-4 py-3">
+              <div class="space-y-2" aria-busy="true" aria-label="Loading employees">
+                <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-hover" />
+              </div>
+            </td>
           </tr>
           <tr v-else-if="!users.length">
             <td colspan="6" class="px-4 py-8 text-center text-faint">No employees match the filters.</td>
           </tr>
-          <tr v-for="u in users" :key="u.id" class="hover:bg-hover/60">
+          <tr v-for="u in users" :key="u.id" class="transition-colors hover:bg-hover">
             <td class="px-4 py-3">
               <p class="font-medium text-ink">{{ u.full_name }}</p>
               <p class="text-xs text-muted">{{ u.email }}</p>
@@ -96,7 +102,7 @@
                 <button
                   v-if="canManage && u.account_status === 'active'"
                   type="button"
-                  class="rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                  class="btn-danger !px-2.5 !py-1.5 text-xs"
                   @click="deactivate(u)"
                 >
                   Deactivate
@@ -108,11 +114,14 @@
       </table>
     </section>
 
+    <p v-if="pageError" role="alert" class="alert-error mt-4">{{ pageError }}</p>
+
     <div v-if="totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
       <button
         type="button"
-        class="rounded-lg border border-line px-3 py-1.5 disabled:opacity-40"
+        class="btn-secondary px-3 py-1.5"
         :disabled="page <= 1"
+        aria-label="Previous page"
         @click="page--; loadUsers()"
       >
         Previous
@@ -120,15 +129,16 @@
       <span class="text-muted">Page {{ page }} of {{ totalPages }}</span>
       <button
         type="button"
-        class="rounded-lg border border-line px-3 py-1.5 disabled:opacity-40"
+        class="btn-secondary px-3 py-1.5"
         :disabled="page >= totalPages"
+        aria-label="Next page"
         @click="page++; loadUsers()"
       >
         Next
       </button>
     </div>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Create employee" v-dialog="{ close: () => showCreate = false }" @click.self="showCreate = false">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-base font-semibold text-ink">Create employee</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createUser">
@@ -157,9 +167,9 @@
               <option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</option>
             </select>
           </div>
-          <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
+          <p v-if="formError" role="alert" class="alert-error">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
+            <button type="button" class="btn-secondary" @click="showCreate = false">Cancel</button>
             <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create employee' }}
             </button>
@@ -169,7 +179,7 @@
     </div>
 
     <!-- Roles modal -->
-    <div v-if="rolesTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+    <div v-if="rolesTarget" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Global roles" v-dialog="{ close: closeRoles }" @click.self="closeRoles">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-base font-semibold text-ink">Global roles - {{ rolesTarget.full_name }}</h2>
         <p class="mt-1 text-xs text-muted">Permission changes are audited and take effect on the next request.</p>
@@ -181,13 +191,17 @@
             class="flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 py-1 pl-3 pr-2 text-xs font-medium text-brand-700 dark:text-brand-300"
           >
             {{ r.name }}
-            <button type="button" class="text-brand-400 hover:text-brand-700 dark:hover:text-brand-300" aria-label="Revoke role" @click="revokeRole(r)">✕</button>
+            <button type="button" class="text-brand-400 hover:text-brand-700 dark:hover:text-brand-300" aria-label="Revoke role" @click="revokeRole(r)">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-3.5 w-3.5" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </span>
           <span v-if="!rolesTargetRoles.length" class="text-xs text-faint">No global roles assigned.</span>
         </div>
 
         <div class="mt-4 flex gap-2">
-          <select v-model="roleToAdd" class="flex-1 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-brand-500">
+          <select v-model="roleToAdd" class="select-field flex-1" aria-label="Select a role to assign">
             <option value="" disabled>Select a role to assign…</option>
             <option v-for="r in assignableRoles" :key="r.id" :value="r.id">{{ r.name }}</option>
           </select>
@@ -200,9 +214,9 @@
             Assign
           </button>
         </div>
-        <p v-if="formError" class="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
+        <p v-if="formError" role="alert" class="alert-error mt-3">{{ formError }}</p>
         <div class="mt-4 flex justify-end">
-          <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="closeRoles">Done</button>
+          <button type="button" class="btn-secondary" @click="closeRoles">Done</button>
         </div>
       </div>
     </div>
@@ -214,6 +228,7 @@ import type { Role, RoleListPage, UserDetail, UserOut, UserPage } from '~/types/
 
 const auth = useAuth()
 const api = useApi()
+const { confirm } = useConfirm()
 
 const canManage = computed(() => auth.hasPermission('users.manage'))
 
@@ -233,6 +248,7 @@ const roleDetails = ref<Record<string, UserDetail>>({})
 const showCreate = ref(false)
 const busy = ref(false)
 const formError = ref('')
+const pageError = ref('')
 const form = reactive({ full_name: '', email: '', employee_code: '', password: '', roleId: '' })
 
 const rolesTarget = ref<UserOut | null>(null)
@@ -249,9 +265,9 @@ function detailRoles(userId: string): Role[] {
   }))
 }
 
-function statusTone(status: string): 'green' | 'red' | 'gray' {
+function statusTone(status: string) {
   if (status === 'active') return 'green'
-  if (status === 'deactivated') return 'red'
+  if (status === 'deactivated') return 'rose'
   return 'gray'
 }
 
@@ -271,7 +287,7 @@ async function loadUsers() {
     total.value = res.total
     await loadRolesForPage()
   } catch (e) {
-    formError.value = e instanceof Error ? e.message : 'Failed to load users.'
+    pageError.value = e instanceof Error ? e.message : 'Failed to load users.'
   } finally {
     loading.value = false
   }
@@ -322,7 +338,14 @@ async function createUser() {
 }
 
 async function deactivate(u: UserOut) {
-  if (!confirm(`Deactivate ${u.full_name}? Their sessions are revoked immediately.`)) return
+  const ok = await confirm({
+    title: 'Deactivate account',
+    message: `Deactivate ${u.full_name}? Their sessions are revoked immediately.`,
+    confirmLabel: 'Deactivate',
+    tone: 'danger',
+  })
+  if (!ok) return
+  formError.value = ''
   try {
     await api.post(`/api/v1/users/${u.id}/status`, {
       status: 'deactivated',
@@ -330,7 +353,7 @@ async function deactivate(u: UserOut) {
     })
     await loadUsers()
   } catch (e) {
-    alert(e instanceof Error ? e.message : 'Could not deactivate the employee.')
+    formError.value = e instanceof Error ? e.message : 'Could not deactivate the employee.'
   }
 }
 

@@ -23,20 +23,20 @@
       <svg :viewBox="`0 0 ${width} ${height}`" :width="width" :height="height" class="min-w-full" role="img" aria-label="Workflow Gantt chart">
         <!-- month/week grid -->
         <g v-for="tick in ticks" :key="`tick-${tick.x}`">
-          <line :x1="tick.x" :x2="tick.x" y1="18" :y2="height - 8" stroke="#e2e8f0" stroke-width="1" />
+          <line :x1="tick.x" :x2="tick.x" y1="18" :y2="height - 8" class="stroke-line" stroke-width="1" />
           <text :x="tick.x + 4" y="12" class="fill-faint" font-size="10">{{ tick.label }}</text>
         </g>
 
         <!-- today marker -->
-        <line v-if="todayX !== null" :x1="todayX" :x2="todayX" y1="18" :y2="height - 8" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="4 3" />
+        <line v-if="todayX !== null" :x1="todayX" :x2="todayX" y1="18" :y2="height - 8" class="stroke-rose-400" stroke-width="1.5" stroke-dasharray="4 3" />
 
         <!-- dependency lines (successor start <- predecessor end) -->
         <g v-for="dep in dependencyPaths" :key="`dep-${dep.id}`">
-          <path :d="dep.d" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)" />
+          <path :d="dep.d" fill="none" class="stroke-faint" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)" />
         </g>
         <defs>
           <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L8,4 L0,8 z" fill="#94a3b8" />
+            <path d="M0,0 L8,4 L0,8 z" class="fill-faint" />
           </marker>
         </defs>
 
@@ -57,7 +57,7 @@
           <template v-else-if="row.kind === 'milestone' && row.x1 !== null">
             <path
               :d="diamondPath(row.x1, rowY(index) + 10, 5)"
-              :fill="row.fill" stroke="#fff" stroke-width="1"
+              :fill="row.fill" class="stroke-surface" stroke-width="1"
             />
           </template>
         </g>
@@ -119,15 +119,15 @@ function latest(wf: Workflow): string | null {
 }
 
 function barFill(status: string): string {
-  if (status === 'completed') return '#94a3b8'
-  if (status === 'cancelled') return '#e2e8f0'
-  if (status === 'in_progress') return '#6366f1'
-  return 'rgba(99,102,241,0.35)'
+  if (status === 'completed') return 'var(--line-strong)'
+  if (status === 'cancelled') return 'var(--line)'
+  if (status === 'in_progress') return 'var(--brand-500)'
+  return 'color-mix(in srgb, var(--brand-500) 35%, transparent)'
 }
 function milestoneFill(m: WorkItem): string {
-  if (m.status === 'completed') return '#94a3b8'
-  if (m.status === 'in_progress') return '#f59e0b'
-  return '#fbbf24'
+  if (m.status === 'completed') return 'var(--line-strong)'
+  if (m.status === 'in_progress') return '#d97706'
+  return '#f59e0b'
 }
 
 function milestoneRows(stage: WorkflowStage): WorkItem[] {

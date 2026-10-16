@@ -23,10 +23,10 @@
     </section>
 
     <section class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <div v-if="loading" class="rounded-2xl border border-line bg-surface p-8 text-center text-faint lg:col-span-2">
-        Loading…
+      <div v-if="loading" class="empty-state rounded-2xl border border-line bg-surface lg:col-span-2">
+        Loading departments…
       </div>
-      <div v-else-if="!departments.length" class="rounded-2xl border border-line bg-surface p-8 text-center text-faint lg:col-span-2">
+      <div v-else-if="!departments.length" class="empty-state rounded-2xl border border-line bg-surface lg:col-span-2">
         No departments yet. Create the first one to start assigning employees.
       </div>
 
@@ -69,7 +69,7 @@
             <button
               v-if="canManage"
               type="button"
-              class="text-xs text-red-500 hover:text-red-700"
+              class="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400"
               @click="removeMember(d, m.user_id, m.user?.full_name)"
             >
               Remove
@@ -79,18 +79,18 @@
 
         <!-- Add member -->
         <div v-if="canManage" class="mt-3 flex gap-2 border-t border-line pt-3">
-          <select v-model="memberPick[d.id]" class="flex-1 rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+          <select v-model="memberPick[d.id]" class="select-field flex-1" aria-label="Add employee to department">
             <option value="" disabled>Add employee…</option>
             <option v-for="u in addableUsers(d)" :key="u.id" :value="u.id">{{ u.full_name }}</option>
           </select>
-          <select v-model="rolePick[d.id]" class="rounded-lg border border-line px-2 py-1.5 text-sm outline-none focus:border-brand-500">
+          <select v-model="rolePick[d.id]" class="select-field" aria-label="Membership role">
             <option value="member">member</option>
             <option value="lead">lead</option>
           </select>
           <button
             type="button"
             :disabled="!memberPick[d.id]"
-            class="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-canvas disabled:opacity-40"
+            class="btn-primary !px-3 !py-1.5 text-xs"
             @click="addMember(d)"
           >
             Add
@@ -99,7 +99,9 @@
       </article>
     </section>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true">
+    <p v-if="actionError" role="alert" class="alert-error mt-4">{{ actionError }}</p>
+
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Create department" v-dialog="{ close: () => showCreate = false }" @click.self="showCreate = false">
       <div class="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-base font-semibold text-ink">Create department</h2>
         <form class="mt-4 space-y-3" @submit.prevent="createDepartment">
@@ -118,9 +120,9 @@
               <option v-for="u in allUsers" :key="u.id" :value="u.id">{{ u.full_name }} ({{ u.employee_code }})</option>
             </select>
           </div>
-          <p v-if="formError" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ formError }}</p>
+          <p v-if="formError" role="alert" class="alert-error">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="rounded-lg border border-line px-3 py-2 text-sm" @click="showCreate = false">Cancel</button>
+            <button type="button" class="btn-secondary" @click="showCreate = false">Cancel</button>
             <button type="submit" :disabled="busy" class="btn-primary">
               {{ busy ? 'Creating…' : 'Create department' }}
             </button>
@@ -136,6 +138,7 @@ import type { Department, DepartmentDetail, DepartmentMembership, UserOut, UserP
 
 const auth = useAuth()
 const api = useApi()
+const { confirm } = useConfirm()
 
 const canManage = computed(() => auth.hasPermission('departments.manage'))
 
@@ -146,6 +149,7 @@ const loading = ref(true)
 const showCreate = ref(false)
 const busy = ref(false)
 const formError = ref('')
+const actionError = ref('')
 const depForm = reactive({ name: '', description: '', lead_user_id: '' })
 const memberPick = reactive<Record<string, string>>({})
 const rolePick = reactive<Record<string, 'member' | 'lead'>>({})
@@ -204,6 +208,7 @@ async function addMember(d: Department) {
   const userId = memberPick[d.id]
   if (!userId) return
   busy.value = true
+  actionError.value = ''
   try {
     const detail = await api.post<DepartmentDetail>(`/api/v1/departments/${d.id}/members`, {
       user_id: userId,
@@ -214,19 +219,26 @@ async function addMember(d: Department) {
     if (idx >= 0) departments.value[idx] = detail
     memberPick[d.id] = ''
   } catch (e) {
-    alert(e instanceof Error ? e.message : 'Could not add the member.')
+    actionError.value = e instanceof Error ? e.message : 'Could not add the member.'
   } finally {
     busy.value = false
   }
 }
 
 async function removeMember(d: Department, userId: string, name?: string) {
-  if (!confirm(`Remove ${name || 'this employee'} from ${d.name}?`)) return
+  const ok = await confirm({
+    title: 'Remove member',
+    message: `Remove ${name || 'this employee'} from ${d.name}?`,
+    confirmLabel: 'Remove',
+    tone: 'danger',
+  })
+  if (!ok) return
+  actionError.value = ''
   try {
     await api.delete(`/api/v1/departments/${d.id}/members/${userId}`)
     await loadDepartments()
   } catch (e) {
-    alert(e instanceof Error ? e.message : 'Could not remove the member.')
+    actionError.value = e instanceof Error ? e.message : 'Could not remove the member.'
   }
 }
 

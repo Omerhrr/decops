@@ -35,6 +35,7 @@
           </span>
         </div>
       </div>
+      <p v-if="exportError" role="alert" class="alert-error mt-4">{{ exportError }}</p>
     </section>
 
     <!-- Not authorized -->

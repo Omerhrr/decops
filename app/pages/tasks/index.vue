@@ -139,7 +139,7 @@
       </button>
     </div>
 
-    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" @click.self="showCreate = false">
+    <div v-if="showCreate" class="fixed inset-0 z-50 flex items-center justify-center bg-overlay p-4" role="dialog" aria-modal="true" aria-label="Create task" v-dialog="{ close: () => showCreate = false }" @click.self="showCreate = false">
       <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-surface p-6 shadow-xl">
         <h2 class="text-lg font-semibold text-ink">Create task</h2>
         <p class="mt-1 text-sm text-muted">
@@ -261,9 +261,6 @@ const form = reactive({
 
 const statusLabel = (s: string) => s.replaceAll('_', ' ')
 const visibilityLabel = (v: string) => v.replaceAll('_', ' ')
-const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1)
-const priorityTone = (p: string) =>
-  p === 'critical' ? 'rose' : p === 'high' ? 'amber' : p === 'medium' ? 'gray' : 'green'
 
 const hasActiveFilters = computed(() =>
   Boolean(query.value.trim() || statusFilter.value || priorityFilter.value))
@@ -274,27 +271,6 @@ function clearFilters() {
   priorityFilter.value = ''
   page.value = 1
   loadTasks()
-}
-
-function statusTone(s: string): 'green' | 'amber' | 'gray' | 'rose' {
-  switch (s) {
-    case 'completed': return 'green'
-    case 'open':
-    case 'in_progress': return 'amber'
-    case 'blocked': return 'rose'
-    case 'cancelled': return 'rose'
-    default: return 'gray'
-  }
-}
-
-function isOverdue(t: Task): boolean {
-  if (!t.due_date || ['completed', 'cancelled', 'archived'].includes(t.status)) return false
-  return new Date(t.due_date).getTime() < Date.now()
-}
-
-function formatDate(value: string | null): string {
-  if (!value) return '-'
-  return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 function openTask(id: string) {

@@ -106,6 +106,8 @@
         </div>
       </footer>
     </div>
+
+    <ConfirmDialog />
   </div>
 </template>
 
