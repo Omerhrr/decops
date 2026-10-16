@@ -85,3 +85,54 @@ export function initials(fullName: string): string {
   const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : ''
   return (first + last).toUpperCase()
 }
+
+// Friendly names for permission codes. The catalogue is fixed, so a static map
+// keeps the role editor free of internal identifiers.
+const PERMISSION_LABELS: Record<string, string> = {
+  'attachments.upload': 'Upload attachments',
+  'audit.read': 'View audit log',
+  'audit.security.read': 'View security events',
+  'blockers.escalate': 'Escalate blockers',
+  'blockers.report': 'Report blockers',
+  'comments.create': 'Write comments',
+  'dashboards.view': 'View dashboards',
+  'departments.manage': 'Manage departments',
+  'exports.approved': 'Export approved data',
+  'imports.manage': 'Run imports',
+  'imports.view': 'View import history',
+  'milestones.manage': 'Manage milestones',
+  'profile.read': 'View own profile',
+  'profile.update': 'Edit own profile',
+  'progress.update': 'Update task progress',
+  'reports.department.view': 'View department reports',
+  'reports.view': 'View management reports',
+  'review.approve': 'Approve reviews',
+  'review.reject': 'Reject reviews',
+  'review.request': 'Request reviews',
+  'review.request_changes': 'Request changes in review',
+  'review.view_submitted': 'View submitted reviews',
+  'roles.assign': 'Assign roles',
+  'settings.org.manage': 'Manage organization profile',
+  'system.config.manage': 'Manage system configuration',
+  'system.health.inspect': 'Check system health',
+  'system.settings.manage': 'Manage system settings',
+  'tasks.approve': 'Approve tasks',
+  'tasks.assign_department': 'Assign across departments',
+  'tasks.create': 'Create tasks',
+  'tasks.manage_all': 'Manage all tasks',
+  'tasks.update_assigned': 'Edit assigned tasks',
+  'tasks.view_authorized': 'View authorized tasks',
+  'tasks.view_department': 'View department tasks',
+  'users.manage': 'Manage users',
+  'work_items.update_assigned': 'Edit assigned work items',
+  'workflows.configure': 'Configure workflows',
+  'workload.view': 'View workload',
+}
+
+export function permissionLabel(code: string): string {
+  return PERMISSION_LABELS[code] ?? capitalize(statusLabel(code.split('.').pop() ?? code))
+}
+
+export function permissionGroupName(prefix: string): string {
+  return capitalize(statusLabel(prefix))
+}

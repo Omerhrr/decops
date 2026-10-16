@@ -127,7 +127,7 @@
             <div class="mt-3 max-h-80 space-y-4 overflow-y-auto rounded-xl border border-line p-3">
               <fieldset v-for="group in groupedPermissions" :key="group.prefix" class="space-y-1.5">
                 <legend class="px-1 text-xs font-semibold uppercase tracking-wider text-faint">
-                  {{ group.prefix }}
+                  {{ permissionGroupName(group.prefix) }}
                 </legend>
                 <label
                   v-for="perm in group.items"
@@ -142,8 +142,11 @@
                     class="mt-0.5 h-4 w-4 rounded border-line-strong accent-brand-600"
                   >
                   <span class="min-w-0">
-                    <span class="block font-mono text-xs text-ink">{{ perm.code }}</span>
-                    <span class="block truncate text-xs text-muted">{{ perm.description || perm.code }}</span>
+                    <span class="block truncate text-sm font-medium text-ink">{{ permissionLabel(perm.code) }}</span>
+                    <span
+                      v-if="perm.description && perm.description !== perm.code"
+                      class="block truncate text-xs text-muted"
+                    >{{ perm.description }}</span>
                   </span>
                 </label>
               </fieldset>
@@ -212,8 +215,14 @@ const groupedPermissions = computed(() => {
   const needle = permissionFilter.value.trim().toLowerCase()
   const groups = new Map<string, Permission[]>()
   for (const perm of permissions.value) {
-    if (needle && !perm.code.toLowerCase().includes(needle) && !(perm.description ?? '').toLowerCase().includes(needle)) {
-      continue
+    if (needle) {
+      const haystack = [
+        perm.code,
+        permissionLabel(perm.code),
+        permissionGroupName(perm.code.split('.')[0] ?? 'other'),
+        perm.description ?? '',
+      ].join(' ').toLowerCase()
+      if (!haystack.includes(needle)) continue
     }
     const prefix = perm.code.split('.')[0] ?? 'other'
     if (!groups.has(prefix)) groups.set(prefix, [])
