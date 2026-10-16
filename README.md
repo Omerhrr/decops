@@ -71,7 +71,8 @@ talks to one origin and session cookies remain first-party HttpOnly.
 │   │   │                   #   delivery), email_sender, outbox_worker,
 │   │   │                   #   import (staged pipeline: validate → report →
 │   │   │                   #   batched retry-safe commit)
-│   │   └── seeds/          # Idempotent RBAC matrix + admin seed
+│   │   └── seeds/          # Idempotent RBAC matrix, admin, demo departments,
+│                         #   staff, and task register seed
 │   ├── alembic/            # Migrations (foundation, Phase 4, Phase 5, Phase 6, Phase 8)
 │   └── tests/              # Pytest: auth, authorization, transitions, audit,
 │   │                       #   access policy, assignment policy, cross-task isolation,
@@ -89,7 +90,7 @@ Backend (from `backend/`):
 ```bash
 uv sync                                   # install deps into .venv
 uv run alembic upgrade head               # apply migrations
-uv run python -m app.seeds.seed           # seed roles + admin (idempotent)
+uv run python -m app.seeds.seed           # seed roles, admin, demo data (idempotent)
 uv run uvicorn app.main:app --port 8000   # start API
 ```
 
@@ -105,6 +106,10 @@ Default seed administrator (override via env, see `backend/.env.example`):
 ```
 admin@interdec.com / DecOps!2026
 ```
+
+The seed also creates three departments, six demo staff accounts
+(password `Interdec!2026`), and an 18 task register so dashboards, charts,
+and PDF exports show meaningful data on first launch. Every step is idempotent.
 
 ## Environment configuration
 
