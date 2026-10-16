@@ -122,7 +122,7 @@ body {
   @apply bg-canvas text-body font-sans;
 }
 
-/* Consistent focus ring for accessibility (spec: accessible forms and navigation) */
+/* Consistent focus ring for accessibility */
 *:focus-visible {
   @apply outline-2 outline-offset-2 outline-brand-600;
 }

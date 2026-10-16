@@ -80,7 +80,7 @@ const route = useRoute()
 const sections = computed<NavSection[]>(() => {
   const workspace: NavItem[] = [
     { to: '/', label: 'Dashboard', icon: 'home', exact: true },
-    // The register lists engine-authorized tasks only, so it is safe for everyone.
+    // The register lists only tasks the actor may view, so it is safe for everyone.
     { to: '/tasks', label: 'Tasks', icon: 'tasks' },
     { to: '/my-tasks', label: 'My Tasks', icon: 'myTasks' },
   ]
@@ -100,7 +100,7 @@ const sections = computed<NavSection[]>(() => {
   if (auth.hasPermission('departments.manage', 'users.manage')) {
     administration.push({ to: '/admin/departments', label: 'Departments', icon: 'departments' })
   }
-  // Import center: Company Administration only (spec restriction).
+  // Import center is restricted to company administration roles.
   if (auth.hasPermission('imports.manage', 'imports.view')) {
     administration.push({ to: '/imports', label: 'Imports', icon: 'imports' })
   }

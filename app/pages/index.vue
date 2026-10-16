@@ -208,7 +208,7 @@
       aria-label="Administration"
     >
       <h2 class="text-base font-semibold text-ink">Administration</h2>
-      <p class="page-subtitle">Identity administration is permission-gated; these areas are audited.</p>
+      <p class="page-subtitle">These areas are limited to authorized administrators; every change is audited.</p>
       <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <NuxtLink
           v-if="auth.hasPermission('users.manage')"

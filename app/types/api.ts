@@ -1,5 +1,4 @@
-// Shared API types mirroring the backend response schemas (typed API clients -
-// spec technology_stack.frontend.requirements)
+// Shared API types mirroring the backend response schemas.
 
 export interface RoleBrief {
   id: string
@@ -51,7 +50,7 @@ export interface UserPage {
   page_size: number
 }
 
-// ---------- Phase 3: administration ----------
+// ---------- Administration ----------
 
 export interface Permission {
   id: string
@@ -123,7 +122,7 @@ export interface DepartmentDetail extends Department {
   memberships: DepartmentMembership[]
 }
 
-// ---------- Phase 4: task management ----------
+// ---------- Task management ----------
 
 export type TaskStatus =
   | 'draft'
@@ -228,7 +227,7 @@ export interface TransitionOptions {
   allowed_transitions: TaskStatus[]
 }
 
-// ---------- Phase 5: workflow engine ----------
+// ---------- Workflow engine ----------
 
 export type StageStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled'
 export type WorkItemStatus = StageStatus
@@ -333,7 +332,7 @@ export interface WorkflowTemplate {
   updated_at: string
 }
 
-// ---------- Phase 6: collaboration & notifications ----------
+// ---------- Collaboration & notifications ----------
 
 export interface Comment {
   id: string
@@ -381,7 +380,7 @@ export interface NotificationPreference {
   email_enabled: boolean
 }
 
-// ---------- Phase 7: dashboards & reporting ----------
+// ---------- Dashboards & reporting ----------
 
 export interface PersonalSummary {
   assigned_active: number
@@ -579,7 +578,7 @@ export interface DepartmentWorkspace {
 }
 
 // ---------------------------------------------------------------------------
-// Phase 8 - CSV Migration (imports)
+// CSV migration (imports)
 // ---------------------------------------------------------------------------
 
 export type ImportJobStatus = 'draft' | 'validated' | 'committed' | 'failed'

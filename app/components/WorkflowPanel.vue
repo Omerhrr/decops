@@ -3,7 +3,7 @@
     Loading workflow…
   </div>
   <div v-else class="space-y-6">
-    <!-- Progress + calculation method (AC-06) -->
+    <!-- Progress + calculation method -->
     <section class="rounded-2xl border border-line bg-surface p-5">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>

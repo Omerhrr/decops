@@ -185,10 +185,10 @@
             <label class="flex items-center gap-2">
               <span>Initial visibility</span>
               <select v-model="optionsDraft.visibility_mode" class="select-field" aria-label="Initial visibility">
-                <option value="participants">participants</option>
-                <option value="private">private</option>
-                <option value="department_scoped">department_scoped</option>
-                <option value="custom">custom</option>
+                <option value="participants">Participants</option>
+                <option value="private">Private</option>
+                <option value="department_scoped">Department scoped</option>
+                <option value="custom">Custom</option>
               </select>
             </label>
             <label class="flex items-center gap-2">
@@ -205,7 +205,7 @@
             </label>
             <label class="flex items-center gap-2">
               <input v-model="optionsDraft.reuse_task_number" type="checkbox" class="h-3.5 w-3.5 accent-brand-600">
-              Reuse TSK-pattern Task IDs
+              Keep original task IDs
             </label>
             <button
               type="button"

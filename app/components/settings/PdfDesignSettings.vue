@@ -5,7 +5,7 @@
         <div>
           <h2 id="pdf-design-title" class="text-base font-semibold text-ink">PDF export design</h2>
           <p class="page-subtitle">
-            Controls the look of every PDF report (WeasyPrint): cover, header, footer, tables.
+            Controls the look of every PDF export: cover, header, footer, and tables.
           </p>
         </div>
         <button type="button" class="btn-secondary shrink-0" :disabled="previewing" @click="preview">
@@ -182,7 +182,7 @@
               </div>
             </div>
             <p class="mt-3 text-xs text-muted">
-              Sketch only. Use Preview PDF for the exact WeasyPrint output with sample data.
+              Sketch only. Use Preview PDF for the exact generated output with sample data.
             </p>
           </div>
         </div>

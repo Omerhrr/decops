@@ -1,6 +1,6 @@
 <template>
-  <figure class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6" role="img" :aria-label="chartLabel">
-    <svg :viewBox="`0 0 ${size} ${size}`" class="h-40 w-40 shrink-0" xmlns="http://www.w3.org/2000/svg">
+  <figure class="flex flex-col items-center gap-4" role="img" :aria-label="chartLabel">
+    <svg :viewBox="`0 0 ${size} ${size}`" class="h-36 w-36 shrink-0" xmlns="http://www.w3.org/2000/svg">
       <g transform="rotate(-90 70 70)">
         <circle
           v-for="(segment, i) in segments"
@@ -16,19 +16,19 @@
           <title>{{ `${segment.label}: ${segment.value}` }}</title>
         </circle>
       </g>
-      <text x="70" y="66" text-anchor="middle" class="fill-ink" font-size="26" font-weight="600">{{ total }}</text>
+      <text x="70" y="66" text-anchor="middle" class="fill-ink" :font-size="total >= 1000 ? 21 : 26" font-weight="600">{{ total }}</text>
       <text x="70" y="84" text-anchor="middle" class="fill-faint" font-size="10" letter-spacing="1">TASKS</text>
     </svg>
 
-    <ul class="grid w-full grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-1">
+    <ul class="grid w-full max-w-xs grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
       <li
         v-for="segment in segments"
         :key="segment.label"
-        class="flex items-center gap-2"
+        class="flex min-w-0 items-center gap-2"
       >
         <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: segment.color }" aria-hidden="true" />
-        <span class="text-muted">{{ segment.label }}</span>
-        <span class="ml-auto font-semibold text-ink">{{ segment.value }}</span>
+        <span class="min-w-0 truncate text-muted" :title="segment.label">{{ segment.label }}</span>
+        <span class="ml-auto shrink-0 font-semibold tabular-nums text-ink">{{ segment.value }}</span>
       </li>
     </ul>
   </figure>

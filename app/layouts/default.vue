@@ -101,7 +101,7 @@
 
       <footer class="border-t border-line bg-surface">
         <div class="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-xs text-faint sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>DecOps v1.1 · Internal Operations Management System</p>
+          <p>DecOps · Internal Operations Management System</p>
           <p>{{ orgName }}</p>
         </div>
       </footer>

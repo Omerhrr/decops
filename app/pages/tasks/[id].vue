@@ -140,7 +140,7 @@
 
         <section class="rounded-2xl border border-line bg-surface p-5">
           <h2 class="text-sm font-semibold text-ink">Activity history</h2>
-          <p class="mt-1 text-xs text-faint">Every creation, transition, assignment, and access change on this task (AC-12).</p>
+          <p class="mt-1 text-xs text-faint">Every creation, transition, assignment, and access change on this task.</p>
           <ol v-if="activity.length" class="mt-4 space-y-4">
             <li v-for="a in activity" :key="a.id" class="relative border-l-2 border-line pl-4">
               <span class="absolute -left-[7px] top-1 h-3 w-3 rounded-full border-2 border-surface" :class="activityDot(a.activity_type)" />

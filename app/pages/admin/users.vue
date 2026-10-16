@@ -9,7 +9,7 @@
         </nav>
         <h1 class="mt-1 text-xl font-semibold text-ink">User administration</h1>
         <p class="mt-1 text-sm text-muted">
-          Employees, account status, and global role assignment (MOD-002). All changes are audited.
+          Employees, account status, and global role assignment. All changes are audited.
         </p>
       </div>
       <button

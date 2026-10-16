@@ -6,7 +6,7 @@
         {{ workload?.scope === 'all'
           ? 'All departments (management reporting scope).'
           : 'Departments you lead or belong to.' }}
-        Task contents inside each workspace are still filtered by your task access policies.
+        Task contents inside each workspace are still filtered by your access to each task.
       </p>
     </section>
 
@@ -20,7 +20,7 @@
       <div v-else-if="error" class="mt-6 rounded-2xl border border-line bg-surface p-10 text-center">
         <p class="text-sm font-medium text-body">No department reporting access</p>
         <p class="mt-1 text-sm text-faint">
-          Department workspaces require the <code>reports.view</code> or <code>reports.department.view</code> permission.
+          Department workspaces are available to roles with reporting access. Ask an administrator if you need them.
         </p>
       </div>
     <div v-else-if="workload" class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

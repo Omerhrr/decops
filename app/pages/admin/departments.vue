@@ -9,7 +9,7 @@
         </nav>
         <h1 class="mt-1 text-xl font-semibold text-ink">Department management</h1>
         <p class="mt-1 text-sm text-muted">
-          Departments, leads, and employee memberships (MOD-002). All changes are audited.
+          Departments, leads, and employee memberships. All changes are audited.
         </p>
       </div>
       <button

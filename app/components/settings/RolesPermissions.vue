@@ -5,7 +5,7 @@
         <div>
           <h2 class="text-base font-semibold text-ink">Roles</h2>
           <p class="page-subtitle">
-            System roles mirror the approved spec matrix and stay read-only. Custom roles are fully editable.
+            System roles ship with a fixed permission set and stay read-only. Custom roles are fully editable.
           </p>
         </div>
         <button type="button" class="btn-primary shrink-0" @click="openCreate">

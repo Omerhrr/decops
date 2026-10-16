@@ -5,7 +5,7 @@
         <div>
           <h1 class="page-title">My Tasks</h1>
           <p class="page-subtitle">
-            Quick access to the work assigned to you; the same engine-authorized set as the register.
+            Quick access to the work assigned to you, drawn from the same task register.
           </p>
         </div>
         <div class="inline-flex rounded-xl border border-line bg-elevated p-1" role="tablist" aria-label="Task scope">

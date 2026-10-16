@@ -42,8 +42,8 @@
     <section v-if="!canSeeCompletion && !canSeeWorkload" class="mt-6 rounded-2xl border border-line bg-surface p-10 text-center">
       <p class="text-sm font-medium text-body">No reporting access</p>
       <p class="mt-1 text-sm text-faint">
-        Reporting requires the <code>reports.view</code> or <code>reports.department.view</code> permission.
-        {{ auth.hasPermission('exports.approved') ? 'You can still use the export buttons above.' : '' }}
+        Reporting is available to roles with reporting access.
+        {{ auth.hasPermission('exports.approved') ? 'You can still use the export buttons above.' : 'Ask an administrator if you need it.' }}
       </p>
     </section>
 

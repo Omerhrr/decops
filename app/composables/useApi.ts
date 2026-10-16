@@ -1,6 +1,6 @@
 // Typed API client. All requests go through the Nuxt server proxy on this
 // origin (/api/** -> FastAPI :8000), so session cookies stay first-party and
-// HttpOnly. Centralized error handling per spec frontend requirements.
+// HttpOnly. Centralized error handling for every request.
 
 import type { ApiErrorBody } from '~/types/api'
 

@@ -9,7 +9,7 @@
         </nav>
         <h1 class="mt-1 text-xl font-semibold text-ink">Task register</h1>
         <p class="mt-1 text-sm text-muted">
-          Every task you are authorized to see (MOD-003). Access is evaluated per task by the policy engine.
+          Every task your role and assignments give you access to, checked per task.
         </p>
       </div>
       <button
@@ -36,7 +36,7 @@
       />
       <select v-model="statusFilter" class="select-field" aria-label="Filter by status" @change="loadTasks">
         <option value="">All statuses</option>
-        <option v-for="s in STATUSES" :key="s" :value="s">{{ statusLabel(s) }}</option>
+        <option v-for="s in STATUSES" :key="s" :value="s">{{ capitalize(statusLabel(s)) }}</option>
       </select>
       <select v-model="priorityFilter" class="select-field" aria-label="Filter by priority" @change="loadTasks">
         <option value="">All priorities</option>
@@ -109,7 +109,7 @@
                 <span class="text-xs text-muted">{{ t.percent_complete }}%</span>
               </div>
             </td>
-            <td class="whitespace-nowrap px-4 py-3 text-xs" :class="isOverdue(t) ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-muted'">
+            <td class="whitespace-nowrap px-4 py-3 text-xs" :class="isOverdue(t.due_date, t.status) ? 'font-medium text-rose-600 dark:text-rose-400' : 'text-muted'">
               {{ formatDate(t.due_date) }}
             </td>
           </tr>
