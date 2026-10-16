@@ -1,4 +1,4 @@
-"""Import API schemas (Phase 8 CSV Migration)."""
+"""Import API schemas (CSV Migration)."""
 
 import uuid
 from datetime import datetime
@@ -9,7 +9,7 @@ from app.models import ImportJobStatus
 
 
 class ImportOptions(BaseModel):
-    """Operator-approved import options (spec legacy_data_policy)."""
+    """Operator-approved import options."""
 
     visibility_mode: str = Field(
         default="participants",

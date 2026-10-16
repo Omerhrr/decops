@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 class JSONType(types.TypeDecorator):
-    """JSON that maps to JSONB on PostgreSQL (indexable, spec-ready) and JSON elsewhere."""
+    """JSON that maps to JSONB on PostgreSQL (indexable) and JSON elsewhere."""
 
     impl = types.JSON
     cache_ok = True
@@ -23,7 +23,7 @@ class JSONType(types.TypeDecorator):
 
 class UTCDateTime(types.TypeDecorator):
     """DateTime that always stores and returns timezone-aware UTC values
-    (spec data_model.conventions.timestamps: store UTC)."""
+    ."""
 
     impl = types.DateTime
     cache_ok = True

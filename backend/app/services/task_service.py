@@ -1,13 +1,13 @@
-"""Task management service (MOD-003, Phase 4).
+"""Task management service ().
 
 Every read and mutation flows through the access-policy engine with freshly
-loaded actor state (immediate revocation), the assignment policy (DEC-02,
+loaded actor state (immediate revocation), the assignment policy (
 active assignees, department scoping), and the lifecycle state machine
 (reason-required transitions). All mutations are audited AND recorded on the
-task's activity timeline (AC-12).
+task's activity timeline.
 
 Authorization failures surface as 404 (not 403) so the API never confirms the
-existence of restricted tasks (spec api conventions + AC-10).
+existence of restricted tasks.
 """
 
 import uuid
@@ -141,7 +141,7 @@ def _require_permission_codes(actor: User, *codes: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Activity timeline (AC-12, user-facing)
+# Activity timeline (user-facing)
 # ---------------------------------------------------------------------------
 
 def record_activity(
@@ -203,7 +203,7 @@ def list_tasks_for_actor(
     stmt = select(Task).options(
         joinedload(Task.accountable_pm),
         joinedload(Task.task_departments).joinedload(TaskDepartment.department),
-        # Phase 9 perf: build_policy reads assignments + grants per candidate;
+        # Perf: build_policy reads assignments + grants per candidate;
         # eager-load them once so the authorization loop is O(1) queries.
         selectinload(Task.assignments),
         selectinload(Task.access_grants),
@@ -267,7 +267,7 @@ def create_task(
     grant_access_level: AccessLevel = AccessLevel.view,
     request_id: str | None = None,
 ) -> Task:
-    """AC-01: authorized user creates a task with unique number, title,
+    """Authorized user creates a task with unique number, title,
     accountable PM, and due date. Creation establishes a valid access policy."""
     actor_ctx = build_actor_context(db, actor)
 
@@ -304,7 +304,7 @@ def create_task(
     if grant_access_level == AccessLevel.denied and grant_users:
         raise ValidationFailedError("Cannot create a task with an explicit denial; remove the user instead.")
 
-    # Validate the policy structurally BEFORE persisting (spec: "Task creation
+    # Validate the policy structurally BEFORE persisting
     # must establish a valid access policy").
     draft_policy = AccessPolicy(
         task_id=uuid.uuid4(),
@@ -373,7 +373,7 @@ def update_task(
     fields: dict,
     request_id: str | None = None,
 ) -> Task:
-    """Permitted-field update with optimistic concurrency (AC-18).
+    """Permitted-field update with optimistic concurrency.
 
     `fields` contains ONLY the keys the client actually sent (model_fields_set),
     so PATCH semantics distinguish "not sent" from "explicitly cleared".
@@ -450,7 +450,7 @@ def update_task(
     if not changes:
         return task
 
-    task.version += 1  # AC-18: every writer bumps the version
+    task.version += 1  # Every writer bumps the version
     summary = f"Updated {', '.join(sorted(changes))} on '{task.title}'"
     record_activity(db, task=task, actor=actor, activity_type="task.updated",
                     summary=summary, detail={"changes": changes})
@@ -480,7 +480,7 @@ def _serializable(value):
     return value
 
 
-# Operation required per lifecycle target (engine matrix, spec roles).
+# Operation required per lifecycle target (engine matrix).
 _TRANSITION_OPERATION = {
     TaskStatus.completed: Operation.COMPLETE,
     TaskStatus.cancelled: Operation.CANCEL,
@@ -497,7 +497,7 @@ def transition_task(
     reason: str | None = None,
     request_id: str | None = None,
 ) -> Task:
-    """Backend-validated, authorized lifecycle transition (spec transition_rules)."""
+    """Backend-validated, authorized lifecycle transition."""
     from_status = TaskStatus(_enum_value(task.status))
     target = validate_transition(from_status, to_status, reason=reason)
 
@@ -537,7 +537,7 @@ def transition_task(
         metadata={"from_status": from_status.value, "to_status": target.value},
     )
 
-    # Notification events (Phase 6) - same-transaction outbox rows.
+    # Notification events - same-transaction outbox rows.
     from app.services import notification_service as _ns
 
     _status_events = {
@@ -608,7 +608,7 @@ def assign_user(
         raise ConflictError("This user already holds that assignment role.", code="already_assigned")
 
     if role == AssignmentRoleType.accountable_pm and task.accountable_pm_id != user_id:
-        # DEC-02: revoke the previous accountable PM's assignment row.
+        # : revoke the previous accountable PM's assignment row.
         previous = db.scalars(select(TaskAssignment).where(
             TaskAssignment.task_id == task.id,
             TaskAssignment.assignment_role == AssignmentRoleType.accountable_pm.value,
@@ -640,7 +640,7 @@ def assign_user(
     assignment = TaskAssignment(
         task_id=task.id, user_id=user_id,
         assignment_role=AssignmentRoleType(role.value),
-        assigned_by_id=actor.id,  # MOD-003: record the assigning user
+        assigned_by_id=actor.id,  # : record the assigning user
     )
     db.add(assignment)
     db.flush()
@@ -748,7 +748,7 @@ def add_access_grant(
     access_level: AccessLevel, request_id: str | None = None,
 ) -> TaskAccessGrant:
     """Grant (or explicitly deny) a user; requires the visibility-change
-    operation and produces an audit event (spec task_visibility.rules)."""
+    operation and produces an audit event."""
     try:
         access_policy.require_access(
             build_actor_context(db, actor), build_policy(db, task),

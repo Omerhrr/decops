@@ -1,6 +1,6 @@
-"""Reporting service (MOD-007, Phase 7): authorized trends, workload, exports.
+"""Reporting service (): authorized trends, workload, exports.
 
-Authorization model (spec RBAC matrix):
+Authorization model :
 - task-completion  -> reports.view (Management); aggregates over the actor's
   engine-visible tasks only.
 - department-workload -> reports.view (all departments) OR
@@ -82,7 +82,7 @@ def task_completion_report(db: Session, actor: User, *, weeks: int = WEEK_WINDOW
         counts[_status_of(t).value] += 1
     active = sum(counts[s.value] for s in ACTIVE_STATUSES)
 
-    # Milestone progress across authorized tasks (MOD-007 "Milestone progress")
+    # Milestone progress across authorized tasks ("Milestone progress")
     milestone_rows = db.scalars(
         select(WorkItem).where(
             WorkItem.task_id.in_([t.id for t in visible]) if visible else False,
@@ -191,7 +191,7 @@ def department_workload_report(
 
 
 def department_workspace(db: Session, actor: User, department: Department) -> dict:
-    """Department Workspace page payload (spec frontend_pages.Department
+    """Department Workspace page payload
     Workspace): authorized departmental tasks, workload, blocked work,
     upcoming deadlines, team assignments."""
     today = datetime.now(UTC).date()

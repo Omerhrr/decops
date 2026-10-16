@@ -1,8 +1,8 @@
-"""Task management endpoints (MOD-003, Phase 4).
+"""Task management endpoints.
 
 Route-level: global permission gates for task creation only. Every other
 operation is guarded by the task access-policy engine inside the service -
-a user who merely knows a task id gets 404, never 403 (AC-10).
+a user who merely knows a task id gets 404, never 403.
 """
 
 import uuid

@@ -1,4 +1,4 @@
-"""Health and system checks (spec deployment: health checks)."""
+"""Health and system checks."""
 
 from fastapi import APIRouter
 from sqlalchemy import text

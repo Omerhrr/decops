@@ -1,4 +1,4 @@
-"""Department models (spec data_model: departments, department_memberships)."""
+"""Department models."""
 
 import enum
 import uuid

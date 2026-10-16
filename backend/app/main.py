@@ -1,6 +1,6 @@
 """DecOps API application factory.
 
-Modular monolith (spec backend_architecture): route handlers stay thin,
+Modular monolith : route handlers stay thin,
 business logic lives in services/domain, authorization is centralized.
 """
 
@@ -48,7 +48,7 @@ class RequestContextMiddleware:
 
 
 class SecurityHeadersMiddleware:
-    """Phase 9 hardening: baseline response headers on every API response.
+    """ hardening: baseline response headers on every API response.
 
     The API serves JSON only (the UI is the Nuxt origin), so a restrictive
     CSP plus no-sniff/no-frame/referrer defaults cost nothing and blunt
@@ -95,7 +95,7 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        # Background transactional-outbox worker (Phase 6). Disabled in tests.
+        # Background transactional-outbox worker. Disabled in tests.
         worker_task = outbox_worker.start_worker()
         try:
             yield
@@ -119,7 +119,7 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
     # Request id + structured access log
     app.add_middleware(RequestContextMiddleware)
 
-    # Phase 9 hardening: security headers on every response
+    # Hardening: security headers on every response
     app.add_middleware(
         SecurityHeadersMiddleware,
         hsts_seconds=31536000 if app_settings.secure_cookies else 0,

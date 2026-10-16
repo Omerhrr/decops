@@ -1,4 +1,4 @@
-"""User and session models (spec data_model: users; sessions for MOD-001)."""
+"""User and session models."""
 
 import enum
 import uuid
@@ -58,7 +58,7 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
 
 class UserSession(UUIDPrimaryKeyMixin, Base):
-    """Server-managed session (spec authentication: secure HttpOnly cookie sessions,
+    """Server-managed session
     expiration and revocation). Only the token hash is persisted."""
 
     __tablename__ = "sessions"

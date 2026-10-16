@@ -1,5 +1,4 @@
-"""Reporting & export endpoints (MOD-007, Phase 7; spec api "Dashboards and
-Reports" + MOD-005 "Restricted exports").
+"""Reporting & export endpoints.
 
 - GET /reports/task-completion -> reports.view (Management)
 - GET /reports/department-workload -> reports.view (all departments) OR
@@ -150,7 +149,7 @@ def _pdf_export(db, user, body: ExportRequest) -> tuple[bytes, int]:
     return content, len(report["series"])
 
 
-# Department Workspace data (spec frontend_pages.Department Workspace) lives
+# Department Workspace data lives
 # with reports because it reuses the workload aggregation; the department
 # itself must exist, and all task content inside is engine-filtered.
 @router.get("/departments/{department_id}/workspace")

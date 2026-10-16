@@ -1,4 +1,4 @@
-"""Phase 7 - Reporting & export tests (MOD-007 + MOD-005 "Restricted exports").
+""" - Reporting & export tests ("Restricted exports").
 
 Under test:
 - reports.view gates task-completion (Management).

@@ -1,7 +1,7 @@
-"""Cross-task isolation tests (Phase 3 exit criterion: "Cross-task isolation
+"""Cross-task isolation tests (exit criterion: "Cross-task isolation
 tests pass") plus immediate-revocation guarantees at both the domain and API
-layer. These tests are the safety net the spec demands before task CRUD
-arrives in Phase 4."""
+layer. These tests are the safety net the before task CRUD
+arrives."""
 
 import uuid
 
@@ -151,7 +151,7 @@ class TestDeactivationEndsApiAccessImmediately:
         # Sanity: alice's session works.
         assert client.get("/api/v1/auth/me").status_code == 200
 
-        # Admin (separate client/session) deactivates alice via the Phase 3 API.
+        # Admin (separate client/session) deactivates alice via the API.
         admin_settings = client.app.state.settings
         admin_app = create_app(override_settings=admin_settings)
 

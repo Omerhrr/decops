@@ -1,4 +1,4 @@
-"""Phase 10 launch-drill guards: credential-source stability, smoke coverage,
+""" launch-drill guards: credential-source stability, smoke coverage,
 and retry-safe register pre-check (tests/test_launch.py)."""
 
 import csv
@@ -99,7 +99,7 @@ def test_register_precheck_detects_fully_imported_register(test_db):
 
 
 def test_manifest_and_register_assets_are_wellformed():
-    """The shipped launch assets parse and match the approved 17-column spec."""
+    """The shipped launch assets parse and match the 17-column template."""
     manifest = REPO_ROOT / "docs" / "launch" / "accounts_manifest.csv"
     with open(manifest, newline="", encoding="utf-8-sig") as fh:
         rows = list(csv.DictReader(fh))

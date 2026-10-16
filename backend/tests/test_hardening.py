@@ -1,4 +1,4 @@
-"""Phase 9 hardening suite: security headers, cookie/session hygiene,
+""" hardening suite: security headers, cookie/session hygiene,
 unauthenticated endpoint matrix, IDOR/privilege-escalation probes, mass
 assignment robustness, and the audit-trail coverage matrix.
 
@@ -224,7 +224,7 @@ class TestAccessControlProbes:
         original_number = task.task_number
         # Identity fields and a bogus version are sent alongside the permitted
         # field; the schema must ignore unknown fields and the version value
-        # must be the REAL one (AC-18), not the attacker-supplied 99.
+        # Must be the REAL one, not the attacker-supplied 99.
         response = client.patch(
             f"/api/v1/tasks/{task.id}",
             json={
@@ -258,7 +258,7 @@ class TestAccessControlProbes:
 
 
 # ---------------------------------------------------------------------------
-# Audit trail coverage matrix (spec Phase 9: "Verify audit trails")
+# Audit trail coverage matrix
 # ---------------------------------------------------------------------------
 
 class TestAuditCoverageMatrix:

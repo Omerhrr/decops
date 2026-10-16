@@ -1,4 +1,4 @@
-"""Authentication service (MOD-001): login with throttling, session lifecycle,
+"""Authentication service : login with throttling, session lifecycle,
 and security event auditing."""
 
 import logging
@@ -121,7 +121,7 @@ def revoke_session(db: Session, session: UserSession) -> None:
 def resolve_session(db: Session, token: str | None) -> tuple[User, UserSession] | None:
     """Resolve a raw session token to (user, session) if it is valid and active.
     Returns None for missing/expired/revoked sessions or deactivated users -
-    so revocation and deactivation take effect immediately (spec rule)."""
+    so revocation and deactivation take effect immediately."""
     if not token:
         return None
     session = db.scalar(

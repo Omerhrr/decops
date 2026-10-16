@@ -1,5 +1,5 @@
-"""Assignment authorization tests (spec Phase 3: assignment authorization,
-MOD-003: one accountable PM, recorded assigning user)."""
+"""Assignment authorization tests
+: one accountable PM, recorded assigning user)."""
 
 import uuid
 
@@ -52,7 +52,7 @@ class TestActorAuthorization:
         assigning_user = validate_assignment(
             ACTOR, ASSIGN_PERMS, AssignmentRole.ACCOUNTABLE_PM, profile(PM_A), context()
         )
-        # The assigning user is recorded (spec MOD-003).
+        # The assigning user is recorded.
         assert assigning_user == str(ACTOR)
 
 

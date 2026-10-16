@@ -1,4 +1,4 @@
-"""Collaboration endpoints: task comments and private attachments (Phase 6).
+"""Collaboration endpoints: task comments and private attachments.
 
 Route-level authentication only - every operation is authorized against the
 task's access policy inside the service (404, never 403, for outsiders).

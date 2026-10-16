@@ -1,4 +1,4 @@
-"""Workflow engine endpoints (MOD-004, Phase 5).
+"""Workflow engine endpoints.
 
 All workflow operations are nested under /tasks/{task_id}/... and guarded by
 the task access-policy engine inside the service (404 for unauthorized
@@ -296,7 +296,7 @@ def remove_dependency(
 
 
 # ---------------------------------------------------------------------------
-# Progress mode (AC-06)
+# Progress mode
 # ---------------------------------------------------------------------------
 
 @router.post("/tasks/{task_id}/workflow-settings")

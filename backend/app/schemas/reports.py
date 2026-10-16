@@ -1,9 +1,9 @@
-"""Report & export schemas (MOD-007, Phase 7).
+"""Report & export schemas.
 
 Reports are authorization-aware: `reports.view` holders get trends over the
 tasks they may view; `reports.department.view` holders (department leads) are
 scoped to their own departments. Exports additionally require
-`exports.approved` (spec RBAC matrix: Read-Only Auditor) and every exported
+`exports.approved` and every exported
 row passes the same access engine as the on-screen register.
 """
 

@@ -4,7 +4,7 @@ Every error returned by the API has the shape:
     {"error": {"code": "<MACHINE_CODE>", "message": "<human readable>", "details": ...}}
 so the frontend has a single, predictable contract. Access-denied responses for
 missing resources use 404 (not 403) to avoid leaking the existence of
-restricted resources (spec: "Avoid leaking restricted resource existence").
+restricted resources.
 """
 
 import logging

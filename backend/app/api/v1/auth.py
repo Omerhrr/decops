@@ -1,4 +1,4 @@
-"""Authentication endpoints (spec api: POST /auth/login, /auth/logout, GET /auth/me)."""
+"""Authentication endpoints."""
 
 import logging
 
@@ -71,7 +71,7 @@ def login(
     )
     db.commit()
 
-    # HttpOnly session cookie (spec: server-managed sessions, not JS-readable)
+    # HttpOnly session cookie
     response.set_cookie(
         key=settings.session_cookie_name,
         value=token,

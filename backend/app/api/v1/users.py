@@ -1,4 +1,4 @@
-"""User administration endpoints (MOD-002, Phase 3): employee lifecycle and
+"""User administration endpoints (): employee lifecycle and
 global role assignment. All routes require users.manage; permission changes
 are audited by the service layer."""
 

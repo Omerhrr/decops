@@ -1,4 +1,4 @@
-"""RBAC models (spec data_model: roles, permissions, role_permissions, user_roles)."""
+"""RBAC models."""
 
 import uuid
 from datetime import datetime

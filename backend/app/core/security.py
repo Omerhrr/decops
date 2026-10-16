@@ -1,6 +1,6 @@
 """Password hashing and session token utilities.
 
-- Passwords: Argon2id via pwdlib (spec: secure password hashing for locally managed credentials)
+- Passwords: Argon2id via pwdlib
 - Session tokens: cryptographically random opaque tokens; only the SHA-256 hash is stored,
   so a database leak does not expose usable session credentials.
 """

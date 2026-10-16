@@ -1,4 +1,4 @@
-"""Authentication + authorization flow tests (spec security.mandatory_test_scenarios)."""
+"""Authentication + authorization flow tests."""
 
 from tests.conftest import login, make_user
 
@@ -45,7 +45,7 @@ class TestAuthentication:
         login(client, "carol@interdec.com", "Strong!Pass1")
         assert client.get("/api/v1/auth/me").status_code == 200
         assert client.post("/api/v1/auth/logout").status_code == 204
-        # Revoked access takes effect immediately (spec task_visibility.rules)
+        # Revoked access takes effect immediately
         assert client.get("/api/v1/auth/me").status_code == 401
 
     def test_deactivated_user_cannot_login(self, client, test_db):

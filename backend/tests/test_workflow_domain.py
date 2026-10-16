@@ -1,8 +1,8 @@
-"""Phase 5 - Workflow Engine domain unit tests (pure logic).
+""" - Workflow Engine domain unit tests (pure logic).
 
 Exit criteria coverage: "Invalid transitions and dependency cycles are
 rejected", sequential/parallel/mixed actionability, completion rules and the
-progress calculation (AC-04/05/06).
+progress calculation.
 """
 
 import uuid
@@ -277,7 +277,7 @@ class TestCompletionRules:
 
 
 # ---------------------------------------------------------------------------
-# Progress calculation (AC-06)
+# Progress calculation
 # ---------------------------------------------------------------------------
 
 class TestProgressCalculation:

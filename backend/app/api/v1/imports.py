@@ -1,9 +1,9 @@
-"""Import center endpoints (Phase 8 CSV Migration, spec api group "Imports").
+"""Import center endpoints.
 
 Permission model: Company Administrator holds imports.manage + imports.view.
 System Administration deliberately does NOT hold imports.view - import
-reports carry business content (titles, people) and the spec restricts
-technical administration from automatic access to confidential content.
+reports carry business content (titles, people), and the policy keeps
+technical administration separate from automatic access to confidential content.
 Permission failures surface as 404-consistent errors per API conventions.
 """
 
@@ -52,7 +52,7 @@ def upload_csv(
     options: str | None = Form(default=None),
 ) -> dict:
     """Upload + validate a legacy CSV; returns the job with validation counts
-    (spec pipeline steps 1-2; mapping/options may accompany the upload)."""
+    ."""
     actor = _auth(request, user)
     mapping_dict = _parse_json_form(mapping, "mapping")
     options_dict = _parse_json_form(options, "options")
@@ -102,7 +102,7 @@ def download_import_report(
     db: DbSession,
     _perm=Depends(require_permission("imports.view", "imports.manage")),
 ) -> Response:
-    """Downloadable reconciliation summary (spec pipeline step 15)."""
+    """Downloadable reconciliation summary."""
     job = import_service.get_job(db, job_id)
     content, filename = import_service.summary_csv(job)
     return Response(
@@ -121,8 +121,7 @@ def update_import_config(
     user=Depends(_auth),
     _perm=Depends(require_permission("imports.manage")),
 ) -> dict:
-    """Apply a revised column mapping and/or options, then re-validate
-    (spec pipeline: "Allow authorized users to map source columns").
+    """Apply a revised column mapping and/or options, then re-validate.
 
     Body: {"mapping": {header: target|null, ...}, "options": {...}} -
     both keys optional; any provided key triggers re-validation."""
@@ -159,7 +158,7 @@ def commit_import(
     user=Depends(_auth),
     _perm=Depends(require_permission("imports.manage")),
 ) -> dict:
-    """Commit validated rows in controlled, retry-safe batches (spec pipeline
+    """Commit validated rows in controlled, retry-safe batches
     steps 12-14). Duplicate and failed rows are excluded and reported."""
     actor = _auth(request, user)
     job = import_service.get_job(db, job_id)

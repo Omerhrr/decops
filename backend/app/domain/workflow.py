@@ -1,4 +1,4 @@
-"""Workflow domain logic (spec workflow_engine; Phase 5).
+"""Workflow domain logic.
 
 Pure domain rules - no database or framework imports - covering:
 
@@ -13,7 +13,7 @@ Pure domain rules - no database or framework imports - covering:
   completion; optional and cancelled items never block).
 
 The service layer enforces authorization and persistence; this module owns
-the *rules* so they can be unit tested exhaustively (Phase 5 exit criteria:
+the *rules* so they can be unit tested exhaustively (exit criteria:
 "Invalid transitions and dependency cycles are rejected").
 """
 

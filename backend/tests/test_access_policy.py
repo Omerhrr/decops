@@ -1,4 +1,4 @@
-"""Task access policy engine unit tests (spec task_visibility)."""
+"""Task access policy engine unit tests."""
 
 import uuid
 

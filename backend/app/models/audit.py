@@ -1,4 +1,4 @@
-"""Audit event model (spec data_model: audit_events, SEC-005 Auditability).
+"""Audit event model.
 
 Audit events are append-only from the application: no update or delete
 operations are ever issued against this table.

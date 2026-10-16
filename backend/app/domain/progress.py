@@ -1,11 +1,11 @@
-"""Workflow progress calculation (spec progress_calculation; AC-06).
+"""Workflow progress calculation.
 
 Pure functions over plain facts so the calculation is exhaustively unit
 testable and independently displayable ("Display the calculation method to
 authorized users" - the breakdown returned here is exactly what the API
 shows).
 
-Rules (each maps to a spec requirement):
+Rules (each maps to a):
 
 - Default: progress comes from required work items and configured stage
   weights ("Calculate progress from required work items and configured

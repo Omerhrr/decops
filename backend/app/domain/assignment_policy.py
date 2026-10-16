@@ -1,14 +1,14 @@
-"""Assignment authorization (spec Phase 3: "Implement assignment authorization"
-and MOD-003 "Assign one accountable project manager / supporting project managers").
+"""Assignment authorization rules: one accountable project manager plus
+supporting project managers per task.
 
-Pure domain rules, enforced by the task API in Phase 4:
+Pure domain rules, enforced by the task API:
 - The actor must hold an assignment permission appropriate for the target role.
 - The assignee must be an active employee (deactivated accounts cannot take work).
-- Exactly ONE accountable project manager per task (DEC-02); zero or multiple
+- Exactly ONE accountable project manager per task; zero or multiple
   supporting PMs are fine.
 - Department-scoped tasks may only take assignees from the participating
   departments (unless the actor holds tasks.manage_all).
-- The actor who assigns is recorded (spec: "Record the assigning user").
+- The actor who assigns is recorded.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ class AssignmentDeniedError(ValueError):
         super().__init__(reason)
 
 
-# Actor permission needed per assignment role (spec roles_and_permissions matrix).
+# Actor permission needed per assignment role.
 ACTOR_PERMISSIONS: dict[AssignmentRole, frozenset[str]] = {
     AssignmentRole.ACCOUNTABLE_PM: frozenset({"tasks.update_assigned", "tasks.assign_department"}),
     AssignmentRole.SUPPORTING_PM: frozenset({"tasks.update_assigned", "tasks.assign_department"}),
@@ -81,7 +81,7 @@ def can_assign(
             return False, "assignee does not belong to any department of this task"
 
     if target_role is AssignmentRole.ACCOUNTABLE_PM:
-        # DEC-02: one accountable PM. Already holding accountability is a no-op
+        # : one accountable PM. Already holding accountability is a no-op
         # (allowed, idempotent); someone else holding it is a replacement and
         # is allowed - the caller records the change - but must be deliberate.
         pass
@@ -98,7 +98,7 @@ def validate_assignment(
     """Validate and return the effective assigning user id for audit purposes.
 
     Raises AssignmentDeniedError when the assignment violates policy. The
-    returned actor id must be persisted with the assignment (MOD-003: record
+    returned actor id must be persisted with the assignment (record
     the assigning user).
     """
     allowed, reason = can_assign(actor_permission_codes, target_role, assignee, context)
@@ -115,7 +115,7 @@ def replace_accountable_pm(
     current: AssignmentContext,
     new_pm_id: uuid.UUID,
 ) -> AssignmentContext:
-    """Return a new context with the accountable PM replaced (DEC-02: one PM)."""
+    """Return a new context with the accountable PM replaced (: one PM)."""
     supporting = set(current.current_supporting_pms)
     supporting.discard(new_pm_id)  # cannot be accountable and supporting simultaneously
     return AssignmentContext(

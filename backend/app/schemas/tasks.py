@@ -1,4 +1,4 @@
-"""Task API schemas (spec api.endpoint_groups.Tasks; strict validation)."""
+"""Task API schemas."""
 
 import uuid
 from datetime import date, datetime
@@ -16,7 +16,7 @@ class TaskCreateRequest(BaseModel):
     title: str = Field(min_length=3, max_length=300)
     description: str | None = Field(default=None, max_length=20000)
     priority: TaskPriority = TaskPriority.medium
-    # AC-01: a task is created with an accountable PM
+    # A task is created with an accountable PM
     accountable_pm_id: uuid.UUID
     start_date: date | None = None
     due_date: date | None = None
@@ -39,7 +39,7 @@ class TaskCreateRequest(BaseModel):
 
 
 class TaskUpdateRequest(BaseModel):
-    """Partial update. `version` is required (AC-18 optimistic concurrency)."""
+    """Partial update. `version` is required (optimistic concurrency)."""
 
     title: str | None = Field(default=None, min_length=3, max_length=300)
     description: str | None = Field(default=None, max_length=20000)
@@ -143,7 +143,7 @@ class TaskActivityOut(BaseModel):
 
 
 class TaskOut(BaseModel):
-    """Task register row (spec frontend_pages.TaskRegister columns)."""
+    """Task register row."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -168,7 +168,7 @@ class TaskDetailOut(TaskOut):
     description: str | None = None
     created_by_id: uuid.UUID
     dependency_summary: str | None = None
-    # Phase 8 CSV migration provenance (untrusted legacy reference + source ID)
+    # CSV migration provenance (untrusted legacy reference + source ID)
     legacy_external_id: str | None = None
     attachment_folder_reference: str | None = None
     version: int

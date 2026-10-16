@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
 
     # --- Database ---
-    # Production target is PostgreSQL (spec); SQLite is used for local sandbox development.
+    # Production target is PostgreSQL; SQLite is used for local sandbox development.
     database_url: str = f"sqlite:///{BACKEND_DIR / 'decops.db'}"
 
     # --- Sessions ---
@@ -47,20 +47,20 @@ class Settings(BaseSettings):
     seed_admin_name: str = "Interdec Administrator"
     seed_admin_employee_code: str = "INT-0001"
 
-    # --- Attachments (Phase 6: private, task-scoped document storage) ---
+    # --- Attachments (private, task-scoped document storage) ---
     attachment_storage_dir: Path = BACKEND_DIR / "var" / "attachments"
-    attachment_max_bytes: int = 25 * 1024 * 1024  # 25 MB (spec: file size restrictions)
+    attachment_max_bytes: int = 25 * 1024 * 1024  # 25 MB
     attachment_allowed_extensions: list[str] = [
         ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
         ".txt", ".csv", ".md", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".zip",
     ]
 
-    # --- CSV migration (Phase 8: import center) ---
+    # --- CSV migration (import center) ---
     import_storage_dir: Path = BACKEND_DIR / "var" / "imports"
     import_max_bytes: int = 10 * 1024 * 1024  # 10 MB per uploaded CSV
     import_batch_size: int = 100
 
-    # --- Notifications & transactional outbox (Phase 6) ---
+    # --- Notifications & transactional outbox ---
     outbox_worker_enabled: bool = True
     outbox_worker_interval_seconds: float = 15.0
     outbox_max_attempts: int = 8
@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     deadline_reminder_days: int = 3
     deadline_dedup_hours: int = 20
 
-    # --- Optional email delivery (spec: "Email, if approved") ---
+    # --- Optional email delivery ---
     email_notifications_enabled: bool = False
     smtp_host: str = "localhost"
     smtp_port: int = 25

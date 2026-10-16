@@ -1,4 +1,4 @@
-"""CSV import jobs (spec data_model: import_jobs; Phase 8 CSV Migration).
+"""CSV import jobs.
 
 An import job is a staged, reviewable unit of legacy migration:
 
@@ -13,7 +13,7 @@ An import job is a staged, reviewable unit of legacy migration:
                 rows are recognised by their legacy identifiers and skipped,
                 never duplicated).
 
-The job row records the import actor and timestamps (spec rule: "Record the
+The job row records the import actor and timestamps
 import actor and timestamp"). The raw report and source file live on disk
 under the storage dir; only keys are stored in the database.
 """
@@ -53,7 +53,7 @@ class ImportJob(UUIDPrimaryKeyMixin, Base):
     warning_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     failed_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    # Extra reconciliation detail beyond the spec's four counters
+    # Extra reconciliation detail beyond the product requirements four counters
     duplicate_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     already_committed_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     committed_rows: Mapped[int] = mapped_column(Integer, default=0, nullable=False)

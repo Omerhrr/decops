@@ -1,4 +1,4 @@
-"""User administration API tests (MOD-002 Phase 3): CRUD, role assignment,
+"""User administration API tests : CRUD, role assignment,
 deactivation, authorization boundaries, and audit trail writes."""
 
 import uuid
@@ -148,7 +148,7 @@ class TestRolesCatalogue:
         assert "roles.assign" in company_admin["permissions"]
         system_admin = next(r for r in roles if r["name"] == "System Administrator")
         assert "system.config.manage" in system_admin["permissions"]
-        # Per spec matrix, System Administrator does NOT manage users.
+        # Per Administrator does NOT manage users.
         assert "users.manage" not in system_admin["permissions"]
         assert all(r["is_system_role"] for r in roles)
 

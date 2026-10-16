@@ -1,9 +1,9 @@
-"""Task models (spec data_model: tasks, task_assignments, task_departments,
-task_access_grants; Phase 4 adds task_activities for the activity timeline).
+"""Task models
+task_access_grants; adds task_activities for the activity timeline).
 
 Every task carries an explicit, self-contained access policy (visibility_mode
 + grants) evaluated by app.domain.access_policy. Task content is protected by
-resource-level authorization, never by identifier secrecy alone (AC-10).
+resource-level authorization, never by identifier secrecy alone.
 """
 
 import enum
@@ -26,7 +26,7 @@ class TaskPriority(str, enum.Enum):
 
 
 class ProgressMode(str, enum.Enum):
-    """AC-06: progress calculation method is explicit and visible."""
+    """Progress calculation method is explicit and visible."""
 
     manual = "manual"
     calculated = "calculated"
@@ -46,7 +46,7 @@ class Task(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         String(20), default=TaskStatus.draft, nullable=False, index=True
     )
 
-    # DEC-02: exactly one accountable PM (also mirrored in task_assignments)
+    # : exactly one accountable PM (also mirrored in task_assignments)
     accountable_pm_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id"), index=True, nullable=False
     )
@@ -64,20 +64,20 @@ class Task(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     dependency_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     attachment_folder_reference: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
-    # Phase 8 CSV migration: source identifier preserved for traceability and
+    # CSV migration: source identifier preserved for traceability and
     # retry-safe imports ("Task ID" -> task_number when reusable, else stored
     # here). Indexed; uniqueness is enforced by the import service, which must
     # recognise already-committed legacy rows instead of duplicating them.
     legacy_external_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
-    # Explicit, self-contained access policy (spec task_visibility.rules)
+    # Explicit, self-contained access policy
     visibility_mode: Mapped[str] = mapped_column(String(30), nullable=False)
 
     completed_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     cancelled_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
     archived_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
-    # AC-18: optimistic concurrency for concurrent edits
+    # Optimistic concurrency for concurrent edits
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     accountable_pm = relationship("User", foreign_keys=[accountable_pm_id], lazy="joined")
@@ -107,7 +107,7 @@ class AssignmentRoleType(str, enum.Enum):
 
 
 class TaskAssignment(UUIDPrimaryKeyMixin, Base):
-    """Assignment record; the assigning user is always recorded (MOD-003)."""
+    """Assignment record; the assigning user is always recorded."""
 
     __tablename__ = "task_assignments"
 
@@ -162,7 +162,7 @@ class AccessLevel(str, enum.Enum):
     view = "view"
     operate = "operate"
     manage = "manage"
-    # A recorded, structural denial (deny overrides any grant, AC-10)
+    # A recorded, structural denial (deny overrides any grant)
     denied = "denied"
 
 

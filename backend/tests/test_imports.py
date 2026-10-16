@@ -1,6 +1,6 @@
-"""Phase 8 CSV Migration: domain validation engine + import center API.
+""" CSV Migration: domain validation engine + import center API.
 
-Covers the spec's spreadsheet_migration pipeline and rules:
+Covers the product requirements spreadsheet_migration pipeline and rules:
 - approved mapping tables (status/priority), normalization, date parsing;
 - user resolution never invents mappings for ambiguous names;
 - duplicate detection via legacy identifiers + configurable rules;
@@ -604,7 +604,7 @@ class TestCommit:
 
     def test_legacy_task_number_reuse(self, test_db, client, admin, people, isolated_storage):
         """A legacy Task ID matching the TSK-YYYY-NNNN pattern and unallocated
-        becomes the new task_number (spec: 'task_number or legacy_external_id')."""
+        becomes the new task_number."""
         row = dict(VALID_ROW, **{"Task ID": "TSK-2024-0777"})
         job, response = self._upload_and_commit(client, [row])
         assert response.status_code == 200

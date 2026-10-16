@@ -35,6 +35,7 @@ download/
 skills/
 worklog.md
 scripts/*.log
+scripts/*.png
 scripts/phase9_bench.json
 
 # OS / editor
@@ -43,5 +44,5 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Runtime attachment storage (Phase 6)
+# Runtime attachment storage
 backend/var/

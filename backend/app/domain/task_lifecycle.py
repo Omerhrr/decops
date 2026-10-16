@@ -1,8 +1,8 @@
-"""Task lifecycle state machine (spec: task_lifecycle).
+"""Task lifecycle state machine.
 
 Pure domain logic - no database dependencies - so it can be unit tested
-exhaustively (spec testing_strategy.unit_tests: "Task status transitions")
-and reused by the future Task API (Phase 4).
+exhaustively
+and reused by the future Task API.
 """
 
 from enum import StrEnum
@@ -37,7 +37,7 @@ ALLOWED_TRANSITIONS: dict[TaskStatus, frozenset[TaskStatus]] = {
     TaskStatus.archived: frozenset(),
 }
 
-# Transitions that require a recorded reason (spec: transition_rules)
+# Transitions that require a recorded reason
 REASON_REQUIRED_TRANSITIONS: frozenset[tuple[TaskStatus, TaskStatus]] = frozenset(
     {
         (TaskStatus.completed, TaskStatus.in_progress),  # reopening a completed task
@@ -49,7 +49,7 @@ REASON_REQUIRED_TRANSITIONS: frozenset[tuple[TaskStatus, TaskStatus]] = frozense
     }
 )
 
-# Transitions that require an explanation (spec: "Blocked tasks must have an explanation")
+# Transitions that require an explanation
 EXPLANATION_REQUIRED_TRANSITIONS: frozenset[tuple[TaskStatus, TaskStatus]] = frozenset(
     {
         (TaskStatus.open, TaskStatus.blocked),

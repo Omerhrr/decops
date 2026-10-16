@@ -1,4 +1,4 @@
-"""Department management service (MOD-002): department lifecycle, lead
+"""Department management service : department lifecycle, lead
 assignment, and membership changes - all audited."""
 
 import uuid

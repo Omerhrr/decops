@@ -1,9 +1,9 @@
-"""Phase 5 - Workflow Engine API tests (MOD-004).
+""" - Workflow Engine API tests.
 
 Covers: stage/item CRUD + transitions, sequential gating through the API,
 dependency cycle rejection, blockers, milestone auto-completion cascade,
-progress calculation + manual/calculated modes (AC-06), optimistic
-concurrency on work items (AC-18), authorization (view/operate grants,
+progress calculation + manual/calculated modes, optimistic
+concurrency on work items, authorization (view/operate grants,
 outsider 404s) and audit + activity records.
 """
 
@@ -413,7 +413,7 @@ class TestWorkItemsAPI:
 
 
 # ---------------------------------------------------------------------------
-# Progress (AC-06)
+# Progress
 # ---------------------------------------------------------------------------
 
 class TestProgressAPI:
@@ -459,7 +459,7 @@ class TestProgressAPI:
         assert response.status_code == 409
         assert response.json()["error"]["code"] == "progress_is_calculated"
 
-        # The calculation method is visible to authorized users (AC-06).
+        # The calculation method is visible to authorized users.
         method_text = tree["progress"]["method"].lower()
         assert "weighted" in method_text
         stage_breakdown = {s["stage_name"]: s for s in tree["progress"]["stages"]}

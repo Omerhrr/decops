@@ -1,4 +1,4 @@
-"""Collaboration & notification models (spec data_model, Phase 6).
+"""Collaboration & notification models.
 
 comments / attachments are nested task resources: they inherit the task's
 access policy through the access engine (Operation.COMMENT / Operation.ATTACH)
@@ -34,7 +34,7 @@ class OutboxEvent(UUIDPrimaryKeyMixin, Base):
 
     `payload` carries everything the worker needs at delivery time so it can
     RE-RESOLVE recipients and RE-CHECK authorization against current state
-    (spec: "Re-check authorization before sending sensitive task details",
+
     "A background notification job does not disclose information after access
     revocation").
     """
@@ -85,7 +85,7 @@ class Notification(UUIDPrimaryKeyMixin, Base):
 
 
 class NotificationPreference(UUIDPrimaryKeyMixin, Base):
-    """Per-user, per-event channel switches (spec: respect user notification
+    """Per-user, per-event channel switches
     preferences). Missing rows default to enabled on both channels."""
 
     __tablename__ = "notification_preferences"
@@ -102,7 +102,7 @@ class NotificationPreference(UUIDPrimaryKeyMixin, Base):
 
 
 class Comment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    """Task/work-item comment (spec MOD-006). Soft-deleted rows keep the
+    """Task/work-item comment. Soft-deleted rows keep the
     audit trail intact but are excluded from listings."""
 
     __tablename__ = "comments"

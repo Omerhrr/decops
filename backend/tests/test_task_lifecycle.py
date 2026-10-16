@@ -1,4 +1,4 @@
-"""Task lifecycle state machine unit tests (spec testing_strategy.unit_tests:
+"""Task lifecycle state machine unit tests
 "Task status transitions")."""
 
 import pytest

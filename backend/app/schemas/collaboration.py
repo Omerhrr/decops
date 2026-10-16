@@ -1,4 +1,4 @@
-"""Schemas for collaboration & notification endpoints (Phase 6)."""
+"""Schemas for collaboration & notification endpoints."""
 
 import uuid
 from datetime import datetime

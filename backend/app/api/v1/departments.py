@@ -1,4 +1,4 @@
-"""Department management endpoints (MOD-002, Phase 3): CRUD + membership
+"""Department management endpoints: CRUD + membership
 administration. Requires departments.manage; all changes audited."""
 
 import uuid

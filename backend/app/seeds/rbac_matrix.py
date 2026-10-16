@@ -1,4 +1,4 @@
-"""RBAC seed data: role matrix from the spec (roles_and_permissions.roles)."""
+"""RBAC seed data: role matrix."""
 
 ROLE_MATRIX: dict[str, dict] = {
     "System Administrator": {
@@ -19,14 +19,14 @@ ROLE_MATRIX: dict[str, dict] = {
             "workflows.configure",
             "settings.org.manage",
             "tasks.create",
-            # Permitted administrator for restricted tasks (spec task_visibility
+            # Permitted administrator for restricted tasks
             # design principles). The engine requires this code to administer
             # task visibility (grants/denials) even with tasks.manage_all.
             "tasks.update_assigned",
             "tasks.manage_all",
-            # Phase 8 CSV migration: the import center stages historical data
+            # CSV migration: the import center stages historical data
             # (business content) and commits new tasks. Company Administration
-            # owns org-wide approved operational settings per spec role matrix.
+            # Owns org-wide approved operational settings per matrix.
             "imports.manage",
             "imports.view",
         ],

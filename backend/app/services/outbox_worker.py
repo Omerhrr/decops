@@ -1,4 +1,4 @@
-"""Background outbox worker (Phase 6 deliverable: "Background worker" +
+"""Background outbox worker (deliverable: "Background worker" +
 "Delivery retry handling").
 
 Runs as an asyncio task inside the FastAPI lifespan. Each tick uses its own

@@ -1,4 +1,4 @@
-"""Workflow engine service (MOD-004, Phase 5).
+"""Workflow engine service ().
 
 Every mutation is authorized through the task access-policy engine (fresh
 actor state per request), validated by the pure domain rules in
@@ -160,7 +160,7 @@ def calculate_progress(db: Session, task: Task) -> tuple:
 
 def sync_task_percent(db: Session, task: Task) -> int:
     """Write engine progress into tasks.percent_complete when the task is in
-    calculated mode (AC-06: manual and calculated stay distinguishable)."""
+    calculated mode (manual and calculated stay distinguishable)."""
     if _enum_value(task.progress_mode) != "calculated":
         return int(task.percent_complete or 0)
     progress, _, _ = calculate_progress(db, task)
@@ -743,7 +743,7 @@ def transition_item(db: Session, actor: User, task_id: uuid.UUID,
                 )
 
     # ------------------------------------------------------------------
-    # Phase 6: notification events (same-transaction outbox rows)
+    # : notification events (same-transaction outbox rows)
     # ------------------------------------------------------------------
     from app.services import notification_service as _ns
 
@@ -874,7 +874,7 @@ def remove_dependency(db: Session, actor: User, task_id: uuid.UUID,
 
 
 # ---------------------------------------------------------------------------
-# Progress mode (AC-06)
+# Progress mode
 # ---------------------------------------------------------------------------
 
 def set_progress_mode(db: Session, actor: User, task_id: uuid.UUID,

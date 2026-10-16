@@ -1,4 +1,4 @@
-"""Phase 7 - Dashboard tests (MOD-007).
+""" - Dashboard tests.
 
 Exit criteria under test:
 - "Dashboard totals reconcile with authorized task records": every summary

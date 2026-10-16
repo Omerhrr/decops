@@ -1,4 +1,4 @@
-"""Phase 6 - Notifications & transactional outbox tests (spec exit criteria:
+""" - Notifications & transactional outbox tests
 "Notification processing is retry-safe"; mandatory scenario: "A background
 notification job does not disclose information after access revocation")."""
 

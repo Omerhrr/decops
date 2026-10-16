@@ -1,4 +1,4 @@
-"""Phase 3 administration schemas: users (MOD-002), departments, RBAC."""
+""" administration schemas: users, departments, RBAC."""
 
 import uuid
 from datetime import date, datetime

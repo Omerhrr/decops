@@ -1,4 +1,4 @@
-"""Dashboard & report schemas (MOD-007, Phase 7; spec api.endpoint_groups
+"""Dashboard & report schemas (;
 "Dashboards and Reports").
 
 Every aggregate in this module is computed over the *authorized* task set -

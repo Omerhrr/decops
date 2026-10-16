@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
 
 class UUIDPrimaryKeyMixin:
-    """Non-guessable UUID primary keys (spec data_model.conventions.primary_keys)."""
+    """Non-guessable UUID primary keys."""
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
 

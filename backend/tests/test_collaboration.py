@@ -1,7 +1,7 @@
-"""Phase 6 - Collaboration tests (spec MOD-005/MOD-006, Phase 6 exit criteria
+""" - Collaboration tests
 "Restricted content remains protected across collaboration features").
 
-Mandatory security scenarios covered (spec security.mandatory_test_scenarios):
+Mandatory security scenarios covered :
 - User A cannot retrieve another task's comments.
 - User A cannot download another task's attachments.
 """

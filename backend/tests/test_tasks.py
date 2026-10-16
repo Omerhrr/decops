@@ -1,10 +1,10 @@
-"""Phase 4 - Task Management API tests (spec exit criteria: "Users can manage
+""" - Task Management API tests
 authorized tasks. All task mutations enforce authorization and validation.").
 
-Covers: creation (AC-01), DEC-02 accountability, visibility modes through the
+Covers: creation, accountability, visibility modes through the
 API, transition validation + authorization, assignment policy, access grants
-with immediate revocation, cross-task isolation (AC-10/AC-11), optimistic
-concurrency (AC-18), and the activity timeline (AC-12).
+with immediate revocation, cross-task isolation (/), optimistic
+concurrency, and the activity timeline.
 """
 
 import uuid
@@ -67,7 +67,7 @@ class TestTaskCreation:
         assert data["visibility_mode"] == "participants"
         roles = [(a["assignment_role"], a["user"]["id"]) for a in data["assignments"]]
         assert ("accountable_pm", str(pm.id)) in roles
-        # Activity history starts with the creation event (AC-12)
+        # Activity history starts with the creation event
         activity = client.get(f"/api/v1/tasks/{data['id']}/activity").json()
         assert any(a["activity_type"] == "task.created" for a in activity)
 
@@ -198,7 +198,7 @@ class TestVisibilityAndIsolation:
                               title="Task B secret", grant_user_ids=[str(pm.id)])
         login(client, "grantee2@interdec.com", "Secret!1234")
         assert client.get(f"/api/v1/tasks/{task_a['id']}").status_code == 200
-        # AC-10/AC-11: access to one task never grants another
+        # /access to one task never grants another
         assert client.get(f"/api/v1/tasks/{task_b['id']}").status_code == 404
         listing = client.get("/api/v1/tasks").json()
         listed_ids = {t["id"] for t in listing["items"]}
@@ -215,7 +215,7 @@ class TestVisibilityAndIsolation:
 
 
 # ---------------------------------------------------------------------------
-# Editing (AC-18)
+# Editing
 # ---------------------------------------------------------------------------
 
 class TestTaskEditing:
@@ -255,7 +255,7 @@ class TestTaskEditing:
         response = client.patch(f"/api/v1/tasks/{task['id']}", json={
             "version": current_version, "title": "Hijack attempt",
         })
-        assert response.status_code == 404  # view != update (spec task_visibility.rules)
+        assert response.status_code == 404  # View != update
 
     def test_update_ignores_unsent_fields(self, client, test_db):
         pm, _, task = self._setup(client, test_db)
@@ -331,7 +331,7 @@ class TestTransitions:
         # under_review -> completed
         data = client.post(f"/api/v1/tasks/{tid}/transition", json={"to_status": "completed"}).json()
         assert data["status"] == "completed" and data["completed_at"]
-        # reopening requires a reason (spec transition_rules)
+        # Reopening requires a reason
         response = client.post(f"/api/v1/tasks/{tid}/transition", json={"to_status": "in_progress"})
         assert response.status_code == 422
         data = client.post(f"/api/v1/tasks/{tid}/transition", json={
@@ -384,7 +384,7 @@ class TestTransitions:
 
 
 # ---------------------------------------------------------------------------
-# Assignments (DEC-02, MOD-003)
+# Assignments
 # ---------------------------------------------------------------------------
 
 class TestAssignments:
@@ -487,7 +487,7 @@ class TestDepartmentsAndActivity:
         client.post(f"/api/v1/tasks/{task['id']}/assignments",
                     json={"user_id": str(worker.id), "assignment_role": "work_item_assignee"})
         # A participant without tasks.update_assigned can contribute but never
-        # restructure access (engine operation matrix, Phase 3 semantics).
+        # Restructure access (engine operation matrix, semantics).
         login(client, "worker1@interdec.com", "Secret!1234")
         response = client.post(f"/api/v1/tasks/{task['id']}/access-grants",
                                json={"user_id": str(other.id), "access_level": "view"})

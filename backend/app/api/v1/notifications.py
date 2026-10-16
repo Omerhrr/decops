@@ -1,4 +1,4 @@
-"""Notification center endpoints (Phase 6): in-app delivery state, read
+"""Notification center endpoints : in-app delivery state, read
 tracking, per-user channel preferences, and a manual worker trigger for
 administrators (useful for ops and demonstrations)."""
 

@@ -1,4 +1,4 @@
-"""Notification domain rules (spec notifications.*, Phase 6) - pure logic.
+"""Notification domain rules - pure logic.
 
 Event catalog, recipient fan-out defaults, email subject redaction, and retry
 backoff live here so they are unit-testable and reusable by the worker.

@@ -1,10 +1,10 @@
-"""Notification service (Phase 6): transactional outbox + delivery.
+"""Notification service : transactional outbox + delivery.
 
 Producer side (runs inside business transactions):
 - record_event() appends an outbox_events row in the SAME database
   transaction as the business change. If the transaction rolls back, the
   event never existed - "Do not send notifications for transactions that
-  ultimately roll back" (spec delivery_requirements).
+  ultimately roll back".
 
 Consumer side (background worker, own sessions, one commit per event):
 - process_due_events() claims due events, re-resolves recipients from

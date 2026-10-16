@@ -1,4 +1,4 @@
-"""CSV migration domain logic (Phase 8, spec spreadsheet_migration).
+"""CSV migration domain logic.
 
 Pure functions and value objects only: no database, no framework imports.
 The service layer feeds directory snapshots / existing-task indexes in and
@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 
 # ---------------------------------------------------------------------------
-# Source schema (spec spreadsheet_migration.source_columns)
+# Source schema
 # ---------------------------------------------------------------------------
 
 SOURCE_COLUMNS: tuple[str, ...] = (
@@ -66,7 +66,7 @@ TARGET_FIELDS: tuple[str, ...] = (
     "completion_date",
 )
 
-# Source column -> default target field (spec spreadsheet_migration.mapping)
+# Source column -> default target field
 DEFAULT_COLUMN_MAPPING: dict[str, str | None] = {
     "Task ID": "legacy_task_id",
     "Date Created": "date_created",
@@ -95,7 +95,7 @@ DATE_TARGETS = frozenset({
 
 
 def auto_map_headers(headers: list[str]) -> dict[str, str | None]:
-    """Map spreadsheet headers to DecOps fields (spec pipeline step 3).
+    """Map spreadsheet headers to DecOps fields.
 
     Matching is normalization-based (case, punctuation, whitespace) with a
     curated alias list; unmapped headers yield None so the operator can map
@@ -144,7 +144,7 @@ def auto_map_headers(headers: list[str]) -> dict[str, str | None]:
 
 
 # ---------------------------------------------------------------------------
-# Approved mapping tables (spec legacy_data_policy.legacy_statuses + rules)
+# Approved mapping tables
 # ---------------------------------------------------------------------------
 
 STATUS_MAPPING: dict[str, str] = {
@@ -254,8 +254,7 @@ _DATE_FORMATS = (
 def parse_date(raw: str | None, *, day_first: bool = True) -> date:
     """Parse a legacy date. Unparseable non-empty values are errors.
 
-    `day_first` selects how ambiguous dd/mm vs mm/dd input is read
-    (spec: dates normalized via an explicit, operator-approved format).
+    `day_first` selects how ambiguous dd/mm vs mm/dd input is read.
     """
     text = (raw or "").strip()
     if not text:
@@ -283,7 +282,7 @@ def parse_optional_date(raw: str | None, *, day_first: bool = True) -> date | No
 
 
 def parse_datetime_value(raw: str | None, *, day_first: bool = True) -> datetime | None:
-    """Historical timestamps preserved when reliable (spec legacy policy)."""
+    """Historical timestamps preserved when reliable."""
     parsed = parse_optional_date(raw, day_first=day_first)
     return datetime(parsed.year, parsed.month, parsed.day, 12, 0, 0) if parsed else None
 
@@ -301,7 +300,7 @@ def split_people(raw: str | None) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# User resolution (spec: resolve names against the user directory; never
+# User resolution
 # invent a mapping when names are ambiguous)
 # ---------------------------------------------------------------------------
 
@@ -364,7 +363,7 @@ class UserDirectory:
 
 
 # ---------------------------------------------------------------------------
-# Duplicate detection (spec pipeline step 9: legacy identifiers +
+# Duplicate detection
 # configurable matching rules)
 # ---------------------------------------------------------------------------
 
@@ -441,7 +440,7 @@ def _norm_title(title: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Row validation (spec pipeline steps 4-8: normalize, resolve, validate)
+# Row validation
 # ---------------------------------------------------------------------------
 
 ROW_OK = "ok"
@@ -478,7 +477,7 @@ class NormalizedRow:
 
 @dataclass
 class RowReport:
-    """Per-row outcome (spec pipeline step 10: row-level validation report)."""
+    """Per-row outcome."""
     row_number: int
     source_task_id: str | None
     title: str
@@ -526,7 +525,7 @@ def validate_row(
     """Validate and normalize one spreadsheet row (never raises).
 
     Warnings are committable notices; errors make the row non-committable.
-    Every problem is recorded - no row is ever silently discarded (spec).
+    Every problem is recorded - no row is ever silently discarded.
     """
     report = RowReport(row_number=row_number, source_task_id=None, title="", status=ROW_OK)
 

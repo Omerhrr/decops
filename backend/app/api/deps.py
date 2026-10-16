@@ -1,10 +1,10 @@
 """Shared API dependencies: authentication and permission resolution.
 
-Authorization pipeline (spec backend_architecture.request_authorization_pipeline):
+Authorization pipeline:
 1. Authenticate via session cookie
 2. Confirm account + session are active
 3. (Per-route) check required global permission
-Task-level authorization lands with the task resources in Phase 4.
+Task-level authorization lands with the task resources.
 """
 
 import uuid
@@ -37,7 +37,7 @@ CurrentUser = Annotated[User, Depends(get_request_user)]
 
 def get_user_permission_codes(db: Session, user: User) -> set[str]:
     """Collect distinct permission codes from the user's global roles.
-    Scoped roles (department/task) are evaluated by task-level authz in Phase 4+."""
+    Scoped roles (department/task) are evaluated by task-level authz."""
     codes: set[str] = set()
     for user_role in user.roles:
         if user_role.scope_type != "global":

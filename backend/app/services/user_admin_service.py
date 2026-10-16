@@ -1,5 +1,5 @@
-"""User administration service (MOD-002): employee lifecycle, role assignment,
-and audited permission changes (Phase 3 exit criterion: "Permission changes
+"""User administration service : employee lifecycle, role assignment,
+and audited permission changes (exit criterion: "Permission changes
 are audited")."""
 
 import uuid
@@ -41,7 +41,7 @@ def create_user(
     role_ids: list[uuid.UUID] | None = None,
     request_id: str | None = None,
 ) -> User:
-    """Create an employee with locally managed credentials (DEC-12)."""
+    """Create an employee with locally managed credentials."""
     if len(password) < MIN_PASSWORD_LENGTH:
         raise UserAdminError(
             f"Password must be at least {MIN_PASSWORD_LENGTH} characters.",
@@ -135,7 +135,7 @@ def set_account_status(
     request_id: str | None = None,
 ) -> User:
     """Deactivate/disable/reactivate an employee. Deactivation immediately
-    invalidates all their sessions (spec: revoked access takes effect at once)."""
+    invalidates all their sessions."""
     if _status_value(user.account_status) == _status_value(status):
         return user
     previous = _status_value(user.account_status)
@@ -169,7 +169,7 @@ def assign_global_role(
     role: Role,
     request_id: str | None = None,
 ) -> UserRole:
-    """Grant a global role. Permission changes are audited (Phase 3 exit criteria)."""
+    """Grant a global role. Permission changes are audited (exit criteria)."""
     existing = db.scalar(
         select(UserRole).where(
             UserRole.user_id == user.id,

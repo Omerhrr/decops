@@ -1,4 +1,4 @@
-"""Comments and attachments (Phase 6, MOD-006 + MOD-005).
+"""Comments and attachments ().
 
 Both are nested task resources: every operation is authorized through the task
 access engine (COMMENT / ATTACH / VIEW / UPDATE), evaluated with fresh actor

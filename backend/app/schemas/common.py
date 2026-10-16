@@ -1,4 +1,4 @@
-"""Pydantic request/response schemas (strict validation, spec api conventions)."""
+"""Pydantic request/response schemas (strict validation, conventions)."""
 
 import uuid
 from datetime import datetime
@@ -49,7 +49,7 @@ class AuthErrorResponse(BaseModel):
     error: dict
 
 
-# ---------- Users (admin list - Phase 3 expands) ----------
+# ---------- Users (admin list - expands) ----------
 class UserOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

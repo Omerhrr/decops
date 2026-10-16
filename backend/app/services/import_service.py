@@ -1,9 +1,9 @@
-"""CSV import orchestration (Phase 8, spec spreadsheet_migration pipeline).
+"""CSV import orchestration (pipeline).
 
 Pipeline: upload -> validate/mapping -> preview/report -> commit (batched,
 retry-safe) -> reconciliation summary.
 
-Safety properties (spec rules):
+Safety properties :
 - invalid rows are NEVER silently discarded (row report lists everything);
 - ambiguous users are flagged, never invented (domain module resolution);
 - imports cannot grant unauthorized access: tasks are created with the
@@ -79,12 +79,12 @@ def _report_path(job: ImportJob) -> Path:
 
 
 DEFAULT_OPTIONS: dict = {
-    # Approved initial visibility policy for imported tasks (spec
+    # Approved initial visibility policy for imported tasks
     # legacy_data_policy.legacy_access: "explicitly approved").
     "visibility_mode": "participants",
     # Ambiguous dd/mm vs mm/dd interpretation for legacy dates.
     "day_first": True,
-    # Duplicate matching rules (configurable per spec pipeline step 9).
+    # Duplicate matching rules (configurable per step 9).
     "match_title_due": True,
     "match_title_only": False,
     # Reuse a legacy "Task ID" as the DecOps task_number when it already
@@ -112,7 +112,7 @@ def _clean_options(raw: dict | None) -> dict:
 
 
 def _clean_mapping(raw: dict | None, headers: list[str]) -> dict[str, str | None]:
-    """Merge an operator-supplied mapping over the auto-mapping (spec pipeline
+    """Merge an operator-supplied mapping over the auto-mapping
     step 3: authorized users map source columns to DecOps fields)."""
     mapping = ci.auto_map_headers(headers)
     for header, target in (raw or {}).items():
@@ -245,7 +245,7 @@ def _write_report(job: ImportJob, payload: dict) -> None:
 
 def validate_job(db: Session, job: ImportJob) -> ImportJob:
     """(Re)validate the stored source file with the current mapping/options
-    and (re)write the row-level validation report (spec pipeline steps 4-10)."""
+    and (re)write the row-level validation report."""
     if job.status == ImportJobStatus.committed:
         raise ConflictError("This import was already committed and can no longer change.",
                             code="import_committed")
@@ -430,7 +430,7 @@ def load_report(job: ImportJob) -> dict:
 
 
 def summary_csv(job: ImportJob) -> tuple[str, str]:
-    """Reconciliation summary download (spec pipeline step 15)."""
+    """Reconciliation summary download."""
     report = load_report(job)
     buffer = io.StringIO()
     writer = csv.writer(buffer)
@@ -458,7 +458,7 @@ def summary_csv(job: ImportJob) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
-# Commit (spec pipeline steps 12-14)
+# Commit
 # ---------------------------------------------------------------------------
 
 def _noon(date_iso: str | None) -> datetime | None:
@@ -501,12 +501,12 @@ def commit_import(
     job: ImportJob,
     batch_size: int = 100,
 ) -> dict:
-    """Commit committable rows in controlled batches (spec pipeline step 12).
+    """Commit committable rows in controlled batches.
 
     Committable = validated ok/warning rows that are not flagged for duplicate
     review. Failed rows and duplicates are reported, never committed. Safe to
     retry: legacy identifiers already present in DecOps are skipped and
-    reported as already_committed (spec rule: "Support safe retries without
+    reported as already_committed
     duplicating previously committed records").
     """
     if job.status == ImportJobStatus.committed:
@@ -657,7 +657,7 @@ def commit_import(
 def _create_task_from_row(
     db: Session, *, actor: User, job: ImportJob, normalized: dict, options: dict,
 ) -> Task:
-    """Create one historical task (spec legacy_data_policy).
+    """Create one historical task.
 
     Historical timestamps are preserved when provided and reliable; status
     comes from the approved mapping; the initial visibility policy is the

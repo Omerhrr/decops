@@ -1,4 +1,4 @@
-"""Workflow API schemas (spec api.endpoint_groups.Workflow; Phase 5)."""
+"""Workflow API schemas."""
 
 import uuid
 from datetime import date, datetime
@@ -69,7 +69,7 @@ class WorkItemCreateRequest(BaseModel):
 
 
 class WorkItemUpdateRequest(BaseModel):
-    """Partial update; `version` required (AC-18 optimistic concurrency)."""
+    """Partial update; `version` required (optimistic concurrency)."""
 
     title: str | None = Field(default=None, min_length=1, max_length=300)
     description: str | None = Field(default=None, max_length=20000)
@@ -104,7 +104,7 @@ class DependencyCreateRequest(BaseModel):
 
 
 class ProgressModeRequest(BaseModel):
-    """Switch between manual and calculated task progress (AC-06)."""
+    """Switch between manual and calculated task progress."""
 
     progress_mode: str
     reason: str | None = Field(default=None, max_length=2000)
@@ -224,7 +224,7 @@ class BlockerOut(BaseModel):
 
 class WorkflowOut(BaseModel):
     """The full workflow tree of one task: stages, items, dependencies,
-    blockers and the progress calculation with its method (AC-04/05/06)."""
+    blockers and the progress calculation with its method."""
 
     task_id: uuid.UUID
     task_status: str

@@ -1,7 +1,7 @@
-"""Workflow models (spec data_model: task_stages, work_items,
-workflow_dependencies; Phase 5 - Workflow Engine).
+"""Workflow models
+workflow_dependencies; - Workflow Engine).
 
-Structure (spec workflow_engine.structure): Task → Stage → Milestone/Subtask.
+Structure : Task → Stage → Milestone/Subtask.
 - Stages order work into phases; each stage declares an execution_mode
   (sequential stages gate on predecessor completion, parallel stages may run
   simultaneously - mixed workflows are simply a combination).
@@ -58,7 +58,7 @@ class WorkItemStatus(str, enum.Enum):
 
 class ProgressBasis(str, enum.Enum):
     """Which work items contribute to a stage's calculated progress
-    (spec progress_calculation: "Define whether milestones or subtasks
+
     contribute to progress")."""
 
     all_items = "all_items"
@@ -151,7 +151,7 @@ class WorkItem(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
-    # AC-18: optimistic concurrency on editable work items.
+    # Optimistic concurrency on editable work items.
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     stage = relationship("TaskStage", foreign_keys=[stage_id])
@@ -197,7 +197,7 @@ class WorkItemDependency(UUIDPrimaryKeyMixin, Base):
 
 
 class WorkflowTemplate(UUIDPrimaryKeyMixin, TimestampMixin, Base):
-    """Reusable workflow blueprints (spec data_model.workflow_templates;
+    """Reusable workflow blueprints
     Administration page lists them). `definition` JSON shape:
     {"stages": [{"name", "execution_mode", "weight", "items":
                  [{"item_type", "title", "is_required", "weight"}]}]}

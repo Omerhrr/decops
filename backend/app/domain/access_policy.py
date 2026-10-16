@@ -1,9 +1,9 @@
-"""Task access policy engine (spec task_visibility; Phase 3 deliverable).
+"""Task access policy engine.
 
 Pure domain logic - no database or framework imports - so the rules are unit
-testable and reusable by any persistence layer (tasks arrive in Phase 4).
+testable and reusable by any persistence layer.
 
-Design invariants (spec task_visibility.rules):
+Design invariants :
 - Every task has an explicit access policy (mode is mandatory).
 - Access to one task NEVER authorizes another task: evaluation is strictly
   per-task; grants are task-scoped by construction (the policy carries the
@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 
 
 class VisibilityMode(str, enum.Enum):
-    """The four visibility modes defined by the spec."""
+    """The four visibility modes."""
 
     PRIVATE = "private"
     PARTICIPANTS = "participants"
@@ -69,7 +69,7 @@ class ActorContext:
 
 
 # The single permission that permits an administrator to bypass visibility.
-# "Permitted administrators" (spec): not all admins, only holders of this code.
+# "Permitted administrators" : not all admins, only holders of this code.
 ADMIN_BYPASS_PERMISSION = "tasks.manage_all"
 # Permissions that grant view regardless of scoping in department_scoped mode.
 DEPARTMENT_VIEW_PERMISSIONS = frozenset({"tasks.view_department", "tasks.manage_all"})
@@ -83,7 +83,7 @@ class AccessPolicy:
     tasks because a policy is only ever constructed for a single task id.
 
     grant_levels maps user_id -> "view" | "operate" | "manage". Grants without
-    a recorded level default to "operate" (Phase 3 binary-grant behaviour).
+    a recorded level default to "operate" (binary-grant behaviour).
     """
 
     task_id: uuid.UUID
@@ -134,7 +134,7 @@ def _can_view_scope(actor: ActorContext, policy: AccessPolicy) -> bool:
         if not (actor.department_ids & policy.department_ids):
             return False
         # Department membership alone is not enough: the member must hold the
-        # department view permission (spec: "subject to explicit restrictions").
+        # Department view permission.
         return bool(actor.permission_codes & DEPARTMENT_VIEW_PERMISSIONS)
 
     # CUSTOM: only explicit grants (checked by the caller) - scope grants nothing.
@@ -168,15 +168,15 @@ def evaluate_access(actor: ActorContext, policy: AccessPolicy, operation: Operat
         level = policy.grant_levels.get(actor.user_id, "operate")
         if level == "view":
             # Read/contribute grant: access must not automatically authorize
-            # every operation (spec task_visibility.rules).
+            # Every operation.
             return AccessDecision.ALLOW if operation in GRANT_VIEW_OPERATIONS else AccessDecision.DENY
         if operation is Operation.MANAGE_WORKFLOW:
             # Restructuring the workflow (stages, items, dependencies) is a
             # manage-level power; operate grants execute work on items but
-            # cannot restructure (Phase 5).
+            # Cannot restructure.
             return AccessDecision.ALLOW if level == "manage" else AccessDecision.DENY
         if operation is Operation.CHANGE_VISIBILITY:
-            # Changing visibility requires explicit permission (spec rule).
+            # Changing visibility requires explicit permission.
             return AccessDecision.ALLOW if "tasks.update_assigned" in actor.permission_codes else AccessDecision.DENY
         if operation is Operation.ARCHIVE:
             return AccessDecision.DENY  # archiving is administrative only
@@ -254,7 +254,7 @@ def nested_resource_access(
     stricter_nested: bool = False,
 ) -> AccessDecision:
     """Nested resources (comments, attachments, workflow items) inherit the
-    task restrictions unless a more restrictive policy applies (spec rule)."""
+    task restrictions unless a more restrictive policy applies."""
     decision = evaluate_access(actor, task_policy, operation)
     if stricter_nested and operation is not Operation.VIEW:
         # Example of a more restrictive nested policy: no archive on children.

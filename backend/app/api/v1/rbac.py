@@ -2,8 +2,8 @@
 
 Reading the matrix requires users.manage or roles.assign; assigning roles to
 users is handled by the users router (roles.assign). Creating and editing
-custom roles also requires roles.assign. System roles are the approved spec
-matrix and stay read-only so RBAC guarantees cannot be silently weakened.
+custom roles also requires roles.assign. System roles are fixed and stay
+read-only so RBAC guarantees cannot be silently weakened.
 """
 
 from fastapi import APIRouter, Depends, Request

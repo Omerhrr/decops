@@ -1,4 +1,4 @@
-"""Dashboard service (MOD-007, Phase 7).
+"""Dashboard service ().
 
 Single source of truth for dashboard aggregates: every number on every
 dashboard is computed from `visible_tasks()` - the identical access-engine
@@ -58,7 +58,7 @@ def visible_tasks(db: Session, actor: User) -> list[Task]:
         .options(
             joinedload(Task.accountable_pm),
             joinedload(Task.task_departments).joinedload(TaskDepartment.department),
-            # Phase 9 perf: build_policy needs assignments + grants per task;
+            # Perf: build_policy needs assignments + grants per task;
             # eager-load once instead of two lazy queries per candidate.
             selectinload(Task.assignments),
             selectinload(Task.access_grants),

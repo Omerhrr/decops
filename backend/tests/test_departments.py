@@ -1,4 +1,4 @@
-"""Department management API tests (MOD-002 Phase 3): CRUD, memberships,
+"""Department management API tests : CRUD, memberships,
 lead handling, authorization boundaries, and audit trail."""
 
 from fastapi.testclient import TestClient
@@ -104,7 +104,7 @@ class TestMemberships:
         assert client.post(f"/api/v1/departments/{dept['id']}/members", json=payload).status_code == 409
 
     def test_employee_can_belong_to_multiple_departments(self, client: TestClient, test_db):
-        """Spec MOD-002: support employees belonging to multiple departments."""
+        """Spec : support employees belonging to multiple departments."""
         member = make_user(test_db, email="multi.member@interdec.com")
         admin_client(client)
         d1 = client.post("/api/v1/departments", json={"name": "Dept One"}).json()
