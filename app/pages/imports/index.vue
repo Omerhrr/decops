@@ -65,9 +65,9 @@
               >
                 <td class="py-3 pr-4 font-medium text-ink">
                   {{ job.filename }}
-                  <span v-if="selectedId === job.id" class="ml-2 text-xs text-brand-600 dark:text-brand-400">viewing</span>
+                  <span v-if="selectedId === job.id" class="ml-2 text-xs text-brand-600 dark:text-brand-400">Viewing</span>
                 </td>
-                <td class="py-3 pr-4"><span :class="statusChip(job.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ job.status }}</span></td>
+                <td class="py-3 pr-4"><span :class="statusChip(job.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ capitalize(job.status) }}</span></td>
                 <td class="py-3 pr-4 text-body">
                   {{ job.total_rows }} total
                   <span class="text-emerald-600 dark:text-emerald-400">{{ job.successful_rows }} ok</span>,
@@ -98,7 +98,7 @@
           <div>
             <h2 class="text-base font-semibold text-ink">
               {{ selected.filename }}
-              <span :class="statusChip(selected.status)" class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium">{{ selected.status }}</span>
+              <span :class="statusChip(selected.status)" class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium">{{ capitalize(selected.status) }}</span>
             </h2>
             <p class="mt-1 text-sm text-muted">
               Uploaded {{ formatDate(selected.created_at) }}
@@ -242,7 +242,7 @@
                   <td class="py-2.5 pr-3 font-mono text-xs text-muted">{{ row.source_task_id || '-' }}</td>
                   <td class="max-w-[16rem] truncate py-2.5 pr-3 text-ink" :title="row.title">{{ row.title || '-' }}</td>
                   <td class="py-2.5 pr-3">
-                    <span :class="rowChip(row.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ row.status }}</span>
+                    <span :class="rowChip(row.status)" class="rounded-full px-2 py-0.5 text-xs font-medium">{{ capitalize(row.status) }}</span>
                   </td>
                   <td class="py-2.5 pr-3 text-xs text-body">
                     <template v-if="row.outcome">

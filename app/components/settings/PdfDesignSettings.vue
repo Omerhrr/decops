@@ -188,6 +188,18 @@
         </div>
       </div>
 
+      <div v-if="previewUrl" class="mt-6">
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-sm font-medium text-body">Live preview</p>
+          <a :href="previewUrl" target="_blank" rel="noopener" class="text-sm font-medium text-brand-700 hover:underline dark:text-brand-400">Open in new tab</a>
+        </div>
+        <iframe
+          :src="previewUrl"
+          class="mt-2 h-[720px] w-full rounded-xl border border-line bg-white"
+          title="PDF design preview"
+        />
+      </div>
+
       <div class="mt-6 flex items-center gap-3 border-t border-line pt-4">
         <button type="button" class="btn-primary" :disabled="saving || !dirty" @click="save">
           {{ saving ? 'Saving' : 'Save design' }}
@@ -235,6 +247,7 @@ const saving = ref(false)
 const previewing = ref(false)
 const savedFlash = ref(false)
 const errorMessage = ref('')
+const previewUrl = ref('')
 
 const dirty = computed(() =>
   design.value !== null && JSON.stringify(normalize(design.value)) !== baseline.value,
@@ -307,14 +320,18 @@ async function preview(): Promise<void> {
       },
     })
     const url = URL.createObjectURL(blob)
-    window.open(url, '_blank', 'noopener')
-    window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
+    if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+    previewUrl.value = url
   } catch (err) {
     errorMessage.value = err instanceof Error ? err.message : 'Unable to render the preview.'
   } finally {
     previewing.value = false
   }
 }
+
+onUnmounted(() => {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+})
 
 onMounted(() => void load())
 </script>

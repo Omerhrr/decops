@@ -41,7 +41,7 @@
             <h2 class="text-base font-semibold text-ink">{{ d.name }}</h2>
             <p class="mt-0.5 text-sm text-muted">{{ d.description || 'No description' }}</p>
           </div>
-          <AppBadge :tone="d.status === 'active' ? 'green' : 'gray'">{{ d.status }}</AppBadge>
+          <AppBadge :tone="d.status === 'active' ? 'green' : 'gray'">{{ capitalize(d.status) }}</AppBadge>
         </header>
 
         <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -64,7 +64,7 @@
           >
             <span class="text-body">
               {{ m.user?.full_name || m.user_id }}
-              <span class="ml-1 text-xs text-faint">({{ m.membership_role }})</span>
+              <span class="ml-1 text-xs text-faint">({{ capitalize(m.membership_role) }})</span>
             </span>
             <button
               v-if="canManage"
@@ -79,18 +79,18 @@
 
         <!-- Add member -->
         <div v-if="canManage" class="mt-3 flex gap-2 border-t border-line pt-3">
-          <select v-model="memberPick[d.id]" class="select-field flex-1" aria-label="Add employee to department">
+          <select v-model="memberPick[d.id]" class="select-field min-w-0 flex-1" aria-label="Add employee to department">
             <option value="" disabled>Add employee…</option>
             <option v-for="u in addableUsers(d)" :key="u.id" :value="u.id">{{ u.full_name }}</option>
           </select>
-          <select v-model="rolePick[d.id]" class="select-field" aria-label="Membership role">
-            <option value="member">member</option>
-            <option value="lead">lead</option>
+          <select v-model="rolePick[d.id]" class="select-field w-24 min-w-0 shrink" aria-label="Membership role">
+            <option value="member">Member</option>
+            <option value="lead">Lead</option>
           </select>
           <button
             type="button"
             :disabled="!memberPick[d.id]"
-            class="btn-primary !px-3 !py-1.5 text-xs"
+            class="btn-primary shrink-0 !px-3 !py-1.5 text-xs"
             @click="addMember(d)"
           >
             Add

@@ -112,7 +112,7 @@
                   <p class="font-medium text-ink">{{ entry.user.full_name }}</p>
                   <p class="text-xs text-faint">{{ entry.user.email }} · {{ entry.user.employee_code }}</p>
                 </td>
-                <td class="px-4 py-3"><AppBadge :tone="entry.membership_role === 'lead' ? 'green' : 'gray'">{{ entry.membership_role }}</AppBadge></td>
+                <td class="px-4 py-3"><AppBadge :tone="entry.membership_role === 'lead' ? 'green' : 'gray'">{{ capitalize(entry.membership_role) }}</AppBadge></td>
                 <td class="px-4 py-3 text-body">{{ entry.open_assignments }}</td>
               </tr>
             </tbody>
