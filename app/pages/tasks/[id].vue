@@ -339,6 +339,7 @@ import {
   formatDate as formatDateValue,
   formatDateTime as formatDateTimeValue,
   isOverdue as isOverdueFor,
+  visibilityLabel,
 } from '~/utils/display'
 
 const route = useRoute()
@@ -393,7 +394,6 @@ function canChangeVisibility(t: TaskDetail): boolean {
 }
 
 const statusLabel = (s: string) => s.replaceAll('_', ' ')
-const visibilityLabel = (v: string) => v.replaceAll('_', ' ')
 const roleLabel = (r: AssignmentRole) => ({
   accountable_pm: 'Accountable PM',
   supporting_pm: 'Supporting PM',

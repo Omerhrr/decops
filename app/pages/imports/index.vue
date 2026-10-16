@@ -187,7 +187,7 @@
               <select v-model="optionsDraft.visibility_mode" class="select-field" aria-label="Initial visibility">
                 <option value="participants">Participants</option>
                 <option value="private">Private</option>
-                <option value="department_scoped">Department scoped</option>
+                <option value="department_scoped">Shared with departments</option>
                 <option value="custom">Custom</option>
               </select>
             </label>

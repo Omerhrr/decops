@@ -86,7 +86,7 @@
               <NuxtLink :to="`/tasks/${t.id}`" class="font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300" @click.stop>
                 {{ t.title }}
               </NuxtLink>
-              <p class="text-xs text-muted">{{ visibilityLabel(t.visibility_mode) }} visibility</p>
+              <p class="text-xs text-muted">{{ visibilityLabel(t.visibility_mode) }}</p>
             </td>
             <td class="px-4 py-3 text-body">{{ t.accountable_pm?.full_name ?? '-' }}</td>
             <td class="px-4 py-3">
@@ -192,7 +192,7 @@
             <select v-model="form.visibility_mode" class="input-field mt-1">
               <option value="participants">Participants (the project team)</option>
               <option value="private">Private (invited people only)</option>
-              <option value="department_scoped">Department scoped</option>
+              <option value="department_scoped">Departments (members of assigned departments)</option>
               <option value="custom">Custom (explicit grants only)</option>
             </select>
           </label>
@@ -260,7 +260,6 @@ const form = reactive({
 })
 
 const statusLabel = (s: string) => s.replaceAll('_', ' ')
-const visibilityLabel = (v: string) => v.replaceAll('_', ' ')
 
 const hasActiveFilters = computed(() =>
   Boolean(query.value.trim() || statusFilter.value || priorityFilter.value))

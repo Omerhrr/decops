@@ -36,6 +36,17 @@ export function statusLabel(status: string): string {
   return status.replaceAll('_', ' ')
 }
 
+const VISIBILITY_LABELS: Record<string, string> = {
+  private: 'Private',
+  participants: 'Participants only',
+  department_scoped: 'Shared with departments',
+  custom: 'Custom access',
+}
+
+export function visibilityLabel(mode: string): string {
+  return VISIBILITY_LABELS[mode] ?? mode.replaceAll('_', ' ')
+}
+
 export function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
