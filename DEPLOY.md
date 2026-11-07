@@ -1,6 +1,65 @@
 # Deploying DecOps
 
-## A. VPS with Docker (HTTPS included)
+## A0. Quick start: decops.rogan.live on a fresh VPS (Ubuntu/Debian)
+
+1. **DNS:** at your DNS provider create an `A` record `decops` (for `decops.rogan.live`) pointing to the VPS IPv4 address (add an `AAAA` only if the VPS has working IPv6). If you use Cloudflare, set it to **DNS only** (grey cloud) until the certificate is issued.
+2. **Server prep** (as root or with sudo):
+   ```bash
+   curl -fsSL https://get.docker.com | sh
+   ufw allow OpenSSH && ufw allow 80,443/tcp && ufw --force enable
+   ```
+3. **Clone and configure:**
+   ```bash
+   git clone <your-repo-url> decops && cd decops
+   bash scripts/gen_env.sh decops.rogan.live you@yourcompany.com   # writes .env with fresh secrets, prints the admin password once
+   nano .env                                                    # optional: SMTP settings
+   docker compose up -d --build
+   docker compose ps && docker compose logs -f api
+   ```
+4. Open `https://decops.rogan.live`, sign in with the printed admin credentials, then change the password and turn on two-factor under *Account*.
+
+Docker publishes ports 80 and 443 itself and bypasses `ufw` for them, which is fine here because only Caddy publishes anything.
+If the certificate does not issue, check `docker compose logs caddy` (almost always DNS not yet pointing at the server, or ports 80/443 blocked by the provider's firewall).
+
+## A1. The server already runs another project's Caddy (e.g. ~/opt/interdec)
+
+Only one container can own ports 80/443, so DecOps reuses the existing Caddy instead of starting its own.
+
+1. **Find the existing Caddy's network and config file:**
+   ```bash
+   docker inspect interdec-caddy-1 --format '{{json .NetworkSettings.Networks}}' | grep -o '"[a-z0-9_-]*":{' | head
+   docker inspect interdec-caddy-1 --format '{{range .Mounts}}{{.Source}} -> {{.Destination}}{{"\n"}}{{end}}'
+   ```
+   The network is usually `<project-folder>_default` (e.g. `interdec_default`). The mount whose destination is `/etc/caddy/Caddyfile` is the file to edit.
+2. **Clone and configure DecOps** (next to the other project, e.g. `~/opt/decops`):
+   ```bash
+   cd ~/opt && git clone <your-repo-url> decops && cd decops
+   bash scripts/gen_env.sh decops.rogan.live you@yourcompany.com
+   echo 'EDGE_NETWORK=interdec_default' >> .env      # the network from step 1
+   docker compose -f docker-compose.yml -f docker-compose.shared-caddy.yml up -d --build
+   docker compose -f docker-compose.yml -f docker-compose.shared-caddy.yml ps
+   ```
+3. **Add a site block to the existing Caddyfile** (keep the existing blocks untouched):
+   ```
+   decops.rogan.live {
+   	encode zstd gzip
+   	request_body {
+   		max_size 30MB
+   	}
+   	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+   	reverse_proxy decops-web:3000
+   }
+   ```
+4. **Reload Caddy without downtime** (validates first, so a typo cannot take the other site down):
+   ```bash
+   docker exec interdec-caddy-1 caddy validate --config /etc/caddy/Caddyfile
+   docker exec interdec-caddy-1 caddy reload --config /etc/caddy/Caddyfile
+   ```
+5. Make sure the DNS `A` record `decops.rogan.live` points at this server, then open `https://decops.rogan.live`.
+
+Use the same `-f docker-compose.yml -f docker-compose.shared-caddy.yml` flags for every later command (`logs`, `down`, `up -d --build` after `git pull`).
+
+## A. VPS with Docker (details)
 
 1. Point a DNS `A` record for your domain (e.g. `ops.example.com`) at the VPS. Open ports 80 and 443.
 2. Install Docker + Compose plugin, clone the repo, then:

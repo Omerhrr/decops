@@ -24,6 +24,9 @@ backend/decops.db
 backend/*.db
 *.sqlite3
 
+# Server backups
+backups/
+
 # Logs & temp
 dev.log
 *.log

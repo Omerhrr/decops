@@ -1,0 +1,20 @@
+# Use this when ANOTHER project on the same server already runs Caddy on ports 80/443
+# (e.g. ~/opt/interdec). DecOps then skips its own Caddy and joins that Caddy's Docker
+# network, so the existing Caddy can reverse-proxy decops.rogan.live to it.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.shared-caddy.yml up -d --build
+#
+# EDGE_NETWORK = the Docker network the existing Caddy is on (see DEPLOY.md).
+services:
+  caddy:
+    profiles: ["bundled-caddy"]   # not started in this mode
+  web:
+    networks:
+      default: {}
+      edge:
+        aliases: [decops-web]     # unique name, so it cannot clash with another project's "web"
+
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-interdec_default}
