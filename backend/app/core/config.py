@@ -3,6 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Backend root (backend/) - .env lives here
@@ -39,7 +40,30 @@ class Settings(BaseSettings):
     login_lockout_minutes: int = 15
 
     # --- CORS (the Nuxt dev server proxies /api, so this is a fallback for direct access) ---
+    # Env var must be JSON, e.g. DECOPS_CORS_ORIGINS='["https://ops.example.com"]'
     cors_origins: list[str] = ["http://localhost:3000"]
+
+    # --- CSRF defence in depth: browser-sent Origin of unsafe requests must be listed here.
+    # Empty = check disabled (dev). REQUIRED in production, e.g. '["https://ops.example.com"]'.
+    trusted_origins: list[str] = []
+
+    # --- Password reset / public links ---
+    public_base_url: str = "http://localhost:3000"   # used in emailed reset links
+    password_reset_minutes: int = 30
+
+    # --- Abuse protection (in-process; the API runs a single worker) ---
+    rate_limit_enabled: bool = True
+
+    # --- Error tracking (optional) ---
+    sentry_dsn: str = ""
+    sentry_traces_sample_rate: float = 0.0
+
+    # --- Request limits ---
+    max_request_bytes: int = 30 * 1024 * 1024  # hard cap on any request body (uploads are 25 MB)
+
+    # --- Demo data (demo staff with a shared, known password + sample tasks) ---
+    # None = auto: seeded outside production, never in production unless set to true.
+    seed_demo_data: bool | None = None
 
     # --- Seed admin (change via env in any real deployment) ---
     seed_admin_email: str = "admin@interdec.com"
@@ -72,13 +96,53 @@ class Settings(BaseSettings):
     email_notifications_enabled: bool = False
     smtp_host: str = "localhost"
     smtp_port: int = 25
+    smtp_ssl: bool = False                # implicit TLS (port 465)
     smtp_username: str = ""
     smtp_password: str = ""
     email_from: str = "decops@interdec.com"
 
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_database_url(cls, value: str) -> str:
+        """Hosting platforms (Render, Heroku) hand out postgres:// or postgresql://
+        URLs; SQLAlchemy needs the psycopg (v3) driver spelled out."""
+        for prefix in ("postgres://", "postgresql://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value[len(prefix):]
+        return value
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def should_seed_demo_data(self) -> bool:
+        if self.seed_demo_data is not None:
+            return self.seed_demo_data
+        return not self.is_production
+
+    def assert_production_ready(self) -> None:
+        """Refuse to boot a production instance with insecure defaults."""
+        if not self.is_production:
+            return
+        problems: list[str] = []
+        if len(self.session_secret_key) < 32 or self.session_secret_key.startswith("change-me"):
+            problems.append("DECOPS_SESSION_SECRET_KEY must be a random value of 32+ characters")
+        if not self.secure_cookies:
+            problems.append("DECOPS_SECURE_COOKIES must be true (serve over HTTPS)")
+        if self.debug:
+            problems.append("DECOPS_DEBUG must be false")
+        if self.database_url.startswith("sqlite"):
+            problems.append("DECOPS_DATABASE_URL must point at PostgreSQL, not SQLite")
+        if self.seed_admin_password in {"DecOps!2026", ""} or len(self.seed_admin_password) < 12:
+            problems.append("DECOPS_SEED_ADMIN_PASSWORD must be changed (12+ characters, not the default)")
+        if not self.trusted_origins:
+            problems.append('DECOPS_TRUSTED_ORIGINS must list the public site origin(s), e.g. \'["https://ops.example.com"]\'')
+        if problems:
+            raise RuntimeError(
+                "Refusing to start in production with insecure configuration:\n  - "
+                + "\n  - ".join(problems)
+            )
 
 
 @lru_cache

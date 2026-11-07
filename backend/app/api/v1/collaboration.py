@@ -37,6 +37,17 @@ def list_comments(
     return [CommentOut.model_validate(c).model_dump(mode="json") for c in comments]
 
 
+@router.get("/{task_id}/mentionable")
+def mentionable(
+    task_id: uuid.UUID, request: Request, db: DbSession,
+    user: User = Depends(_auth),
+    q: str = Query(default="", max_length=80),
+) -> list[dict]:
+    task = _load_task(db, user, task_id)
+    people = collaboration_service.mentionable_users(db, actor=user, task=task, q=q)
+    return [{"id": str(u.id), "full_name": u.full_name} for u in people]
+
+
 @router.post("/{task_id}/comments", status_code=201)
 def create_comment(
     task_id: uuid.UUID, payload: CommentCreate, request: Request, db: DbSession,
@@ -104,7 +115,10 @@ def download_attachment(
     return FileResponse(
         path,
         filename=attachment.original_filename,
-        media_type=attachment.content_type,
+        # Never echo the client-supplied content type: uploads are served as opaque
+        # downloads so an uploaded .html/.svg can never render in the app origin.
+        media_type="application/octet-stream",
+        content_disposition_type="attachment",
     )
 
 

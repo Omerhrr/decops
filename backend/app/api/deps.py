@@ -20,13 +20,65 @@ from app.services import auth_service
 
 DbSession = Annotated[Session, Depends(get_db)]
 
+# Paths a user with must_change_password may still call.
+_PASSWORD_CHANGE_EXEMPT = {
+    "/api/v1/auth/me", "/api/v1/auth/logout", "/api/v1/auth/change-password",
+}
+
+
+TOKEN_PREFIX = "dcp_"
+
+
+def _user_from_api_token(request: Request, db: Session, raw: str) -> User:
+    """Authenticate a personal API token. The token acts as its owner (never
+    with extra rights); read-scoped tokens may only use safe methods."""
+    from datetime import UTC, datetime
+
+    from sqlalchemy import select
+
+    from app.core.errors import PermissionDeniedError
+    from app.core.security import hash_token
+    from app.models import AccountStatus, ApiToken
+
+    row = db.scalar(select(ApiToken).where(ApiToken.token_hash == hash_token(raw)))
+    now = datetime.now(UTC)
+    if row is None or row.revoked_at is not None or (row.expires_at is not None and row.expires_at <= now):
+        raise AuthenticationError()
+    user = db.get(User, row.user_id)
+    if user is None or user.account_status != AccountStatus.active:
+        raise AuthenticationError()
+    path = request.url.path
+    if (path.startswith("/api/v1/auth/") and path != "/api/v1/auth/me") or path.startswith("/api/v1/integrations/api-tokens"):
+        raise PermissionDeniedError()  # account security + token management need a real session
+    if row.scope != "write" and request.method not in ("GET", "HEAD", "OPTIONS"):
+        raise PermissionDeniedError()
+    row.last_used_at = now
+    db.commit()
+    request.state.via_api_token = True
+    return user
+
 
 def get_request_user(request: Request, db: DbSession) -> User:
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.lower().startswith("bearer "):
+        raw = auth_header[7:].strip()
+        if raw.startswith(TOKEN_PREFIX):
+            user = _user_from_api_token(request, db, raw)
+            if user.must_change_password:
+                from app.core.errors import PasswordChangeRequiredError
+
+                raise PasswordChangeRequiredError()
+            request.state.user_session = None
+            return user
     token = request.cookies.get(request.app.state.settings.session_cookie_name)
     resolved = auth_service.resolve_session(db, token)
     if resolved is None:
         raise AuthenticationError()
     user, session = resolved
+    if user.must_change_password and request.url.path not in _PASSWORD_CHANGE_EXEMPT:
+        from app.core.errors import PasswordChangeRequiredError
+
+        raise PasswordChangeRequiredError()
     # Attach the session row for handlers that need it (e.g., logout revocation)
     request.state.user_session = session
     return user

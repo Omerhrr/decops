@@ -49,9 +49,11 @@ class UserPreferencesOut(BaseModel):
     theme_mode: str
     accent_color: str
     font_family: str
+    timezone: str = "UTC"
 
 
 class UserPreferencesUpdate(BaseModel):
     theme_mode: str | None = None
     accent_color: str | None = None
     font_family: str | None = None
+    timezone: str | None = Field(default=None, max_length=64)

@@ -209,7 +209,14 @@ def _deliver_email(db: Session, event: OutboxEvent, task: Task, recipient_id: uu
             actor_name=event.payload.get("actor_name"),
         )
     )
-    email_sender.send_email(to_email=user.email, subject=subject, body=body)
+    if ntf.is_confidential(str(getattr(task.visibility_mode, "value", task.visibility_mode))):
+        # Same rule as the subject: no title (or title-bearing summary) in email.
+        body = f"{ntf.event_label(event.event_type)} - task {task.task_number}"
+    link = f"{settings.public_base_url.rstrip('/')}/tasks/{task.id}"
+    email_sender.send_email(
+        to_email=user.email, subject=subject, body=f"{body}\n\nOpen the task: {link}",
+        html=email_sender.render_html(heading=ntf.event_label(event.event_type), body=body, link=link),
+    )
     emailed.add(str(recipient_id))
     event.payload = {**event.payload, "emailed_to": sorted(emailed)}
     return True
@@ -250,6 +257,12 @@ def process_event(db: Session, event: OutboxEvent, *, now: datetime | None = Non
                 # failure stays on the event for the next pass via last_error.
                 logger.warning("Email delivery failed for event %s: %s", event.id, exc)
                 event.last_error = f"email: {exc}"
+
+        if event.payload.get("webhooks_sent") is None:
+            from app.services import webhook_service
+
+            webhook_service.dispatch(db, event, task)  # best-effort, never raises
+            event.payload = {**event.payload, "webhooks_sent": True}
 
         event.status = OutboxStatus.processed
         event.processed_at = now
@@ -386,4 +399,7 @@ def worker_pass(db: Session, *, now: datetime | None = None) -> dict:
     counts = process_due_events(db, now=now)
     sweep = sweep_deadlines(db, now=now)
     counts["deadline_created"] = sweep["created"]
+    from app.services import recurrence_service
+
+    counts["recurring_created"] = recurrence_service.run_due(db)["created"]
     return counts

@@ -16,6 +16,8 @@ export interface Me {
   roles: RoleBrief[]
   permissions: string[]
   preferences?: UserPreferences
+  mfa_enabled?: boolean
+  must_change_password?: boolean
 }
 
 export interface ApiErrorBody {
@@ -463,6 +465,7 @@ export interface UserPreferences {
   theme_mode: 'light' | 'dark' | 'system'
   accent_color: 'emerald' | 'blue' | 'violet' | 'rose' | 'amber' | 'slate'
   font_family: 'inter' | 'system' | 'serif' | 'mono'
+  timezone?: string
 }
 
 export interface OrgSettings {

@@ -20,6 +20,7 @@ export function useAuth() {
   async function fetchMe(): Promise<Me | null> {
     try {
       user.value = await api.get<Me>('/api/v1/auth/me')
+      setDisplayTimeZone(user.value?.preferences?.timezone)
     } catch {
       user.value = null
     } finally {
@@ -28,10 +29,11 @@ export function useAuth() {
     return user.value
   }
 
-  async function login(email: string, password: string): Promise<void> {
-    user.value = await api.post<Me>('/api/v1/auth/login', { email, password })
+  async function login(email: string, password: string, otpCode?: string): Promise<void> {
+    user.value = await api.post<Me>('/api/v1/auth/login', { email, password, otp_code: otpCode || undefined })
     loaded.value = true
     useAppearance().hydrateFromUser(user.value?.preferences)
+    setDisplayTimeZone(user.value?.preferences?.timezone)
   }
 
   async function logout(): Promise<void> {

@@ -1,0 +1,12 @@
+# Automatic HTTPS (Let's Encrypt). DNS A/AAAA record for $DOMAIN must point at this VPS.
+{$DOMAIN} {
+	encode zstd gzip
+	request_body {
+		max_size 30MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	reverse_proxy web:3000
+}

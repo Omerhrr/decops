@@ -96,6 +96,7 @@ const EVENT_LABELS: Record<string, string> = {
   access_granted: 'Access granted',
   access_revoked: 'Access revoked',
   milestone_completed: 'Milestone completed',
+  comment_mention: 'Mentioned in a comment',
 }
 
 const rootEl = ref<HTMLElement | null>(null)

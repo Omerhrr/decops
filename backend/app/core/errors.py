@@ -43,6 +43,12 @@ class AuthenticationError(AppError):
     message = "Authentication required."
 
 
+class PasswordChangeRequiredError(AppError):
+    status_code = status.HTTP_403_FORBIDDEN
+    code = "password_change_required"
+    message = "You must change your password before continuing."
+
+
 class PermissionDeniedError(AppError):
     """Returned as 404 to avoid confirming the existence of restricted resources."""
 

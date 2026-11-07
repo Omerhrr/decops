@@ -153,3 +153,15 @@ class Attachment(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     @property
     def is_deleted(self) -> bool:
         return self.deleted_at is not None
+
+
+class SavedFilter(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    """A user's named task-list filter. Private to its owner; holds only
+    filter parameters (never task data), so it cannot leak anything."""
+
+    __tablename__ = "saved_filters"
+    __table_args__ = (UniqueConstraint("user_id", "name", name="uq_saved_filters_user_name"),)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    params: Mapped[dict] = mapped_column(JSONType, default=dict)

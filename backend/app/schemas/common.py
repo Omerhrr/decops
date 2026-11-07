@@ -12,6 +12,7 @@ from app.models import AccountStatus
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=200)
+    otp_code: str | None = Field(default=None, max_length=32)
 
 
 class UserBrief(BaseModel):
@@ -43,6 +44,8 @@ class MeResponse(BaseModel):
     roles: list[RoleBrief] = []
     permissions: list[str] = []
     preferences: dict = {}
+    mfa_enabled: bool = False
+    must_change_password: bool = False
 
 
 class AuthErrorResponse(BaseModel):

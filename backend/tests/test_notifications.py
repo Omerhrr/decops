@@ -421,8 +421,10 @@ class TestEmailChannel:
     def test_email_subject_redacted_for_confidential_tasks(self, client, test_db, monkeypatch):
         captured = []
 
-        def fake_send(*, to_email, subject, body):
+        def fake_send(*, to_email, subject, body, html=None):
             captured.append((to_email, subject, body))
+            assert "Secret restructuring" not in body
+            assert html is None or "Secret restructuring" not in html
 
         monkeypatch.setattr(notification_service.email_sender, "send_email", fake_send)
         monkeypatch.setattr(notification_service.settings, "email_notifications_enabled", True)

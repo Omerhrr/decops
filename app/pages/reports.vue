@@ -58,34 +58,12 @@
             </p>
           </div>
           <div v-if="completion" class="flex flex-wrap gap-4 text-xs text-muted">
-            <span><span class="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-brand-500" /> Completed</span>
-            <span><span class="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-line-strong" /> Created</span>
             <span>Avg cycle: <strong>{{ completion.avg_days_to_complete ?? '-' }}d</strong></span>
           </div>
         </div>
 
         <div v-if="completion" class="mt-6">
-          <!-- SVG bar chart: created/completed per week -->
-          <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" class="h-56 w-full" role="img" aria-label="Weekly completion chart">
-            <line v-for="tick in 5" :key="tick"
-                  :x1="chartPad" :x2="chartWidth - 8"
-                  :y1="chartPad + (chartHeight - chartPad * 2) * (tick - 1) / 4"
-                  :y2="chartPad + (chartHeight - chartPad * 2) * (tick - 1) / 4"
-                  class="stroke-line" stroke-width="1" />
-            <g v-for="(point, i) in completion.series" :key="point.week_start">
-              <rect
-                :x="weekX(i) - barGap" :y="yFor(point.created)" :width="barWidth"
-                :height="Math.max(yZero - yFor(point.created), point.created ? 2 : 0)" rx="2" class="fill-line-strong"
-              ><title>{{ weekLabel(point.week_start) }}: {{ point.created }} created</title></rect>
-              <rect
-                :x="weekX(i) + barGap" :y="yFor(point.completed)" :width="barWidth"
-                :height="Math.max(yZero - yFor(point.completed), point.completed ? 2 : 0)" rx="2" class="fill-brand-500"
-              ><title>{{ weekLabel(point.week_start) }}: {{ point.completed }} completed</title></rect>
-              <text v-if="i % labelEvery === 0" :x="weekX(i)" :y="chartHeight - 6" text-anchor="middle" class="fill-faint" font-size="9">
-                {{ shortWeek(point.week_start) }}
-              </text>
-            </g>
-          </svg>
+          <ChartTrend :data="completion.series" label="Weekly tasks created versus completed" />
 
           <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div class="rounded-xl bg-elevated p-4">
@@ -240,38 +218,6 @@ async function runExport(type: string, format: 'csv' | 'pdf') {
   } finally {
     exporting.value = null
   }
-}
-
-const chartWidth = 720
-const chartHeight = 220
-const chartPad = 16
-const yZero = chartHeight - 22
-
-const maxCount = computed(() => {
-  if (!completion.value) return 1
-  return Math.max(1, ...completion.value.series.map(p => Math.max(p.created, p.completed)))
-})
-
-const slotWidth = computed(() => (chartWidth - chartPad - 8) / Math.max(completion.value?.series.length ?? 1, 1))
-const barWidth = computed(() => Math.min(14, slotWidth.value / 3))
-const barGap = computed(() => barWidth.value / 2 + 2)
-const labelEvery = computed(() => (completion.value?.series.length ?? 0) > 16 ? 4 : 2)
-
-function weekX(index: number): number {
-  return chartPad + slotWidth.value * (index + 0.5)
-}
-
-function yFor(count: number): number {
-  const usable = yZero - chartPad
-  return yZero - (count / maxCount.value) * usable
-}
-
-function weekLabel(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-function shortWeek(iso: string): string {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })
 }
 
 useHead({ title: 'Reports - DecOps' })

@@ -9,8 +9,10 @@ from app.models.collaboration import (
     NotificationPreference,
     OutboxEvent,
     OutboxStatus,
+    SavedFilter,
 )
 from app.models.department import Department, DepartmentMembership, DepartmentStatus, MembershipRole
+from app.models.integrations import ApiToken, RecurringTask, Webhook
 from app.models.import_job import ImportJob, ImportJobStatus
 from app.models.rbac import Permission, Role, RolePermission, ScopeType, UserRole
 from app.models.settings import AppSetting
@@ -26,7 +28,7 @@ from app.models.task import (
     TaskDepartment,
     TaskPriority,
 )
-from app.models.user import AccountStatus, User, UserSession
+from app.models.user import AccountStatus, PasswordResetToken, User, UserSession
 from app.models.workflow import (
     ProgressBasis,
     StageExecutionMode,
@@ -54,6 +56,10 @@ __all__ = [
     "ImportJobStatus",
     "MembershipRole",
     "Notification",
+    "SavedFilter",
+    "ApiToken",
+    "RecurringTask",
+    "Webhook",
     "NotificationPreference",
     "OutboxEvent",
     "OutboxStatus",

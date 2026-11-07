@@ -20,7 +20,7 @@ echo "[2/5] Approved accounts + validated register (launch drill, idempotent)"
  echo "launch preflight/provisioning failed - aborting"; exit 1; }
 
 echo "[3/5] Building frontend"
-bun run build
+npm ci && npm run build
 
 echo "[4/5] Starting API (port 8000)"
 (cd backend && nohup uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 \

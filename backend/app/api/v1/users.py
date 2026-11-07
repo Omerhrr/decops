@@ -187,3 +187,33 @@ def revoke_role(
     db.commit()
     db.refresh(user)
     return _detail_out(user)
+
+
+@router.post("/{user_id}/reset-mfa", response_model=UserDetailOut,
+             dependencies=[Depends(require_permission("users.manage"))])
+def reset_mfa(user_id: uuid.UUID, request: Request, db: DbSession) -> UserDetailOut:
+    """Lost authenticator device: clear two-factor and revoke the user's sessions."""
+    from app.services import account_service
+
+    actor: User = request.state.user
+    user = _get_user_or_404(db, user_id)
+    account_service.admin_reset_mfa(db, actor=actor, user=user)
+    db.commit()
+    db.refresh(user)
+    return _detail_out(user)
+
+
+@router.post("/{user_id}/require-password-change", response_model=UserDetailOut,
+             dependencies=[Depends(require_permission("users.manage"))])
+def require_password_change(user_id: uuid.UUID, request: Request, db: DbSession) -> UserDetailOut:
+    from app.services import audit_service
+
+    actor: User = request.state.user
+    user = _get_user_or_404(db, user_id)
+    user.must_change_password = True
+    audit_service.record_audit_event(
+        db, action="user.password_change_required", resource_type="user", resource_id=user.id, actor=actor,
+    )
+    db.commit()
+    db.refresh(user)
+    return _detail_out(user)

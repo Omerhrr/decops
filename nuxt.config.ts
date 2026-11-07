@@ -1,14 +1,46 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   devtools: { enabled: false },
 
-  // FastAPI backend runs on 127.0.0.1:8000; the Nuxt server proxies /api/*
-  // so the browser only ever talks to this origin (first-party session cookies).
-  routeRules: {
-    '/api/**': { proxy: { to: 'http://127.0.0.1:8000/api/**' } },
+  // The Nuxt server proxies /api/* to FastAPI (see server/api/[...].ts) so the
+  // browser only ever talks to this origin (first-party session cookies).
+  // The backend location is runtime config: set NUXT_API_BASE (e.g. http://api:8000).
+  runtimeConfig: {
+    apiBase: 'http://127.0.0.1:8000',
   },
+
+  // Baseline security headers for every page (production only: dev needs HMR).
+  routeRules: isProd
+    ? {
+        '/**': {
+          headers: {
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+            'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+            'Content-Security-Policy': [
+              "default-src 'self'",
+              // Nuxt SSR payload + the pre-paint theme script are inline.
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self' data:",
+              "connect-src 'self'",
+              // PDF design preview renders a blob: URL in an iframe.
+              "frame-src 'self' blob:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
+        },
+      }
+    : {},
 
   css: ['~/assets/css/main.css'],
 
@@ -21,10 +53,9 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     server: {
-      // The app is reached through an ephemeral preview/proxy gateway whose
-      // hostname changes per session (ws-*.fcapp.run). Vite blocks unknown
-      // Host headers by default; allow any host in this sandbox dev setup.
-      allowedHosts: true,
+      // Dev only: the app may be reached through a changing preview gateway
+      // hostname. Never relevant to production builds.
+      allowedHosts: isProd ? undefined : true,
     },
   },
 
@@ -43,7 +74,11 @@ export default defineNuxtConfig({
         { name: 'description', content: 'DecOps Operations Management System for Interdec' },
         { name: 'theme-color', content: '#0b1220' },
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'apple-touch-icon', href: '/icon-192.png' },
+      ],
       script: [
         {
           // Apply the saved theme before first paint to avoid a flash of the

@@ -35,18 +35,20 @@ class EventType:
     ACCESS_GRANTED = "access_granted"
     ACCESS_REVOKED = "access_revoked"
     MILESTONE_COMPLETED = "milestone_completed"
+    COMMENT_MENTION = "comment_mention"
 
     ALL = frozenset({
         TASK_ASSIGNED, SUPPORTING_PM_ADDED, DEADLINE_APPROACHING, TASK_OVERDUE,
         WORK_ITEM_COMPLETED, TASK_BLOCKED, BLOCKER_RESOLVED,
         TASK_SUBMITTED_FOR_REVIEW, REVIEW_REJECTED, TASK_COMPLETED,
         TASK_REOPENED, VISIBILITY_CHANGED, ACCESS_GRANTED, ACCESS_REVOKED,
-        MILESTONE_COMPLETED,
+        MILESTONE_COMPLETED, COMMENT_MENTION,
     })
 
     # Events directed at exactly one user (the affected user), not the circle.
     TARGETED_EVENTS = frozenset({
         TASK_ASSIGNED, SUPPORTING_PM_ADDED, ACCESS_GRANTED, ACCESS_REVOKED,
+        COMMENT_MENTION,
     })
 
 
@@ -135,6 +137,7 @@ def event_label(event_type: str) -> str:
         EventType.ACCESS_GRANTED: "You were granted access to a task",
         EventType.ACCESS_REVOKED: "Your access to a task changed",
         EventType.MILESTONE_COMPLETED: "A milestone was completed",
+        EventType.COMMENT_MENTION: "You were mentioned in a comment",
     }
     return labels.get(event_type, event_type.replace("_", " ").capitalize())
 
@@ -170,6 +173,8 @@ def summary_for_event(event_type: str, *, task_number: str, task_title: str,
         return f"You were granted access to {task_number} ({task_title})"
     if event_type == EventType.ACCESS_REVOKED:
         return f"Your access to {task_number} changed"
+    if event_type == EventType.COMMENT_MENTION:
+        return f"{who} mentioned you in a comment on {task_number} ({task_title})"
     if event_type == EventType.DEADLINE_APPROACHING:
         return f"{task_number} ({task_title}) is due soon"
     if event_type == EventType.TASK_OVERDUE:

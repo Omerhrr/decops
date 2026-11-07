@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-canvas">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <!-- Desktop sidebar (collapsible icon rail) -->
     <aside
       class="fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex"
@@ -11,7 +12,7 @@
         </NuxtLink>
       </div>
 
-      <nav class="flex-1 overflow-y-auto p-3">
+      <nav class="flex-1 overflow-y-auto p-3" aria-label="Primary">
         <AppSidebarNav :collapsed="collapsed" />
       </nav>
 
@@ -33,7 +34,7 @@
     </aside>
 
     <!-- Mobile drawer -->
-    <div v-if="mobileOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
+    <div v-if="mobileOpen" v-dialog="{ close: closeMobile }" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
       <div class="absolute inset-0 bg-overlay" data-test="drawer-backdrop" @click="closeMobile" />
       <aside class="absolute inset-y-0 left-0 flex w-72 max-w-[85vw] flex-col bg-surface shadow-xl">
         <div class="flex h-16 shrink-0 items-center justify-between border-b border-line px-4">
@@ -47,7 +48,7 @@
           </button>
         </div>
 
-        <nav class="flex-1 overflow-y-auto p-3">
+        <nav class="flex-1 overflow-y-auto p-3" aria-label="Primary">
           <AppSidebarNav @navigate="closeMobile" />
         </nav>
 
@@ -87,15 +88,16 @@
           </div>
 
           <div v-if="auth.isAuthenticated.value" class="flex items-center gap-1 sm:gap-2">
+            <AppSearch v-if="!forcedChange" />
             <ThemeToggle />
-            <AppNotifications />
+            <AppNotifications v-if="!forcedChange" />
             <span class="mx-1 hidden h-6 w-px bg-line sm:block" aria-hidden="true" />
             <UserMenu />
           </div>
         </div>
       </header>
 
-      <main class="flex-1">
+      <main id="main-content" tabindex="-1" class="flex-1 focus:outline-none">
         <slot />
       </main>
 
@@ -115,6 +117,9 @@
 const auth = useAuth()
 const api = useApi()
 
+// While a password change is required the API only serves the account endpoints.
+const forcedChange = computed(() => !!auth.user.value?.must_change_password)
+
 const orgName = useState<string>('ui.org-name', () => 'Interdec Operations')
 
 // Collapsed state persists per browser (desktop rail only).
@@ -129,6 +134,7 @@ onMounted(() => {
   } catch {
     /* storage unavailable (private mode) - default expanded */
   }
+  if (forcedChange.value) return
   void api.get<{ org_name: string; org_tagline: string }>('/api/v1/settings/org')
     .then((org) => {
       orgName.value = [org.org_name, org.org_tagline].filter(Boolean).join(' · ') || 'Interdec Operations'

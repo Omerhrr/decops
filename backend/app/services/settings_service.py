@@ -45,6 +45,7 @@ PREFERENCES_DEFAULTS = {
     "theme_mode": "system",
     "accent_color": "emerald",
     "font_family": "inter",
+    "timezone": "UTC",
 }
 
 
@@ -194,6 +195,14 @@ def update_user_preferences(db: Session, user: User, patch: dict) -> dict:
         if patch["font_family"] not in FONT_CHOICES:
             raise ValidationFailedError("Unknown font family.")
         current["font_family"] = patch["font_family"]
+    if patch.get("timezone") is not None:
+        from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+        try:
+            ZoneInfo(patch["timezone"])
+        except (ZoneInfoNotFoundError, ValueError, OSError) as exc:
+            raise ValidationFailedError("Unknown time zone.") from exc
+        current["timezone"] = patch["timezone"]
     user.preferences = current
     db.add(user)
     return current

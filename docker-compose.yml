@@ -1,0 +1,93 @@
+# Production-style stack for a VPS:  docker compose up -d --build
+# Services: db (Postgres) -> api (FastAPI) -> web (Nuxt) -> caddy (HTTPS, public)
+# Only caddy publishes ports; db/api/web live on the internal network.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: decops
+      POSTGRES_USER: decops
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U decops -d decops"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DECOPS_ENVIRONMENT: production
+      DECOPS_DATABASE_URL: postgresql+psycopg://decops:${POSTGRES_PASSWORD}@db:5432/decops
+      DECOPS_SESSION_SECRET_KEY: ${DECOPS_SESSION_SECRET_KEY:?set DECOPS_SESSION_SECRET_KEY in .env}
+      DECOPS_SECURE_COOKIES: "true"
+      DECOPS_TRUSTED_ORIGINS: '["https://${DOMAIN:?set DOMAIN in .env}"]'
+      DECOPS_CORS_ORIGINS: '["https://${DOMAIN}"]'
+      DECOPS_SEED_ADMIN_EMAIL: ${DECOPS_SEED_ADMIN_EMAIL:?set DECOPS_SEED_ADMIN_EMAIL in .env}
+      DECOPS_SEED_ADMIN_PASSWORD: ${DECOPS_SEED_ADMIN_PASSWORD:?set DECOPS_SEED_ADMIN_PASSWORD in .env}
+      DECOPS_SEED_DEMO_DATA: ${DECOPS_SEED_DEMO_DATA:-false}
+      DECOPS_PUBLIC_BASE_URL: https://${DOMAIN}
+      # Optional error tracking (leave empty to disable)
+      DECOPS_SENTRY_DSN: ${DECOPS_SENTRY_DSN:-}
+      # Optional email (password reset links, notifications)
+      DECOPS_EMAIL_NOTIFICATIONS_ENABLED: ${DECOPS_EMAIL_NOTIFICATIONS_ENABLED:-false}
+      DECOPS_SMTP_HOST: ${DECOPS_SMTP_HOST:-localhost}
+      DECOPS_SMTP_PORT: ${DECOPS_SMTP_PORT:-587}
+      DECOPS_SMTP_USERNAME: ${DECOPS_SMTP_USERNAME:-}
+      DECOPS_SMTP_PASSWORD: ${DECOPS_SMTP_PASSWORD:-}
+      DECOPS_EMAIL_FROM: ${DECOPS_EMAIL_FROM:-decops@localhost}
+    volumes:
+      - appdata:/data
+    expose: ["8000"]
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }
+    environment:
+      NUXT_API_BASE: http://api:8000
+    expose: ["3000"]
+
+  # Nightly database dump + attachments archive, 14 days kept in ./backups
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PGHOST: db
+      PGUSER: decops
+      PGDATABASE: decops
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_HOUR_UTC: ${BACKUP_HOUR_UTC:-2}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - ./deploy/backup.sh:/backup.sh:ro
+      - appdata:/data:ro
+      - ./backups:/backups
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web]
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  pgdata:
+  appdata:
+  caddy_data:
+  caddy_config:

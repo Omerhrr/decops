@@ -207,8 +207,11 @@ def run_seed() -> None:
     try:
         seed_permissions_and_roles(db)
         seed_admin(db)
-        seed_departments_and_people(db)
-        seed_demo_tasks(db)
+        if settings.should_seed_demo_data:
+            seed_departments_and_people(db)
+            seed_demo_tasks(db)
+        else:
+            logger.info("demo data skipped (production); set DECOPS_SEED_DEMO_DATA=true to force")
         db.commit()
         logger.info("seed complete")
     except Exception:

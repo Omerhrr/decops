@@ -51,7 +51,7 @@
       <h1 class="text-2xl font-semibold tracking-tight text-ink">Sign in to DecOps</h1>
       <p class="mt-2 text-sm text-muted">Use your Interdec work account.</p>
 
-      <form class="mt-8" novalidate @submit.prevent="submit">
+      <form class="mt-8" method="post" action="/login" novalidate @submit.prevent="submit">
         <div class="space-y-5">
           <div>
             <label for="email" class="block text-sm font-medium text-body">Work email</label>
@@ -61,19 +61,23 @@
               type="email"
               name="email"
               autocomplete="email"
+              autofocus
               required
+              :aria-invalid="!!errorMessage"
+              :aria-describedby="errorMessage ? 'login-error' : undefined"
               class="input-field mt-1.5"
               placeholder="you@interdec.com"
             >
           </div>
 
-          <div>
+          <div v-if="step === 'password'">
             <div class="flex items-center justify-between">
               <label for="password" class="block text-sm font-medium text-body">Password</label>
               <button
                 type="button"
                 class="text-xs font-medium text-muted hover:text-ink"
                 :aria-pressed="showPassword"
+                aria-label="Show password"
                 @click="showPassword = !showPassword"
               >
                 {{ showPassword ? 'Hide' : 'Show' }}
@@ -86,13 +90,43 @@
               name="password"
               autocomplete="current-password"
               required
+              :aria-invalid="!!errorMessage"
+              :aria-describedby="errorMessage ? 'login-error' : undefined"
               class="input-field mt-1.5"
               placeholder="Enter your password"
             >
+            <NuxtLink to="/forgot-password" class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">
+              Forgot your password?
+            </NuxtLink>
+          </div>
+
+          <div v-else>
+            <label for="otp" class="block text-sm font-medium text-body">Verification code</label>
+            <input
+              id="otp"
+              v-model="otp"
+              type="text"
+              inputmode="numeric"
+              name="otp"
+              autocomplete="one-time-code"
+              autofocus
+              required
+              :aria-invalid="!!errorMessage"
+              :aria-describedby="errorMessage ? 'login-error' : 'otp-help'"
+              class="input-field mt-1.5 tracking-widest"
+              placeholder="123456"
+            >
+            <p id="otp-help" class="mt-2 text-xs text-muted">
+              Open your authenticator app and enter the 6-digit code. Lost your device? Use one of your recovery codes instead.
+            </p>
+            <button type="button" class="mt-2 text-xs font-medium text-muted hover:text-ink" @click="backToPassword">
+              Back
+            </button>
           </div>
 
           <p
             v-if="errorMessage"
+            id="login-error"
             role="alert"
             class="flex items-start gap-2 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700 dark:text-rose-300"
           >
@@ -102,12 +136,12 @@
             {{ errorMessage }}
           </p>
 
-          <button type="submit" :disabled="submitting || !email || !password" class="btn-primary w-full py-2.5">
+          <button type="submit" :disabled="submitting" :aria-busy="submitting" class="btn-primary w-full py-2.5">
             <svg v-if="submitting" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
               <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            {{ submitting ? 'Signing in' : 'Sign in' }}
+            {{ submitting ? 'Signing in' : (step === 'otp' ? 'Verify and sign in' : 'Sign in') }}
           </button>
         </div>
       </form>
@@ -130,15 +164,33 @@ const password = ref('')
 const showPassword = ref(false)
 const submitting = ref(false)
 const errorMessage = ref('')
+const step = ref<'password' | 'otp'>('password')
+const otp = ref('')
+
+function backToPassword() {
+  step.value = 'password'
+  otp.value = ''
+  errorMessage.value = ''
+}
 
 async function submit() {
   errorMessage.value = ''
+  if (!email.value.trim() || !password.value) {
+    errorMessage.value = 'Enter your work email and password.'
+    return
+  }
+  if (step.value === 'otp' && !otp.value.trim()) {
+    errorMessage.value = 'Enter the verification code.'
+    return
+  }
   submitting.value = true
   try {
-    await auth.login(email.value.trim(), password.value)
-    await navigateTo('/', { replace: true })
+    await auth.login(email.value.trim(), password.value, step.value === 'otp' ? otp.value.trim() : undefined)
+    await navigateTo(auth.user.value?.must_change_password ? '/account?forced=1' : '/', { replace: true })
   } catch (err) {
-    if (err instanceof ApiError) {
+    if (err instanceof ApiError && err.code === 'mfa_required') {
+      step.value = 'otp'
+    } else if (err instanceof ApiError) {
       errorMessage.value = err.message
     } else {
       errorMessage.value = 'Unable to reach the server. Please try again.'

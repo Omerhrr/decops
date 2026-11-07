@@ -113,7 +113,7 @@ def test_preferences_roundtrip(client, test_db):
     _member(client, test_db)
     r = client.get("/api/v1/me/preferences")
     assert r.status_code == 200
-    assert r.json() == {"theme_mode": "system", "accent_color": "emerald", "font_family": "inter"}
+    assert r.json() == {"theme_mode": "system", "accent_color": "emerald", "font_family": "inter", "timezone": "UTC"}
 
     r = client.put("/api/v1/me/preferences", json={
         "theme_mode": "dark", "accent_color": "violet", "font_family": "serif",

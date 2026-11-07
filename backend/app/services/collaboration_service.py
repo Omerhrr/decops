@@ -10,6 +10,7 @@ Authorization failures surface as 404, consistent with the rest of the API.
 """
 
 import hashlib
+import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -21,7 +22,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.config import get_settings
 from app.core.errors import NotFoundError, ValidationFailedError
 from app.domain import access_policy
-from app.models import Attachment, Comment, Task, User, WorkItem
+from app.models import AccountStatus, Attachment, Comment, Task, User, WorkItem
 from app.services import audit_service, task_service
 
 
@@ -83,7 +84,75 @@ def create_comment(db: Session, *, actor: User, task: Task, body: str,
         summary=f"{actor.full_name} commented on the task",
         detail={"comment_id": str(comment.id)},
     )
+    _notify_mentions(db, actor=actor, task=task, text=text, comment_id=comment.id)
     return comment
+
+
+_MENTION_RE = re.compile(r"@\[[^\]\n]{1,120}\]\(user:([0-9a-fA-F-]{36})\)")
+MAX_MENTIONS = 10
+
+
+def extract_mentioned_ids(text: str) -> list[uuid.UUID]:
+    """Unique user ids from `@[Name](user:<uuid>)` tokens, in order."""
+    seen: list[uuid.UUID] = []
+    for raw in _MENTION_RE.findall(text):
+        try:
+            uid = uuid.UUID(raw)
+        except ValueError:
+            continue
+        if uid not in seen:
+            seen.append(uid)
+    return seen[:MAX_MENTIONS]
+
+
+def user_can_view(db: Session, user: User, task: Task) -> bool:
+    if str(getattr(user.account_status, "value", user.account_status)) != "active":
+        return False
+    try:
+        access_policy.require_access(
+            task_service.build_actor_context(db, user),
+            task_service.build_policy(db, task),
+            access_policy.Operation.VIEW,
+        )
+    except access_policy.AccessDeniedError:
+        return False
+    return True
+
+
+def _notify_mentions(db: Session, *, actor: User, task: Task, text: str, comment_id: uuid.UUID) -> None:
+    """Notify mentioned people - but only those who can already VIEW the task.
+    Mentioning someone never grants access, and silently skips the rest so a
+    mention cannot be used to probe who can see a confidential task."""
+    from app.services import notification_service as ns
+
+    for uid in extract_mentioned_ids(text):
+        if uid == actor.id:
+            continue
+        target = db.get(User, uid)
+        if target is None or not user_can_view(db, target, task):
+            continue
+        ns.record_event(
+            db, event_type=ns.ntf.EventType.COMMENT_MENTION, task_id=task.id,
+            actor=actor, target_user_id=target.id, extra={"comment_id": str(comment_id)},
+        )
+
+
+def mentionable_users(db: Session, *, actor: User, task: Task, q: str = "", limit: int = 8) -> list[User]:
+    """People who could be @mentioned on this task (they can view it)."""
+    _authorize(db, actor, task, access_policy.Operation.COMMENT)
+    stmt = select(User).where(User.account_status == AccountStatus.active)
+    needle = q.strip()
+    if needle:
+        like = f"%{needle}%"
+        stmt = stmt.where(User.full_name.ilike(like) | User.email.ilike(like))
+    stmt = stmt.order_by(User.full_name).limit(60)
+    out: list[User] = []
+    for u in db.scalars(stmt).all():
+        if u.id != actor.id and user_can_view(db, u, task):
+            out.append(u)
+            if len(out) >= limit:
+                break
+    return out
 
 
 def delete_comment(db: Session, *, actor: User, task: Task, comment_id: uuid.UUID) -> None:
@@ -126,7 +195,8 @@ def _validate_upload(db: Session, task: Task, upload: UploadFile, *, work_item_i
         item = db.get(WorkItem, work_item_id)
         if item is None or item.task_id != task.id:
             raise ValidationFailedError("The referenced work item does not exist on this task.")
-    content = upload.file.read()
+    # Read at most limit+1 bytes so an oversized upload cannot exhaust memory.
+    content = upload.file.read(cfg.attachment_max_bytes + 1)
     if len(content) == 0:
         raise ValidationFailedError("The uploaded file is empty.")
     if len(content) > cfg.attachment_max_bytes:

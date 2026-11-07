@@ -18,8 +18,8 @@
   --line-strong: #cbd5e1;
   --ink: #0f172a;
   --body: #334155;
-  --muted: #5b6b80;
-  --faint: #8a97a8;
+  --muted: #475569;
+  --faint: #5b6b80;
   --overlay: rgb(15 23 42 / 0.45);
 }
 
@@ -34,8 +34,8 @@
   --line-strong: #354463;
   --ink: #eef2f7;
   --body: #c4cedd;
-  --muted: #8fa0b5;
-  --faint: #64748b;
+  --muted: #a3b2c6;
+  --faint: #8393a8;
   --overlay: rgb(2 6 16 / 0.65);
 }
 
@@ -202,3 +202,19 @@ body {
 *::-webkit-scrollbar { width: 8px; height: 8px; }
 *::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
 *::-webkit-scrollbar-track { background: transparent; }
+
+/* Skip link: first tab stop, visible only on focus */
+@utility skip-link {
+  @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]
+    focus:rounded-lg focus:bg-brand-700 focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white;
+}
+
+/* Respect the OS "reduce motion" setting */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,63 @@
+# Render Blueprint: New > Blueprint > point at this repo.
+# The API is a *private* service (not reachable from the internet); only the
+# web service is public, and it proxies /api to the API over Render's network.
+# Private services and disks require a paid instance type.
+databases:
+  - name: decops-db
+    plan: basic-256mb
+    databaseName: decops
+    user: decops
+
+services:
+  - type: pserv
+    name: decops-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    healthCheckPath: /api/v1/health
+    disk:
+      name: decops-data
+      mountPath: /data
+      sizeGB: 5
+    envVars:
+      - key: DECOPS_ENVIRONMENT
+        value: production
+      - key: DECOPS_SECURE_COOKIES
+        value: "true"
+      - key: DECOPS_DATABASE_URL
+        fromDatabase: { name: decops-db, property: connectionString }
+      - key: DECOPS_SESSION_SECRET_KEY
+        generateValue: true
+      - key: DECOPS_TRUSTED_ORIGINS
+        sync: false   # e.g. ["https://decops-web.onrender.com"] (your final public URL)
+      - key: DECOPS_SEED_ADMIN_EMAIL
+        sync: false
+      - key: DECOPS_SEED_ADMIN_PASSWORD
+        sync: false
+      - key: DECOPS_SEED_DEMO_DATA
+        value: "false"
+      - key: DECOPS_PUBLIC_BASE_URL
+        sync: false   # your public URL, e.g. https://decops-web.onrender.com (used in reset emails)
+      - key: DECOPS_SENTRY_DSN
+        sync: false   # optional
+      - key: DECOPS_EMAIL_NOTIFICATIONS_ENABLED
+        value: "false"   # set true and fill the SMTP_* vars below to send email
+      - key: DECOPS_SMTP_HOST
+        sync: false
+      - key: DECOPS_SMTP_USERNAME
+        sync: false
+      - key: DECOPS_SMTP_PASSWORD
+        sync: false
+      - key: DECOPS_EMAIL_FROM
+        sync: false
+
+  - type: web
+    name: decops-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /login
+    envVars:
+      - key: NUXT_API_BASE
+        fromService: { type: pserv, name: decops-api, property: hostport }

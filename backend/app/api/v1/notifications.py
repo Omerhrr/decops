@@ -135,3 +135,26 @@ def process_now(request: Request, db: DbSession) -> dict:
     the background loop; this endpoint exists for operations and testing."""
     counts = notification_service.worker_pass(db)
     return WorkerPassOut(**counts).model_dump(mode="json")
+
+
+@router.post("/test-email", dependencies=[Depends(require_permission("settings.manage"))])
+def send_test_email(request: Request, db: DbSession, user: User = Depends(_auth)) -> dict:
+    """Send a test message to the signed-in admin to verify SMTP settings."""
+    from app.core.config import get_settings
+    from app.services import email_sender
+
+    cfg = get_settings()
+    if not cfg.email_notifications_enabled:
+        raise ValidationFailedError(
+            "Email is turned off. Set DECOPS_EMAIL_NOTIFICATIONS_ENABLED=true and the SMTP settings first.",
+            code="email_disabled",
+        )
+    try:
+        email_sender.send_email(
+            to_email=user.email, subject="DecOps test email",
+            body="Your DecOps email settings work.",
+            html=email_sender.render_html(heading="DecOps test email", body="Your DecOps email settings work."),
+        )
+    except email_sender.EmailError as exc:
+        raise ValidationFailedError(str(exc), code="email_failed") from exc
+    return {"sent_to": user.email}

@@ -17,6 +17,7 @@ from app.core.config import Settings, settings
 from app.core.context import request_id_ctx
 from app.core.errors import register_exception_handlers
 from app.core.logging import log_event, setup_logging
+from app.core.ratelimit import RateLimitMiddleware
 from app.services import outbox_worker
 
 logger = logging.getLogger("decops.app")
@@ -89,9 +90,63 @@ class SecurityHeadersMiddleware:
         await self.app(scope, receive, send_with_headers)
 
 
+class RequestGuardMiddleware:
+    """Defence-in-depth request guards.
+
+    * Rejects bodies larger than ``max_request_bytes`` (Content-Length) before
+      they are spooled to disk.
+    * CSRF: for unsafe methods, a browser-supplied ``Origin`` must be in
+      ``trusted_origins`` (when configured). SameSite=Lax cookies already block
+      the classic attack; this closes same-site / subdomain gaps.
+    """
+
+    UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
+
+    def __init__(self, app, *, max_bytes: int, trusted_origins: list[str]) -> None:  # noqa: ANN001
+        self.app = app
+        self.max_bytes = max_bytes
+        self.trusted = {o.rstrip("/").lower() for o in trusted_origins}
+
+    async def _reject(self, send, status: int, code: str, message: str) -> None:  # noqa: ANN001
+        import json
+
+        body = json.dumps({"error": {"code": code, "message": message}}).encode()
+        await send({"type": "http.response.start", "status": status, "headers": [
+            (b"content-type", b"application/json"), (b"content-length", str(len(body)).encode()),
+        ]})
+        await send({"type": "http.response.body", "body": body})
+
+    async def __call__(self, scope, receive, send) -> None:  # noqa: ANN001
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        headers = {k.decode().lower(): v.decode("latin-1") for k, v in scope["headers"]}
+        length = headers.get("content-length")
+        if length and length.isdigit() and int(length) > self.max_bytes:
+            await self._reject(send, 413, "payload_too_large", "Request body is too large.")
+            return
+        if self.trusted and scope["method"] in self.UNSAFE:
+            origin = headers.get("origin")
+            if origin and origin.rstrip("/").lower() not in self.trusted:
+                await self._reject(send, 403, "forbidden", "Cross-origin request blocked.")
+                return
+        await self.app(scope, receive, send)
+
+
 def create_app(override_settings: Settings | None = None) -> FastAPI:
     app_settings = override_settings or settings
+    if override_settings is None:
+        app_settings.assert_production_ready()
     setup_logging()
+    if app_settings.sentry_dsn:
+        import sentry_sdk
+
+        sentry_sdk.init(
+            dsn=app_settings.sentry_dsn,
+            environment=app_settings.environment,
+            traces_sample_rate=app_settings.sentry_traces_sample_rate,
+            send_default_pii=False,  # never ship emails/IPs/cookies to a third party
+        )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -123,6 +178,16 @@ def create_app(override_settings: Settings | None = None) -> FastAPI:
     app.add_middleware(
         SecurityHeadersMiddleware,
         hsts_seconds=31536000 if app_settings.secure_cookies else 0,
+    )
+
+    app.add_middleware(
+        RateLimitMiddleware,
+        enabled=app_settings.rate_limit_enabled and app_settings.environment != "testing",
+    )
+    app.add_middleware(
+        RequestGuardMiddleware,
+        max_bytes=app_settings.max_request_bytes,
+        trusted_origins=app_settings.trusted_origins,
     )
 
     # CORS fallback for direct API access (the Nuxt server normally proxies /api)

@@ -7,14 +7,24 @@
     <p class="mt-1 text-xs text-faint">Visible to everyone who can see this task. Access is re-checked on every request.</p>
 
     <form class="mt-4" @submit.prevent="submit">
-      <textarea
-        v-model="draft"
-        rows="3"
-        placeholder="Write a comment…"
-        class="input-field"
-        :disabled="submitting"
-        data-test="comment-input"
-      />
+      <div class="relative">
+        <textarea
+          ref="inputEl"
+          v-model="draft"
+          rows="3"
+          placeholder="Write a comment… type @ to mention someone"
+          class="input-field"
+          :disabled="submitting"
+          data-test="comment-input"
+          @input="onInput"
+          @keydown.esc="people = []"
+        />
+        <ul v-if="people.length" class="absolute left-0 right-0 top-full z-20 mt-1 max-h-48 overflow-y-auto rounded-xl border border-line bg-surface py-1 shadow-lg" role="listbox" aria-label="People you can mention">
+          <li v-for="p in people" :key="p.id" role="option">
+            <button type="button" class="block w-full px-3 py-1.5 text-left text-sm text-body hover:bg-hover" @mousedown.prevent="pick(p)">{{ p.full_name }}</button>
+          </li>
+        </ul>
+      </div>
       <div class="mt-2 flex items-center justify-between gap-2">
         <p v-if="error" class="text-xs text-rose-600 dark:text-rose-400">{{ error }}</p>
         <span v-else />
@@ -50,7 +60,7 @@
               </button>
             </div>
           </div>
-          <p class="mt-1 whitespace-pre-line text-sm text-body">{{ comment.body }}</p>
+          <p class="mt-1 whitespace-pre-line text-sm text-body"><template v-for="(seg, i) in segments(comment.body)" :key="i"><strong v-if="seg.mention" class="font-semibold text-brand-700 dark:text-brand-300">@{{ seg.text }}</strong><template v-else>{{ seg.text }}</template></template></p>
         </div>
       </li>
     </ul>
@@ -103,6 +113,44 @@ async function remove(comment: Comment): Promise<void> {
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Could not delete the comment.'
   }
+}
+
+// ---- @mentions: stored as @[Name](user:<id>); rendered as text (never HTML) ----
+const inputEl = ref<HTMLTextAreaElement | null>(null)
+const people = ref<{ id: string, full_name: string }[]>([])
+let mentionTimer: ReturnType<typeof setTimeout> | undefined
+
+function onInput(): void {
+  const match = /(?:^|\s)@([^\s@\[\]]{0,30})$/.exec(draft.value)
+  clearTimeout(mentionTimer)
+  if (!match) { people.value = []; return }
+  const q = match[1] ?? ''
+  mentionTimer = setTimeout(async () => {
+    try {
+      people.value = await api.get<{ id: string, full_name: string }[]>(
+        `/api/v1/tasks/${props.taskId}/mentionable?q=${encodeURIComponent(q)}`)
+    } catch { people.value = [] }
+  }, 150)
+}
+
+function pick(p: { id: string, full_name: string }): void {
+  draft.value = draft.value.replace(/@([^\s@\[\]]{0,30})$/, `@[${p.full_name}](user:${p.id}) `)
+  people.value = []
+  inputEl.value?.focus()
+}
+
+function segments(body: string): { text: string, mention: boolean }[] {
+  const out: { text: string, mention: boolean }[] = []
+  const re = /@\[([^\]\n]{1,120})\]\(user:[0-9a-fA-F-]{36}\)/g
+  let last = 0
+  let m: RegExpExecArray | null
+  while ((m = re.exec(body)) !== null) {
+    if (m.index > last) out.push({ text: body.slice(last, m.index), mention: false })
+    out.push({ text: m[1] ?? '', mention: true })
+    last = m.index + m[0].length
+  }
+  if (last < body.length) out.push({ text: body.slice(last), mention: false })
+  return out
 }
 
 function initials(name: string): string {

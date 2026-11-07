@@ -45,10 +45,83 @@
       <span class="text-sm text-muted sm:ml-auto">{{ total }} task{{ total === 1 ? '' : 's' }}</span>
     </section>
 
-    <section class="mt-4 overflow-x-auto rounded-2xl border border-line bg-surface">
+    <div class="mt-3 inline-flex rounded-xl border border-line bg-surface p-0.5 text-sm" role="group" aria-label="Task view">
+      <button v-for="v in VIEWS" :key="v.key" type="button" class="rounded-lg px-3 py-1.5" :class="view === v.key ? 'bg-brand-500 text-white' : 'text-muted hover:text-ink'" :aria-pressed="view === v.key" :data-test="`view-${v.key}`" @click="setView(v.key)">{{ v.label }}</button>
+    </div>
+    <p v-if="boardMessage" class="mt-2 text-sm text-rose-600 dark:text-rose-400" role="alert">{{ boardMessage }}</p>
+
+    <section class="mt-3 flex flex-wrap items-center gap-2 text-sm" aria-label="Saved filters and export">
+      <select v-if="savedFilters.length" class="select-field !w-auto" aria-label="Apply a saved filter" v-model="selectedSaved" @change="applySaved">
+        <option value="">Saved filters…</option>
+        <option v-for="f in savedFilters" :key="f.id" :value="f.id">{{ f.name }}</option>
+      </select>
+      <button v-if="selectedSaved" type="button" class="btn-secondary px-3 py-1.5" @click="deleteSaved">Delete saved filter</button>
+      <template v-if="hasActiveFilters">
+        <input v-if="savingFilter" v-model="newFilterName" type="text" maxlength="80" class="input-field !w-48" placeholder="Filter name" aria-label="Saved filter name" @keydown.enter.prevent="saveFilter" />
+        <button type="button" class="btn-secondary px-3 py-1.5" @click="savingFilter ? saveFilter() : (savingFilter = true)">
+          {{ savingFilter ? 'Save' : 'Save this filter' }}
+        </button>
+      </template>
+      <button v-if="canExport" type="button" class="btn-secondary ml-auto px-3 py-1.5" :disabled="exporting" @click="exportCsv">
+        {{ exporting ? 'Exporting…' : 'Export CSV' }}
+      </button>
+    </section>
+
+    <section v-if="selected.size" class="mt-3 flex flex-wrap items-center gap-2 rounded-2xl border border-brand-500/40 bg-surface p-3 text-sm" aria-live="polite" data-test="bulk-bar">
+      <span class="font-medium text-ink">{{ selected.size }} selected</span>
+      <select v-model="bulkStatus" class="select-field !w-auto" aria-label="Move selected tasks to status">
+        <option value="">Change status…</option>
+        <option v-for="s in STATUSES" :key="s" :value="s">{{ capitalize(statusLabel(s)) }}</option>
+      </select>
+      <button type="button" class="btn-secondary px-3 py-1.5" :disabled="!bulkStatus || bulking" @click="runBulk('transition')">Apply status</button>
+      <select v-model="bulkPriority" class="select-field !w-auto" aria-label="Set priority of selected tasks">
+        <option value="">Set priority…</option>
+        <option v-for="p in PRIORITIES" :key="p" :value="p">{{ capitalize(p) }}</option>
+      </select>
+      <button type="button" class="btn-secondary px-3 py-1.5" :disabled="!bulkPriority || bulking" @click="runBulk('set_priority')">Apply priority</button>
+      <button type="button" class="ml-auto text-xs text-muted hover:text-body" @click="selected.clear()">Clear selection</button>
+    </section>
+    <p v-if="bulkMessage" class="mt-2 text-sm text-muted" role="status">{{ bulkMessage }}</p>
+
+    <TaskBoard v-if="view === 'board'" :tasks="tasks" @move="moveTask" />
+    <TaskCalendar v-else-if="view === 'calendar'" :tasks="tasks" />
+
+    <!-- Phone layout: one card per task (the 8-column table is unreadable at 390px) -->
+    <ul v-show="view === 'list'" class="mt-4 space-y-3 sm:hidden" aria-label="Tasks">
+      <li v-if="loading" class="h-24 animate-pulse rounded-2xl bg-hover" aria-busy="true" />
+      <li v-else-if="!tasks.length" class="card empty-state">
+        <p>No authorized tasks match the filters.</p>
+        <button v-if="hasActiveFilters" type="button" class="btn-secondary mt-3" @click="clearFilters">Clear filters</button>
+      </li>
+      <li v-for="t in tasks" :key="t.id" class="card p-4">
+        <div class="flex items-start justify-between gap-3">
+          <input type="checkbox" class="mt-1 h-4 w-4" :checked="selected.has(t.id)" :aria-label="`Select ${t.task_number}`" @change="toggle(t.id)" />
+          <NuxtLink :to="`/tasks/${t.id}`" class="min-w-0 flex-1 font-medium text-ink">{{ t.title }}</NuxtLink>
+          <span class="shrink-0 font-mono text-xs text-muted">{{ t.task_number }}</span>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center gap-1.5">
+          <AppBadge :tone="statusTone(t.status)">{{ statusLabel(t.status) }}</AppBadge>
+          <AppBadge :tone="priorityTone(t.priority)">{{ capitalize(t.priority) }}</AppBadge>
+          <AppBadge v-for="name in t.department_names" :key="name" tone="gray">{{ name }}</AppBadge>
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-3 text-xs text-muted">
+          <span>{{ t.accountable_pm?.full_name ?? 'Unassigned' }}</span>
+          <span :class="isOverdue(t.due_date, t.status) ? 'font-medium text-rose-600 dark:text-rose-400' : ''">Due {{ formatDate(t.due_date) }}</span>
+        </div>
+        <div class="mt-3 flex items-center gap-2">
+          <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-hover" role="progressbar" :aria-valuenow="t.percent_complete" aria-valuemin="0" aria-valuemax="100">
+            <div class="h-full rounded-full bg-brand-500" :style="{ width: `${t.percent_complete}%` }" />
+          </div>
+          <span class="text-xs text-muted">{{ t.percent_complete }}%</span>
+        </div>
+      </li>
+    </ul>
+
+    <section v-show="view === 'list'" class="mt-4 hidden overflow-x-auto rounded-2xl border border-line bg-surface sm:block">
       <table class="min-w-full divide-y divide-line text-sm">
         <thead class="bg-elevated text-left text-xs uppercase tracking-wide text-muted">
           <tr>
+            <th class="w-10 px-4 py-3"><input type="checkbox" class="h-4 w-4" :checked="allSelected" aria-label="Select all tasks on this page" @change="toggleAll" /></th>
             <th class="px-4 py-3">Number</th>
             <th class="px-4 py-3">Title</th>
             <th class="px-4 py-3">Accountable PM</th>
@@ -61,14 +134,14 @@
         </thead>
         <tbody class="divide-y divide-line">
           <tr v-if="loading">
-            <td colspan="8" class="px-4 py-2">
+            <td colspan="9" class="px-4 py-2">
               <div class="space-y-2 py-2" aria-busy="true" aria-label="Loading tasks">
                 <div v-for="i in 5" :key="i" class="h-10 animate-pulse rounded-lg bg-hover" />
               </div>
             </td>
           </tr>
           <tr v-else-if="!tasks.length">
-            <td colspan="8">
+            <td colspan="9">
               <div class="empty-state">
                 <svg class="h-8 w-8 text-faint" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
@@ -81,6 +154,7 @@
             </td>
           </tr>
           <tr v-for="t in tasks" :key="t.id" class="cursor-pointer transition-colors hover:bg-hover" @click="openTask(t.id)">
+            <td class="px-4 py-3" @click.stop><input type="checkbox" class="h-4 w-4" :checked="selected.has(t.id)" :aria-label="`Select ${t.task_number}`" @change="toggle(t.id)" /></td>
             <td class="table-cell whitespace-nowrap font-mono text-xs text-body">{{ t.task_number }}</td>
             <td class="table-cell">
               <NuxtLink :to="`/tasks/${t.id}`" class="font-medium text-ink hover:text-brand-700 dark:hover:text-brand-300" @click.stop>
@@ -117,7 +191,7 @@
       </table>
     </section>
 
-    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
+    <div v-if="view === 'list' && totalPages > 1" class="mt-4 flex items-center justify-end gap-2 text-sm">
       <button
         type="button"
         class="btn-secondary px-3 py-1.5"
@@ -223,6 +297,9 @@
 <script setup lang="ts">
 import type { Department, Task, TaskPage, TaskPriority, TaskStatus } from '~/types/api'
 
+interface SavedFilter { id: string, name: string, params: Record<string, string> }
+interface BulkResponse { succeeded: number, failed: number, results: { task_id: string, ok: boolean, error?: string }[] }
+
 const api = useApi()
 const auth = useAuth()
 
@@ -232,14 +309,17 @@ const PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'critical']
 const tasks = ref<Task[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = 25
+const VIEWS = [{ key: 'list', label: 'List' }, { key: 'board', label: 'Board' }, { key: 'calendar', label: 'Calendar' }] as const
+const view = ref<'list' | 'board' | 'calendar'>('list')
+const boardMessage = ref('')
+const pageSize = computed(() => (view.value === 'list' ? 25 : 100))
 const loading = ref(true)
 const query = ref('')
 const statusFilter = ref('')
 const priorityFilter = ref('')
 
 const canCreate = computed(() => auth.hasPermission('tasks.create'))
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 
 const showCreate = ref(false)
 const creating = ref(false)
@@ -281,7 +361,7 @@ async function loadTasks() {
   try {
     const params = new URLSearchParams()
     params.set('page', String(page.value))
-    params.set('page_size', String(pageSize))
+    params.set('page_size', String(pageSize.value))
     if (query.value.trim()) params.set('q', query.value.trim())
     if (statusFilter.value) params.set('status', statusFilter.value)
     if (priorityFilter.value) params.set('priority', priorityFilter.value)
@@ -361,6 +441,126 @@ watch(showCreate, (open) => {
   }
 })
 
-onMounted(loadTasks)
+// ---- saved filters ----
+const savedFilters = ref<SavedFilter[]>([])
+const selectedSaved = ref('')
+const savingFilter = ref(false)
+const newFilterName = ref('')
+
+async function loadSaved() {
+  try { savedFilters.value = await api.get<SavedFilter[]>('/api/v1/saved-filters') } catch { savedFilters.value = [] }
+}
+async function saveFilter() {
+  const name = newFilterName.value.trim()
+  if (!name) return
+  const params: Record<string, string> = {}
+  if (query.value.trim()) params.q = query.value.trim()
+  if (statusFilter.value) params.status = statusFilter.value
+  if (priorityFilter.value) params.priority = priorityFilter.value
+  try {
+    await api.post('/api/v1/saved-filters', { name, params })
+    newFilterName.value = ''
+    savingFilter.value = false
+    await loadSaved()
+  } catch { /* leave the form open so the user can retry */ }
+}
+function applySaved() {
+  const f = savedFilters.value.find(x => x.id === selectedSaved.value)
+  if (!f) return
+  query.value = f.params.q ?? ''
+  statusFilter.value = f.params.status ?? ''
+  priorityFilter.value = f.params.priority ?? ''
+  page.value = 1
+  loadTasks()
+}
+async function deleteSaved() {
+  if (!selectedSaved.value) return
+  try { await api.delete(`/api/v1/saved-filters/${selectedSaved.value}`) } catch { /* ignore */ }
+  selectedSaved.value = ''
+  await loadSaved()
+}
+
+// ---- export ----
+const canExport = computed(() => auth.hasPermission('exports.approved'))
+const exporting = ref(false)
+async function exportCsv() {
+  exporting.value = true
+  try {
+    const { blob, filename } = await api.download('/api/v1/reports/exports', {
+      export_type: 'task_register', format: 'csv',
+      q: query.value.trim() || null, status: statusFilter.value || null, priority: priorityFilter.value || null,
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch { /* the register stays usable; export needs exports.approved */ } finally {
+    exporting.value = false
+  }
+}
+
+// ---- bulk actions ----
+const selected = reactive(new Set<string>())
+const bulkStatus = ref('')
+const bulkPriority = ref('')
+const bulking = ref(false)
+const bulkMessage = ref('')
+const allSelected = computed(() => tasks.value.length > 0 && tasks.value.every(t => selected.has(t.id)))
+function toggle(id: string) { if (selected.has(id)) selected.delete(id); else selected.add(id) }
+function toggleAll() {
+  if (allSelected.value) tasks.value.forEach(t => selected.delete(t.id))
+  else tasks.value.forEach(t => selected.add(t.id))
+}
+async function runBulk(action: 'transition' | 'set_priority') {
+  bulking.value = true
+  bulkMessage.value = ''
+  try {
+    const res = await api.post<BulkResponse>('/api/v1/tasks/bulk', {
+      task_ids: [...selected], action,
+      to_status: action === 'transition' ? bulkStatus.value : undefined,
+      priority: action === 'set_priority' ? bulkPriority.value : undefined,
+    })
+    const firstError = res.results.find(r => !r.ok)?.error
+    bulkMessage.value = `${res.succeeded} updated${res.failed ? `, ${res.failed} skipped${firstError ? ` (${firstError})` : ''}` : ''}.`
+    selected.clear()
+    bulkStatus.value = ''
+    bulkPriority.value = ''
+    await loadTasks()
+  } catch (err) {
+    bulkMessage.value = err instanceof Error ? err.message : 'Bulk update failed.'
+  } finally {
+    bulking.value = false
+  }
+}
+
+function setView(v: 'list' | 'board' | 'calendar') {
+  view.value = v
+  boardMessage.value = ''
+  page.value = 1
+  try { localStorage.setItem('decops.tasks.view', v) } catch { /* optional */ }
+  loadTasks()
+}
+async function moveTask(id: string, status: string) {
+  boardMessage.value = ''
+  try {
+    await api.post(`/api/v1/tasks/${id}/transition`, { to_status: status })
+  } catch (err) {
+    boardMessage.value = err instanceof Error ? err.message : 'That move is not allowed.'
+  }
+  await loadTasks()
+}
+
+onMounted(() => {
+  try {
+    const saved = localStorage.getItem('decops.tasks.view')
+    if (saved === 'board' || saved === 'calendar') view.value = saved
+  } catch { /* optional */ }
+  loadTasks()
+  loadSaved()
+})
 useHead({ title: 'Task register - DecOps' })
 </script>

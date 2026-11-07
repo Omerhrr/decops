@@ -28,6 +28,12 @@ _LOGO_MARK = (
 )
 
 
+def _deny_fetch(url, *args, **kwargs):  # noqa: ANN001, ANN201
+    """Reports are fully self-contained: block every external/file resource so
+    rendering can never be used to read local files or reach internal hosts."""
+    raise ValueError(f"External resource blocked in PDF rendering: {url[:80]}")
+
+
 def _esc(value) -> str:
     return html.escape("" if value is None else str(value))
 
@@ -216,7 +222,7 @@ def render_pdf(
 <main>{body}</main>
 <footer>{footer}</footer>
 </body></html>"""
-    return HTML(string=document).write_pdf()
+    return HTML(string=document, url_fetcher=_deny_fetch).write_pdf()
 
 
 # ---------------------------------------------------------------------------

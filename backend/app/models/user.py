@@ -4,7 +4,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin, UUIDPrimaryKeyMixin, utcnow
@@ -36,6 +36,16 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     locked_until: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
 
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+
+    # Credential hygiene: admin-created accounts must pick their own password.
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    password_changed_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)
+
+    # Two-factor (TOTP). The secret is stored Fernet-encrypted; recovery codes
+    # are stored as SHA-256 hashes and are single-use.
+    totp_secret_enc: Mapped[str | None] = mapped_column(Text, nullable=True)
+    totp_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    recovery_code_hashes: Mapped[list | None] = mapped_column(JSONType, nullable=True)
 
     # Appearance preferences (theme mode, accent color, font). JSON so the
     # set of tunable keys can grow without migrations.
@@ -81,3 +91,17 @@ class UserSession(UUIDPrimaryKeyMixin, Base):
     def is_usable(self) -> bool:
         now = utcnow()
         return self.revoked_at is None and self.expires_at > now
+
+
+class PasswordResetToken(UUIDPrimaryKeyMixin, Base):
+    """Single-use, short-lived password reset token (only its hash is stored)."""
+
+    __tablename__ = "password_reset_tokens"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime(), nullable=False)
+    used_at: Mapped[datetime | None] = mapped_column(UTCDateTime(), nullable=True)

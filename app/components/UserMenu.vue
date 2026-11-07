@@ -90,6 +90,7 @@ const ICONS = {
 
 const menuItems = computed(() => {
   const items = [{ to: '/my-tasks', label: 'My Tasks', icon: ICONS.tasks }]
+  items.push({ to: '/account', label: 'Account security', icon: 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z' })
   items.push({ to: '/settings', label: 'Settings', icon: ICONS.settings })
   return items
 })

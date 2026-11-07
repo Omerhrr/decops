@@ -4,13 +4,14 @@
     class="fixed inset-0 z-[60] flex items-center justify-center bg-overlay p-4"
     role="alertdialog"
     aria-modal="true"
-    aria-label="Confirm action"
+    aria-labelledby="confirm-dialog-title"
+    aria-describedby="confirm-dialog-message"
     v-dialog="{ close: cancel }"
     @click.self="cancel"
   >
     <div class="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-xl">
-      <h2 class="text-base font-semibold text-ink">{{ request.title }}</h2>
-      <p class="mt-2 text-sm text-muted">{{ request.message }}</p>
+      <h2 id="confirm-dialog-title" class="text-base font-semibold text-ink">{{ request.title }}</h2>
+      <p id="confirm-dialog-message" class="mt-2 text-sm text-muted">{{ request.message }}</p>
       <div class="mt-5 flex justify-end gap-2">
         <button type="button" class="btn-secondary" @click="cancel">
           {{ request.cancelLabel ?? 'Cancel' }}

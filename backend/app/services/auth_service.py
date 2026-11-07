@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.security import (
+    DUMMY_PASSWORD_HASH,
     generate_session_token,
     hash_session_token,
     new_session_expiry,
@@ -29,14 +30,14 @@ class LoginFailed(Exception):
         self.code = code
 
 
-def authenticate(db: Session, *, email: str, password: str) -> User:
+def authenticate(db: Session, *, email: str, password: str, otp_code: str | None = None) -> User:
     """Validate credentials. Raises LoginFailed with a safe, non-enumerating message."""
     user = db.scalar(select(User).where(User.email == email.strip().lower()))
     generic_failure = LoginFailed("Invalid email or password.", code="invalid_credentials")
 
     if user is None:
         # Constant-ish time: still run a hash comparison to reduce timing signals
-        verify_password(password, "$argon2id$invalid-placeholder$value")
+        verify_password(password, DUMMY_PASSWORD_HASH)
         raise generic_failure
 
     status_value = (
@@ -70,13 +71,11 @@ def authenticate(db: Session, *, email: str, password: str) -> User:
             code="account_locked",
         )
 
-    if not verify_password(password, user.authentication_reference or ""):
+    def _register_failure(reason: str | None = None) -> None:
         user.failed_login_count += 1
         lock_reason = None
         if user.failed_login_count >= settings.max_failed_logins:
-            user.locked_until = datetime.now(UTC) + timedelta(
-                minutes=settings.login_lockout_minutes
-            )
+            user.locked_until = datetime.now(UTC) + timedelta(minutes=settings.login_lockout_minutes)
             user.failed_login_count = 0
             lock_reason = "max_failed_logins"
         audit_service.record_audit_event(
@@ -85,9 +84,22 @@ def authenticate(db: Session, *, email: str, password: str) -> User:
             resource_type="user",
             resource_id=user.id,
             actor_user_id=user.id,
-            metadata={"failed_count": user.failed_login_count, "locked": lock_reason},
+            metadata={"failed_count": user.failed_login_count, "locked": lock_reason, "reason": reason},
         )
+
+    if not verify_password(password, user.authentication_reference or ""):
+        _register_failure()
         raise generic_failure
+
+    if user.totp_enabled:
+        if not otp_code:
+            # Password was right; ask for the second factor (no session yet, no penalty).
+            raise LoginFailed("Enter the 6-digit code from your authenticator app.", code="mfa_required")
+        from app.services import account_service
+
+        if not account_service.verify_second_factor(db, user, otp_code):
+            _register_failure("invalid_otp")
+            raise LoginFailed("That verification code is not valid.", code="invalid_otp")
 
     return user
 

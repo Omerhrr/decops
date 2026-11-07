@@ -42,11 +42,11 @@ def create_user(
     request_id: str | None = None,
 ) -> User:
     """Create an employee with locally managed credentials."""
-    if len(password) < MIN_PASSWORD_LENGTH:
-        raise UserAdminError(
-            f"Password must be at least {MIN_PASSWORD_LENGTH} characters.",
-            code="weak_password",
-        )
+    from app.core.security import password_policy_problem
+
+    problem = password_policy_problem(password, email=email)
+    if problem:
+        raise UserAdminError(problem, code="weak_password")
     normalized_email = email.strip().lower()
     if get_by_email(db, normalized_email) is not None:
         raise UserAdminError("A user with this email already exists.", code="email_taken")
@@ -59,6 +59,7 @@ def create_user(
         email=normalized_email,
         authentication_reference=hash_password(password),
         account_status=AccountStatus.active,
+        must_change_password=True,  # the admin knows the initial password; the user must replace it
     )
     db.add(user)
     db.flush()
